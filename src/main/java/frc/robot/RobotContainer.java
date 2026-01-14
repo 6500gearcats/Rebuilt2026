@@ -23,8 +23,10 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.FeedFuel;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.LedCANdle;
 
 public class RobotContainer {
@@ -49,6 +51,8 @@ public class RobotContainer {
     private LedCANdle m_candle = new LedCANdle();
 
     private final SendableChooser<Command> autoChooser;
+
+    private final Feeder m_feeder = new Feeder();
 
     public RobotContainer() {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
@@ -108,6 +112,8 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         //drivetrain.registerTelemetry(logger::telemeterize);
+
+        joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
     }
 
     public Command getAutonomousCommand() {
