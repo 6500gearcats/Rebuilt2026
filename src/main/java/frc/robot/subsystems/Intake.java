@@ -15,8 +15,10 @@ public class Intake extends SubsystemBase {
   //all below code is from 2022 and may not work and all IntakeConstants have been changed to 1 or 2
   public final MotorController m_intakeMotor = new SparkMax(12, MotorType.kBrushed);
 
-  public Intake() {}
-  
+  public Intake(){
+    
+  }
+
   @Override
   public void simulationPeriodic() {
   // This method will be called once per scheduler run during simulation

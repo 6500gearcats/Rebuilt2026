@@ -23,13 +23,16 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.commands.IntakeFuel;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LedCANdle;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private final Intake intake = new Intake();
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -83,6 +86,7 @@ public class RobotContainer {
         // LED test controls
         joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40))); // gearcat teal!
         joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
+        joystick.y().onTrue(new IntakeFuel(intake, 1));
         // joystick.rightBumper().whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
         //     Math.sqrt(Math.pow(joystick.getLeftX(), 2) + Math.pow(joystick.getLeftY(), 2))
         // )));
@@ -109,6 +113,7 @@ public class RobotContainer {
 
         //drivetrain.registerTelemetry(logger::telemeterize);
     }
+
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
