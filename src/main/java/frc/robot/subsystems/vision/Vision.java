@@ -106,6 +106,7 @@ public class Vision extends SubsystemBase {
     if(sim != null) {
         setUpSim();
     }
+    SmartDashboard.putData("Field", m_field);
   }
 
   public Vision() {
