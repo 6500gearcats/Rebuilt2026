@@ -23,15 +23,15 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("ShooterSpeed", m_shooterMotor.get());
   }
 
-  public void setSpeed(double speed){
+  public void setShootSpeed(double speed){
     m_shooterMotor.set(speed);
   }
 
-  private void yawSpeed(double speed){
+  public void setYawSpeed(double speed){
     m_yawMotor.set(speed);
   }
 
-  private void pitchSpeed(double speed){
+  public void setPitchSpeed(double speed){
     m_pitchMotor.set(speed);
   }
 }

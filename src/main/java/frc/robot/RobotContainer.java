@@ -10,9 +10,15 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
+
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import org.photonvision.simulation.SimCameraProperties;
+
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.FeedFuel;
 import frc.robot.commands.IntakeFuel;
 import frc.robot.commands.ShootFuel;
@@ -32,6 +39,9 @@ import frc.robot.subsystems.Feeder;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
+import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -60,10 +70,45 @@ public class RobotContainer {
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
 
+    // Vision
+    PhotonVisionIO photonVisionIO = new PhotonVisionIO("photonvision", true, new Translation3d(0.1, 0, 0.5),  new Rotation3d(0, Math.toRadians(-15), 0));
+    private final Vision m_vision;
+
     public RobotContainer() {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         configureBindings();
         FollowPathCommand.warmupCommand().schedule();
+        switch (RobotConstants.currentMode) {
+            case REAL:
+                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", true, new Translation3d(0.1, 0, 0.5), new Rotation3d(0, Math.toRadians(-15), 0));
+                m_vision = new Vision(
+                    drivetrain.rotationSupplier(),
+                    drivetrain.modulePositionsSupplier(),
+                    drivetrain.poseSupplier(),
+                    m_photonVisionIO);
+                break;
+            case SIM:
+                // TODO: Add Real Camera Constants to use here
+                SimCameraProperties cameraProp = new SimCameraProperties();
+                cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(100));
+                // Approximate detection noise with average and standard deviation error in pixels.
+                cameraProp.setCalibError(0.25, 0.08);
+                cameraProp.setFPS(60);
+                cameraProp.setAvgLatencyMs(35);
+                cameraProp.setLatencyStdDevMs(5);
+                PhotonVisionSimIO camSim = new PhotonVisionSimIO("photonvision", false, cameraProp,
+                                                                new Translation3d(0.1, 0, 0.5),
+                                                                new Rotation3d(0, Math.toRadians(-15), 0));
+                m_vision = new Vision(
+                    drivetrain.rotationSupplier(),
+                    drivetrain.modulePositionsSupplier(),
+                    drivetrain.poseSupplier(),
+                     camSim);
+                break;
+            default:
+            m_vision = new Vision();
+            break;
+        }
     }
 
     private void configureBindings() {
@@ -122,6 +167,9 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         //drivetrain.registerTelemetry(logger::telemeterize);
+
+        // Reset the field-centric heading on left bumper press.
+        joystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
     }
 
 

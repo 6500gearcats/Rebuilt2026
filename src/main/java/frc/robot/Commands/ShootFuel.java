@@ -22,7 +22,7 @@ public class ShootFuel extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_shooter.setSpeed(speed);
+    m_shooter.setShootSpeed(speed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -32,7 +32,7 @@ public class ShootFuel extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_shooter.setSpeed(0);
+    m_shooter.setShootSpeed(0);
   }
 
   // Returns true when the command should end.
