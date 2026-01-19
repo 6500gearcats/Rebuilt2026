@@ -58,6 +58,7 @@ public class Vision extends SubsystemBase {
    */
   private static final Vector<N3> m_visionStndDev = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(0.1));
 
+  @SuppressWarnings("unused")
   private final VisionIO[] io;
   private AprilTagFieldLayout tagLayout;
 
@@ -124,7 +125,7 @@ public class Vision extends SubsystemBase {
         System.currentTimeMillis() / 1000.0,
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
-    for (VisionIO visionIO : io) {
+    for (VisionIO visionIO : m_visionOdometryCams) {
       visionIO.getVisionEst().ifPresent(est -> estimator.addVisionMeasurement(est.getPose(), est.getTimestamp()));
     }
     // In sim, fall back to drivetrain sim pose if module positions aren't simulated
