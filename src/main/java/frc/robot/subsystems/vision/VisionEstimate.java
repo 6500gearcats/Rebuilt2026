@@ -11,6 +11,7 @@ public class VisionEstimate {
     public VisionEstimate(EstimatedRobotPose pose) {
         this.pose = pose;
     }
+
     public VisionEstimate(PoseEstimate poseEstimate) {
         this.poseEstimate = poseEstimate;
     }

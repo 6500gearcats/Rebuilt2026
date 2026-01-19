@@ -23,6 +23,7 @@ import org.photonvision.simulation.SimCameraProperties;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
@@ -46,8 +47,11 @@ import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 
 public class RobotContainer {
+    private final RobotStateMachine stateMachine;
+
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
+                                                                                      // max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -74,69 +78,72 @@ public class RobotContainer {
     private final Shooter m_shooter = new Shooter();
 
     // Vision
-    PhotonVisionIO photonVisionIO = new PhotonVisionIO("photonvision", true, new Translation3d(0.1, 0, 0.5),  new Rotation3d(0, Math.toRadians(-15), 0));
+    PhotonVisionIO photonVisionIO = new PhotonVisionIO("photonvision", true, new Translation3d(0.1, 0, 0.5),
+            new Rotation3d(0, Math.toRadians(-15), 0));
     private final Vision m_vision;
 
-    public RobotContainer() {
+    public RobotContainer(RobotStateMachine stateMachine) {
+        this.stateMachine = stateMachine;
+
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         configureBindings();
-        FollowPathCommand.warmupCommand().schedule();
+        CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
         switch (RobotConstants.currentMode) {
             case REAL:
-                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", true, new Translation3d(0.1, 0, 0.5), new Rotation3d(0, Math.toRadians(-15), 0));
+                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", true,
+                        new Translation3d(0.1, 0, 0.5), new Rotation3d(0, Math.toRadians(-15), 0));
                 m_vision = new Vision(
-                    drivetrain.rotationSupplier(),
-                    drivetrain.modulePositionsSupplier(),
-                    drivetrain.poseSupplier(),
-                    m_photonVisionIO);
+                        drivetrain.rotationSupplier(),
+                        drivetrain.modulePositionsSupplier(),
+                        drivetrain.poseSupplier(),
+                        m_photonVisionIO);
                 break;
             case SIM:
                 // TODO: Add Real Camera Constants to use here
                 SimCameraProperties cameraProp = new SimCameraProperties();
                 cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(100));
-                // Approximate detection noise with average and standard deviation error in pixels.
+                // Approximate detection noise with average and standard deviation error in
+                // pixels.
                 cameraProp.setCalibError(0.25, 0.08);
                 cameraProp.setFPS(60);
                 cameraProp.setAvgLatencyMs(35);
                 cameraProp.setLatencyStdDevMs(5);
                 PhotonVisionSimIO camSim = new PhotonVisionSimIO("photonvision", false, cameraProp,
-                                                                new Translation3d(0.1, 0, 0.5),
-                                                                new Rotation3d(0, Math.toRadians(-15), 0));
+                        new Translation3d(0.1, 0, 0.5),
+                        new Rotation3d(0, Math.toRadians(-15), 0));
                 m_vision = new Vision(
-                    drivetrain.rotationSupplier(),
-                    drivetrain.modulePositionsSupplier(),
-                    drivetrain.poseSupplier(),
-                     camSim);
+                        drivetrain.rotationSupplier(),
+                        drivetrain.modulePositionsSupplier(),
+                        drivetrain.poseSupplier(),
+                        camSim);
                 break;
             default:
-            m_vision = new Vision();
-            break;
+                m_vision = new Vision();
+                break;
         }
+        stateMachine.bindVision(m_vision);
     }
 
     private void configureBindings() {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
+        // @formatter:off
         drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            )
-        );
-
+                // Drivetrain will execute this command periodically
+                drivetrain.applyRequest(
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
+        // @formatter:on
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
         RobotModeTriggers.disabled().whileTrue(
-            drivetrain.applyRequest(() -> idle).ignoringDisable(true)
-        );
+                drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
+        joystick.b().whileTrue(drivetrain.applyRequest(
+                () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
 
         // LED test controls
         joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40))); // gearcat teal!
@@ -145,18 +152,22 @@ public class RobotContainer {
         joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
         joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
         joystick.pov(90).whileTrue(new IntakeFuel(m_intake, 1));
-        // joystick.rightBumper().whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-        //     Math.sqrt(Math.pow(joystick.getLeftX(), 2) + Math.pow(joystick.getLeftY(), 2))
+        // joystick.rightBumper().whileTrue(new RunCommand(() ->
+        // m_candle.colorWithBrightness(
+        // Math.sqrt(Math.pow(joystick.getLeftX(), 2) + Math.pow(joystick.getLeftY(),
+        // 2))
         // )));
 
-        // joystick.leftTrigger().whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-        //     joystick.getLeftTriggerAxis()
+        // joystick.leftTrigger().whileTrue(new RunCommand(() ->
+        // m_candle.colorWithBrightness(
+        // joystick.getLeftTriggerAxis()
         // )));
 
-        new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01).whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-            () -> joystick2.getLeftTriggerAxis())));
+        new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
+                .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
+                        () -> joystick2.getLeftTriggerAxis())));
 
-        // Change input str to 
+        // Change input str to
         joystick.rightBumper().onTrue(Commands.runOnce(() -> m_candle.cycleFlag()));
 
         // Run SysId routines when holding back/start and X/Y.
@@ -169,12 +180,11 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        //drivetrain.registerTelemetry(logger::telemeterize);
+        // drivetrain.registerTelemetry(logger::telemeterize);
 
         // Reset the field-centric heading on left bumper press.
         joystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
     }
-
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();

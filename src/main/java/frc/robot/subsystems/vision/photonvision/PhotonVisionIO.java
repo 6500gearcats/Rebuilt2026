@@ -37,7 +37,8 @@ public class PhotonVisionIO implements VisionIO {
     private double lastEstTimestamp = 0;
     public boolean isNewResult = false;
 
-    public PhotonVisionIO(String cameraName, boolean forPoseEstimation, Translation3d robotToCameraTrl, Rotation3d robotToCameraRot) {
+    public PhotonVisionIO(String cameraName, boolean forPoseEstimation, Translation3d robotToCameraTrl,
+            Rotation3d robotToCameraRot) {
         this.forPoseEstimation = forPoseEstimation;
         this.robotToCameraTrl = robotToCameraTrl;
         this.robotToCameraRot = robotToCameraRot;
@@ -45,11 +46,11 @@ public class PhotonVisionIO implements VisionIO {
         m_camera = new PhotonCamera(cameraName);
 
         estimator = new PhotonPoseEstimator(
-        kTagLayout, 
-        PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, 
-        robotToCamera);
+                kTagLayout,
+                PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                robotToCamera);
     }
-    
+
     @Override
     public String getName() {
         return m_camera.getName();
@@ -62,31 +63,31 @@ public class PhotonVisionIO implements VisionIO {
 
     @Override
     public double getBestYaw() {
-         var result = getLatestResult();
-         double yaw = 0.0;
-         if (result.hasTargets()) {
-             // Calculate angular turn power
-             // Remove -1.0 because it was inverting results.
-             yaw = result.getBestTarget().getYaw();
-         }
-         return yaw;
+        var result = getLatestResult();
+        double yaw = 0.0;
+        if (result.hasTargets()) {
+            // Calculate angular turn power
+            // Remove -1.0 because it was inverting results.
+            yaw = result.getBestTarget().getYaw();
+        }
+        return yaw;
     }
 
     public PhotonPipelineResult getLatestResult() {
-         return m_camera.getLatestResult();
-     }
+        return m_camera.getLatestResult();
+    }
 
     @Override
     public double getBestPitch() {
         var result = getLatestResult();
-         double pitch = 0.0;
-         if (result.hasTargets()) {
-             // Calculate angular turn power
-             // Remove -1.0 because it was inverting results.
-             pitch = result.getBestTarget().getPitch();
-         }
- 
-         return pitch;
+        double pitch = 0.0;
+        if (result.hasTargets()) {
+            // Calculate angular turn power
+            // Remove -1.0 because it was inverting results.
+            pitch = result.getBestTarget().getPitch();
+        }
+
+        return pitch;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class PhotonVisionIO implements VisionIO {
         var result = getLatestResult();
         double range = 0;
         if (result.hasTargets()) {
-             range = PhotonUtils.calculateDistanceToTargetMeters(
+            range = PhotonUtils.calculateDistanceToTargetMeters(
                     0,
                     0,
                     0,
@@ -149,7 +150,7 @@ public class PhotonVisionIO implements VisionIO {
 
     @Override
     public double getChosenTargetSkew(int fiducialID) {
-     var result = getLatestResult();
+        var result = getLatestResult();
         // Get a list of all of the targets that have been detected.
         List<PhotonTrackedTarget> targets = result.getTargets();
         double rotation = 0;
@@ -171,23 +172,24 @@ public class PhotonVisionIO implements VisionIO {
 
     @Override
     public double getChosenTargetRange(int fiducialID) {
-       var result = getLatestResult();
-         List<PhotonTrackedTarget> targets = result.getTargets();
-         double range = 0;
-         if (result.hasTargets()) {
-             for (PhotonTrackedTarget target : targets) {
-                 if (target.getFiducialId() == fiducialID) {
-                     range = PhotonUtils.calculateDistanceToTargetMeters(
-                             0,
-                             0,
-                             0,
-                             Units.degreesToRadians(target.getPitch()));
-                     return range;
-                 }
-             }
-         }
-         return 0;
+        var result = getLatestResult();
+        List<PhotonTrackedTarget> targets = result.getTargets();
+        double range = 0;
+        if (result.hasTargets()) {
+            for (PhotonTrackedTarget target : targets) {
+                if (target.getFiducialId() == fiducialID) {
+                    range = PhotonUtils.calculateDistanceToTargetMeters(
+                            0,
+                            0,
+                            0,
+                            Units.degreesToRadians(target.getPitch()));
+                    return range;
+                }
+            }
+        }
+        return 0;
     }
+
     @Override
     public boolean hasTargets() {
         var result = getLatestResult();
@@ -196,6 +198,7 @@ public class PhotonVisionIO implements VisionIO {
         }
         return false;
     }
+
     @Override
     public boolean hasChossenTarget(int fiducialID) {
         var result = getLatestResult();
@@ -214,14 +217,14 @@ public class PhotonVisionIO implements VisionIO {
     }
 
     /**
-      * The standard deviations of the estimated pose from
-      * {@link #getEstimatedGlobalPose()}, for use
-      * with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
-      * SwerveDrivePoseEstimator}.
-      * This should only be used when there are targets visible.
-      *
-      * @param estimatedPose The estimated pose to guess standard deviations for.
-      */
+     * The standard deviations of the estimated pose from
+     * {@link #getEstimatedGlobalPose()}, for use
+     * with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
+     * SwerveDrivePoseEstimator}.
+     * This should only be used when there are targets visible.
+     *
+     * @param estimatedPose The estimated pose to guess standard deviations for.
+     */
     public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
         var estStdDevs = VisionConstants.kSingleTagStdDevs;
         var targets = getLatestResult().getTargets();
@@ -249,29 +252,28 @@ public class PhotonVisionIO implements VisionIO {
         return estStdDevs;
     }
 
-
     /**
      * The latest estimated robot pose on the field from vision data. This may be
-    * empty. This should
-    * only be called once per loop.
-    *
-    * @return An {@link Optional<Pose2D>>} with an estimated pose, estimate
-    *         timestamp, and targets
-    *         used for estimation.
-    */
+     * empty. This should
+     * only be called once per loop.
+     *
+     * @return An {@link Optional<Pose2D>>} with an estimated pose, estimate
+     *         timestamp, and targets
+     *         used for estimation.
+     */
     public Optional<VisionEstimate> getVisionEst() {
         PhotonPipelineResult result = getLatestResult();
         var visionEst = estimator.update(result);
         double latestTimestamp = result.getTimestampSeconds();
         boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
-        if(newResult) {
+        if (newResult) {
             lastEstTimestamp = latestTimestamp;
             isNewResult = true;
         } else {
             isNewResult = false;
         }
 
-        if(visionEst.isEmpty()) {
+        if (visionEst.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(new VisionEstimate(visionEst.get()));

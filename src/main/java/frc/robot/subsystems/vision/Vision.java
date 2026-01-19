@@ -92,19 +92,19 @@ public class Vision extends SubsystemBase {
         m_visionStndDev);
 
     for (VisionIO visionIO : io) {
-        if (visionIO instanceof PhotonVisionSimIO) {
-            if (sim == null) {
-                sim = new VisionSystemSim("main");
-            }
-            PhotonVisionSimIO cameraSim = (PhotonVisionSimIO) visionIO;
-            if(cameraSim.isMountedOnTurret()) {
-              m_turretCamSims.add(cameraSim);
-            }
-            m_simCameras.add(cameraSim);
+      if (visionIO instanceof PhotonVisionSimIO) {
+        if (sim == null) {
+          sim = new VisionSystemSim("main");
         }
+        PhotonVisionSimIO cameraSim = (PhotonVisionSimIO) visionIO;
+        if (cameraSim.isMountedOnTurret()) {
+          m_turretCamSims.add(cameraSim);
+        }
+        m_simCameras.add(cameraSim);
+      }
     }
-    if(sim != null) {
-        setUpSim();
+    if (sim != null) {
+      setUpSim();
     }
     SmartDashboard.putData("Field", m_field);
   }
@@ -117,7 +117,7 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if(isReplay) {
+    if (isReplay) {
       return;
     }
     estimator.updateWithTime(
@@ -125,9 +125,7 @@ public class Vision extends SubsystemBase {
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
     for (VisionIO visionIO : io) {
-      visionIO.getVisionEst().ifPresent(est ->
-        estimator.addVisionMeasurement(est.getPose(), est.getTimestamp())
-      );
+      visionIO.getVisionEst().ifPresent(est -> estimator.addVisionMeasurement(est.getPose(), est.getTimestamp()));
     }
     // In sim, fall back to drivetrain sim pose if module positions aren't simulated
     if (RobotBase.isSimulation() && m_poseSupplier != null) {
@@ -139,7 +137,7 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    if(isReplay) {
+    if (isReplay) {
       return;
     }
     // TODO: Get turret angle from turret subsystem
@@ -148,8 +146,8 @@ public class Vision extends SubsystemBase {
         // The turret the camera is mounted on is rotated 5 degrees
         Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(5));
         Transform3d robotToCamera = new Transform3d(
-                cameraSim.robotToCameraTrl.rotateBy(turretRotation),
-                cameraSim.robotToCameraRot.rotateBy(turretRotation));
+            cameraSim.robotToCameraTrl.rotateBy(turretRotation),
+            cameraSim.robotToCameraRot.rotateBy(turretRotation));
         sim.adjustCamera(cameraSim.getCameraSim(), robotToCamera);
       }
     }
@@ -159,7 +157,8 @@ public class Vision extends SubsystemBase {
   public void setUpSim() {
     tagLayout = VisionConstants.kTagLayout;
     sim.addAprilTags(tagLayout);
-    // Add this camera to the vision system simulation with the given robot-to-camera transform.
+    // Add this camera to the vision system simulation with the given
+    // robot-to-camera transform.
     for (PhotonVisionSimIO cameraSim : m_simCameras) {
       sim.addCamera(cameraSim.getCameraSim(), cameraSim.robotToCamera);
     }

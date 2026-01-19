@@ -45,17 +45,19 @@ public class PhotonVisionSimIO implements VisionIO {
     private double lastEstTimestamp = 0;
     public boolean isNewResult = false;
 
-    public PhotonVisionSimIO(String cameraName, boolean forPoseEstimation, SimCameraProperties cameraProp, Translation3d robotToCameraTrl, Rotation3d robotToCameraRot) {
+    public PhotonVisionSimIO(String cameraName, boolean forPoseEstimation, SimCameraProperties cameraProp,
+            Translation3d robotToCameraTrl, Rotation3d robotToCameraRot) {
         this.forPoseEstimation = forPoseEstimation;
         this.robotToCameraTrl = robotToCameraTrl;
         this.robotToCameraRot = robotToCameraRot;
         this.robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
 
         this.cameraProp = cameraProp;
-        
-        // The simulation of this camera. Its values used in real robot code will be updated.
+
+        // The simulation of this camera. Its values used in real robot code will be
+        // updated.
         cameraSim = new PhotonCameraSim(new PhotonCamera(cameraName), cameraProp);
-        
+
         // Enable the raw and processed streams. These are enabled by default.
         cameraSim.enableRawStream(true);
         cameraSim.enableProcessedStream(true);
@@ -65,9 +67,9 @@ public class PhotonVisionSimIO implements VisionIO {
         cameraSim.enableDrawWireframe(true);
 
         estimator = new PhotonPoseEstimator(
-        kTagLayout, 
-        PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY, 
-        robotToCamera);
+                kTagLayout,
+                PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
+                robotToCamera);
     }
 
     @Override
@@ -82,31 +84,31 @@ public class PhotonVisionSimIO implements VisionIO {
 
     @Override
     public double getBestYaw() {
-         var result = getLatestResult();
-         double yaw = 0.0;
-         if (result.hasTargets()) {
-             // Calculate angular turn power
-             // Remove -1.0 because it was inverting results.
-             yaw = result.getBestTarget().getYaw();
-         }
-         return yaw;
+        var result = getLatestResult();
+        double yaw = 0.0;
+        if (result.hasTargets()) {
+            // Calculate angular turn power
+            // Remove -1.0 because it was inverting results.
+            yaw = result.getBestTarget().getYaw();
+        }
+        return yaw;
     }
 
     public PhotonPipelineResult getLatestResult() {
-         return cameraSim.getCamera().getLatestResult();
-     }
+        return cameraSim.getCamera().getLatestResult();
+    }
 
     @Override
     public double getBestPitch() {
         var result = getLatestResult();
-         double pitch = 0.0;
-         if (result.hasTargets()) {
-             // Calculate angular turn power
-             // Remove -1.0 because it was inverting results.
-             pitch = result.getBestTarget().getPitch();
-         }
- 
-         return pitch;
+        double pitch = 0.0;
+        if (result.hasTargets()) {
+            // Calculate angular turn power
+            // Remove -1.0 because it was inverting results.
+            pitch = result.getBestTarget().getPitch();
+        }
+
+        return pitch;
     }
 
     @Override
@@ -155,7 +157,7 @@ public class PhotonVisionSimIO implements VisionIO {
 
     @Override
     public double getChosenTargetSkew(int fiducialID) {
-     var result = getLatestResult();
+        var result = getLatestResult();
         // Get a list of all of the targets that have been detected.
         List<PhotonTrackedTarget> targets = result.getTargets();
         double rotation = 0;
@@ -177,23 +179,24 @@ public class PhotonVisionSimIO implements VisionIO {
 
     @Override
     public double getChosenTargetRange(int fiducialID) {
-       var result = getLatestResult();
-         List<PhotonTrackedTarget> targets = result.getTargets();
-         double range = 0;
-         if (result.hasTargets()) {
-             for (PhotonTrackedTarget target : targets) {
-                 if (target.getFiducialId() == fiducialID) {
-                     range = PhotonUtils.calculateDistanceToTargetMeters(
-                             0,
-                             0,
-                             0,
-                             Units.degreesToRadians(target.getPitch()));
-                     return range;
-                 }
-             }
-         }
-         return 0;
+        var result = getLatestResult();
+        List<PhotonTrackedTarget> targets = result.getTargets();
+        double range = 0;
+        if (result.hasTargets()) {
+            for (PhotonTrackedTarget target : targets) {
+                if (target.getFiducialId() == fiducialID) {
+                    range = PhotonUtils.calculateDistanceToTargetMeters(
+                            0,
+                            0,
+                            0,
+                            Units.degreesToRadians(target.getPitch()));
+                    return range;
+                }
+            }
+        }
+        return 0;
     }
+
     @Override
     public boolean hasTargets() {
         var result = getLatestResult();
@@ -202,6 +205,7 @@ public class PhotonVisionSimIO implements VisionIO {
         }
         return false;
     }
+
     @Override
     public boolean hasChossenTarget(int fiducialID) {
         var result = getLatestResult();
@@ -218,12 +222,13 @@ public class PhotonVisionSimIO implements VisionIO {
 
         return false;
     }
+
     @Override
     public double getBestRange() {
         var result = getLatestResult();
         double range = 0;
         if (result.hasTargets()) {
-             range = PhotonUtils.calculateDistanceToTargetMeters(
+            range = PhotonUtils.calculateDistanceToTargetMeters(
                     0,
                     0,
                     0,
@@ -235,7 +240,6 @@ public class PhotonVisionSimIO implements VisionIO {
     public PhotonCameraSim getCameraSim() {
         return cameraSim;
     }
-    
 
     public void mountedOnTurret() {
         mountedOnTurret = true;
@@ -246,14 +250,14 @@ public class PhotonVisionSimIO implements VisionIO {
     }
 
     /**
-      * The standard deviations of the estimated pose from
-      * {@link #getEstimatedGlobalPose()}, for use
-      * with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
-      * SwerveDrivePoseEstimator}.
-      * This should only be used when there are targets visible.
-      *
-      * @param estimatedPose The estimated pose to guess standard deviations for.
-      */
+     * The standard deviations of the estimated pose from
+     * {@link #getEstimatedGlobalPose()}, for use
+     * with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
+     * SwerveDrivePoseEstimator}.
+     * This should only be used when there are targets visible.
+     *
+     * @param estimatedPose The estimated pose to guess standard deviations for.
+     */
     public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
         var estStdDevs = VisionConstants.kSingleTagStdDevs;
         var targets = getLatestResult().getTargets();
@@ -281,29 +285,28 @@ public class PhotonVisionSimIO implements VisionIO {
         return estStdDevs;
     }
 
-
     /**
      * The latest estimated robot pose on the field from vision data. This may be
-    * empty. This should
-    * only be called once per loop.
-    *
-    * @return An {@link Optional<Pose2D>>} with an estimated pose, estimate
-    *         timestamp, and targets
-    *         used for estimation.
-    */
+     * empty. This should
+     * only be called once per loop.
+     *
+     * @return An {@link Optional<Pose2D>>} with an estimated pose, estimate
+     *         timestamp, and targets
+     *         used for estimation.
+     */
     public Optional<VisionEstimate> getVisionEst() {
         PhotonPipelineResult result = getLatestResult();
         var visionEst = estimator.update(result);
         double latestTimestamp = cameraSim.getCamera().getLatestResult().getTimestampSeconds();
         boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
-        if(newResult) {
+        if (newResult) {
             lastEstTimestamp = latestTimestamp;
             isNewResult = true;
         } else {
             isNewResult = false;
         }
 
-        if(visionEst.isEmpty()) {
+        if (visionEst.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(new VisionEstimate(visionEst.get()));

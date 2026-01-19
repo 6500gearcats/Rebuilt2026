@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.subsystems.vision.Vision;
 
 public final class RobotStateMachine {
-    private RobotState state = RobotState.IDLE;
+    private RobotState state = RobotState.INACTIVE;
 
     // Latest known robot pose. This is always kept in sync with Vision when
     // available.
@@ -60,20 +60,11 @@ public final class RobotStateMachine {
 
     public void update(RobotState s) {
         switch (s) {
-            case INTAKING:
-                state = RobotState.INTAKING;
+            case ACTIVE:
+                state = RobotState.ACTIVE;
                 break;
-            case FEEDING:
-                state = RobotState.FEEDING;
-                break;
-            case SHOOTING:
-                state = RobotState.SHOOTING;
-                break;
-            case AUTO:
-                state = RobotState.AUTO;
-                break;
-            case DISABLED:
-                state = RobotState.DISABLED;
+            case INACTIVE:
+                state = RobotState.INACTIVE;
                 break;
             default:
                 break;
@@ -93,6 +84,6 @@ public final class RobotStateMachine {
     }
 
     enum RobotState {
-        IDLE, INTAKING, FEEDING, SHOOTING, AUTO, DISABLED
+        ACTIVE, INACTIVE
     }
 }

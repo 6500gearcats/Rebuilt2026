@@ -42,11 +42,11 @@ public final class Constants {
   }
 
   public static enum Mode {
-        /** Running on a real robot. */
-        REAL,
+    /** Running on a real robot. */
+    REAL,
 
-        /** Running a physics simulator. */
-        SIM,
+    /** Running a physics simulator. */
+    SIM,
   }
 
   public static final class DriveConstants {
@@ -203,7 +203,8 @@ public final class Constants {
 
     // The standard deviations of our vision estimated poses, which affect
     // correction rate
-    // ! (Fake values. Experiment and determine estimation noise on an actual robot.)
+    // ! (Fake values. Experiment and determine estimation noise on an actual
+    // robot.)
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(.5, .5, Units.degreesToRadians(20));
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(.5, .5, Units.degreesToRadians(5));
     public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(27);
@@ -217,6 +218,3 @@ public final class Constants {
 
   }
 }
-  
-
-

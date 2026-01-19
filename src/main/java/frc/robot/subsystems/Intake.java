@@ -13,18 +13,19 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class Intake extends SubsystemBase {
-  //all below code is from 2022 and may not work and all IntakeConstants have been changed to 1 or 2
+  // all below code is from 2022 and may not work and all IntakeConstants have
+  // been changed to 1 or 2
   public final MotorController m_intakeMotor = new SparkMax(12, MotorType.kBrushed);
 
-  public Intake(){
-    
+  public Intake() {
+
   }
 
   @Override
   public void simulationPeriodic() {
     SmartDashboard.putNumber("IntakeSpeed", m_intakeMotor.get());
   }
-  
+
   public void setReverse(double speed) {
     m_intakeMotor.set(speed);
   }
@@ -35,7 +36,7 @@ public class Intake extends SubsystemBase {
 
   public boolean ballIsPresent() {
     boolean ballIsPresent = false;
-    //ballIsPresent = proxValue > 1.2;
+    // ballIsPresent = proxValue > 1.2;
     return ballIsPresent;
   }
 
