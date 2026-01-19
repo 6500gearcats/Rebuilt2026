@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+@SuppressWarnings("unused")
 public class LedCANdle extends SubsystemBase {
   private static CANdle candle = new CANdle(50, "Default Name");
   private static CANdleConfiguration config = new CANdleConfiguration();
