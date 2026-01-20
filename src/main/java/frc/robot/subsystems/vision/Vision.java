@@ -126,6 +126,7 @@ public class Vision extends SubsystemBase {
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
     for (VisionIO visionIO : m_visionOdometryCams) {
+      System.out.print("I'm here");
       visionIO.getVisionEst().ifPresent(est -> estimator.addVisionMeasurement(est.getPose(), est.getTimestamp()));
     }
     // In sim, fall back to drivetrain sim pose if module positions aren't simulated

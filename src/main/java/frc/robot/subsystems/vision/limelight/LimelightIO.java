@@ -149,7 +149,7 @@ public class LimelightIO implements VisionIO {
 
     @Override
     public Optional<VisionEstimate> getVisionEst() {
-        boolean useMegaTag2 = true; // set to false to use MegaTag1
+        // boolean useMegaTag2_ = true; // set to false to use MegaTag1
         boolean doRejectUpdate = false;
 
         if (useMegaTag2 == false) {
@@ -205,7 +205,8 @@ public class LimelightIO implements VisionIO {
                             0, 0);
                 }
             }
-            LimelightHelpers.setCameraPose_RobotSpace(getName(), -0.318, 0.177, 0.29, 0, 0, 180);
+            // LimelightHelpers.setCameraPose_RobotSpace(getName(), -0.318, 0.177, 0.29, 0,
+            // 0, 180);
             LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(getName());
             if (mt2 != null) {
                 if (Math.abs(angularVelocitySupplier.get()) > 720) // if our angular velocity is greater than 720
