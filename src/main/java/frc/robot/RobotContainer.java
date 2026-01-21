@@ -97,7 +97,7 @@ public class RobotContainer {
                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", true,
                                                 new Translation3d(0.1, 0, 0.5),
                                                 new Rotation3d(0, Math.toRadians(-15), 0));
-                                LimelightIO m_ll = new LimelightIO("gcc", true, drivetrain.rotationSupplier(),
+                                LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
                                 m_vision = new Vision(
@@ -208,6 +208,7 @@ public class RobotContainer {
         }
 
         public void setRobotOrientation() {
+                // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.36, 0, 0.05, 0, 18, 0);
         }
 }
