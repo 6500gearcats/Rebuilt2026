@@ -3,6 +3,8 @@ package frc.robot;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,6 +18,10 @@ public final class RobotStateMachine {
     private Pose2d pose = new Pose2d();
     private Supplier<Pose2d> visionPoseSupplier;
     private FieldZone currentZone = FieldZone.ALLIANCE;
+    private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
+            .getTable("StateMachinePose")
+            .getStructTopic("stateMachinePose", Pose2d.struct)
+            .publish();
 
     private RobotStateMachine() {
         SmartDashboard.putString("RobotState", state.toString());
@@ -32,6 +38,7 @@ public final class RobotStateMachine {
     public void periodic() {
         refreshPoseFromVision();
         currentZone = checkZone();
+        posePublisher.set(pose);
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
