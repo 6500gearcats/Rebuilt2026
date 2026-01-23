@@ -124,8 +124,7 @@ public class Vision extends SubsystemBase {
     if (isReplay) {
       return;
     }
-    estimator.updateWithTime(
-        System.currentTimeMillis() / 1000.0,
+    estimator.update(
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
     for (VisionIO visionIO : m_visionOdometryCams) {

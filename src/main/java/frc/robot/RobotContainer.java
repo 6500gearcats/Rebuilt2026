@@ -18,8 +18,12 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.Optional;
+
 import org.photonvision.simulation.SimCameraProperties;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,15 +38,12 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
-import frc.robot.commands.FeedFuel;
-import frc.robot.commands.IntakeFuel;
-import frc.robot.commands.ShootFuel;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Feeder;
-import frc.robot.subsystems.Intake;
+// import frc.robot.subsystems.Feeder;
+// import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LedCANdle;
-import frc.robot.subsystems.Shooter;
+// import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
@@ -79,13 +80,13 @@ public class RobotContainer {
 
         private final SendableChooser<Command> autoChooser;
 
-        private final Feeder m_feeder = new Feeder();
-        private final Intake m_intake = new Intake();
-        private final Shooter m_shooter = new Shooter();
+        // private final Feeder m_feeder = new Feeder();
+        // private final Intake m_intake = new Intake();
+        // private final Shooter m_shooter = new Shooter();
 
         // Vision
-        PhotonVisionIO photonVisionIO = new PhotonVisionIO("photonvision", true, new Translation3d(0.1, 0, 0.5),
-                        new Rotation3d(0, Math.toRadians(-15), 0));
+        // PhotonVisionIO photonVisionIO = new PhotonVisionIO("photonvision", true, new Translation3d(0.1, 0, 0.5),
+        //                 new Rotation3d(0, Math.toRadians(-15), 0));
         private final Vision m_vision;
 
         public RobotContainer() {
@@ -94,9 +95,9 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", true,
-                                                new Translation3d(0.1, 0, 0.5),
-                                                new Rotation3d(0, Math.toRadians(-15), 0));
+                                // PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", true,
+                                //                 new Translation3d(0.1, 0, 0.5),
+                                //                 new Rotation3d(0, Math.toRadians(-15), 0));
                                 LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
@@ -104,7 +105,7 @@ public class RobotContainer {
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
-                                                m_photonVisionIO,
+                                                // m_photonVisionIO,
                                                 m_ll);
                                 break;
                         case SIM:
@@ -159,10 +160,10 @@ public class RobotContainer {
                 // LED test controls
                 joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40))); // gearcat teal!
                 joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
-                joystick.y().onTrue(new IntakeFuel(m_intake, 1));
-                joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
-                joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
-                joystick.pov(90).whileTrue(new IntakeFuel(m_intake, 1));
+                // joystick.y().onTrue(new IntakeFuel(m_intake, 1));
+                // joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
+                // joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
+                // joystick.pov(90).whileTrue(new IntakeFuel(m_intake, 1));
                 // joystick.rightBumper().whileTrue(new RunCommand(() ->
                 // m_candle.colorWithBrightness(
                 // Math.sqrt(Math.pow(joystick.getLeftX(), 2) + Math.pow(joystick.getLeftY(),
@@ -210,5 +211,20 @@ public class RobotContainer {
         public void setRobotOrientation() {
                 // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.36, 0, 0.05, 0, 18, 0);
+        }
+
+        public void resetRobotGyroAndOrientation() {
+                Optional<Alliance> alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                        if (alliance.get().equals(Alliance.Blue)) {
+                                drivetrain.getPigeon().reset();
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6, 180);
+                        } else {
+                                drivetrain.getPigeon().reset();
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0, 0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6, 180);
+                        }
+                }
         }
 }
