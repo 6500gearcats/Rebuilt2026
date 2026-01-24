@@ -18,12 +18,9 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import java.util.Optional;
-
 import org.photonvision.simulation.SimCameraProperties;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,10 +37,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-// import frc.robot.subsystems.Feeder;
-// import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LedCANdle;
-// import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
@@ -80,13 +75,15 @@ public class RobotContainer {
 
         private final SendableChooser<Command> autoChooser;
 
+        private final Turret m_turret = new Turret();
+
         // private final Feeder m_feeder = new Feeder();
         // private final Intake m_intake = new Intake();
         // private final Shooter m_shooter = new Shooter();
 
         // Vision
-        // PhotonVisionIO photonVisionIO = new PhotonVisionIO("photonvision", true, new Translation3d(0.1, 0, 0.5),
-        //                 new Rotation3d(0, Math.toRadians(-15), 0));
+        PhotonVisionIO photonVisionIO = new PhotonVisionIO("photonvision", false, new Translation3d(0.1, 0, 0.5),
+                        new Rotation3d(0, Math.toRadians(-15), 0));
         private final Vision m_vision;
 
         public RobotContainer() {
@@ -95,9 +92,9 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                // PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", true,
-                                //                 new Translation3d(0.1, 0, 0.5),
-                                //                 new Rotation3d(0, Math.toRadians(-15), 0));
+                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", false,
+                                                new Translation3d(0.1, 0, 0.5),
+                                                new Rotation3d(0, Math.toRadians(-15), 0));
                                 LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
@@ -105,7 +102,7 @@ public class RobotContainer {
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
-                                                // m_photonVisionIO,
+                                                m_photonVisionIO,
                                                 m_ll);
                                 break;
                         case SIM:
@@ -139,12 +136,12 @@ public class RobotContainer {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
+        // drivetrain.setDefaultCommand(
+        //         // Drivetrain will execute this command periodically
+        //         drivetrain.applyRequest(
+        //                 () -> drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
+        //                         .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
+        //                         .withRotationalRate(MathUtil.applyDeadband(joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
@@ -175,6 +172,10 @@ public class RobotContainer {
                 // joystick.getLeftTriggerAxis()
                 // )));
 
+                new Trigger(() -> joystick.getLeftTriggerAxis() > 0.1)
+                                .onTrue(new InstantCommand(() -> m_turret.setTurnSpeed(joystick.getLeftTriggerAxis()))
+                                                .andThen(new InstantCommand(() -> System.out.println("hey there"))));
+                joystick.pov(180).onTrue(new RunCommand(() -> m_turret.stopMotor()));
                 new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
                                 .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
                                                 () -> joystick2.getLeftTriggerAxis())));
@@ -195,7 +196,8 @@ public class RobotContainer {
                 // drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Reset the field-centric heading on left bumper press.
-                joystick.start().onTrue(new InstantCommand(() -> resetRobotGyroAndOrientation()));
+                joystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
                 // Print the robot pose
                 // pranav.circle().onTrue(new InstantCommand(
                 // () -> System.out.println("\n \n \n \n" +
@@ -210,20 +212,5 @@ public class RobotContainer {
         public void setRobotOrientation() {
                 // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.36, 0, 0.05, 0, 18, 0);
-        }
-
-        public void resetRobotGyroAndOrientation() {
-                Optional<Alliance> alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                        if (alliance.get().equals(Alliance.Blue)) {
-                                drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.368, 0, 0.1, 0, 18, 0);
-                        } else {
-                                drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0, 0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6, 180);
-                        }
-                }
         }
 }
