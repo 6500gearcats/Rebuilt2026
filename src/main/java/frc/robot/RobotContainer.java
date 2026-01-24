@@ -35,9 +35,11 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
+import frc.robot.commands.MoveTurret;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
+import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
@@ -74,6 +76,8 @@ public class RobotContainer {
         private LedCANdle m_candle = new LedCANdle();
 
         private final SendableChooser<Command> autoChooser;
+
+        private final Flywheel m_flywheel = new Flywheel();
 
         private final Turret m_turret = new Turret();
 
@@ -151,12 +155,13 @@ public class RobotContainer {
 
                 // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
                 // joystick.b().whileTrue(drivetrain.applyRequest(
-                                // () -> point.withModuleDirection(
-                                //                 new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
+                // () -> point.withModuleDirection(
+                // new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
 
                 // LED test controls
-                //joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40))); // gearcat teal!
-                //joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
+                // joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40)));
+                // // gearcat teal!
+                // joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
                 // joystick.y().onTrue(new IntakeFuel(m_intake, 1));
                 // joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
                 // joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
@@ -173,12 +178,16 @@ public class RobotContainer {
                 // )));
 
                 new Trigger(() -> joystick.getLeftTriggerAxis() > 0.1)
-                                 .whileTrue(new RunCommand(() -> m_turret.setTurnSpeed(1))
-                                                 .andThen(new InstantCommand(() -> System.out.println("hey there"))));
-                 joystick.pov(180).whileTrue(new RunCommand(() -> m_turret.stopMotor()));
+                                .whileTrue(new RunCommand(() -> m_flywheel.setTurnSpeed(1))
+                                                .andThen(new InstantCommand(() -> System.out.println("hey there"))));
+                joystick.pov(180).whileTrue(new RunCommand(() -> m_flywheel.stopMotor()));
+
+                new Trigger(() -> joystick2.getRightX() > 0.1)
+                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX()));
+
                 // new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
-                //                 .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-                //                                 () -> joystick2.getLeftTriggerAxis())));
+                // .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
+                // () -> joystick2.getLeftTriggerAxis())));
 
                 // Change input str to
                 // joystick.rightBumper().onTrue(Commands.runOnce(() -> m_candle.cycleFlag()));
