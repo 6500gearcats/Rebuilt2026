@@ -149,14 +149,14 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-                joystick.b().whileTrue(drivetrain.applyRequest(
-                                () -> point.withModuleDirection(
-                                                new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
+                // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+                // joystick.b().whileTrue(drivetrain.applyRequest(
+                                // () -> point.withModuleDirection(
+                                //                 new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
 
                 // LED test controls
-                joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40))); // gearcat teal!
-                joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
+                //joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40))); // gearcat teal!
+                //joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
                 // joystick.y().onTrue(new IntakeFuel(m_intake, 1));
                 // joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
                 // joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
@@ -173,22 +173,22 @@ public class RobotContainer {
                 // )));
 
                 new Trigger(() -> joystick.getLeftTriggerAxis() > 0.1)
-                                .onTrue(new InstantCommand(() -> m_turret.setTurnSpeed(joystick.getLeftTriggerAxis()))
-                                                .andThen(new InstantCommand(() -> System.out.println("hey there"))));
-                joystick.pov(180).onTrue(new RunCommand(() -> m_turret.stopMotor()));
-                new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
-                                .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-                                                () -> joystick2.getLeftTriggerAxis())));
+                                 .whileTrue(new RunCommand(() -> m_turret.setTurnSpeed(1))
+                                                 .andThen(new InstantCommand(() -> System.out.println("hey there"))));
+                 joystick.pov(180).whileTrue(new RunCommand(() -> m_turret.stopMotor()));
+                // new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
+                //                 .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
+                //                                 () -> joystick2.getLeftTriggerAxis())));
 
                 // Change input str to
-                joystick.rightBumper().onTrue(Commands.runOnce(() -> m_candle.cycleFlag()));
+                // joystick.rightBumper().onTrue(Commands.runOnce(() -> m_candle.cycleFlag()));
 
                 // Run SysId routines when holding back/start and X/Y.
                 // Note that each routine should be run exactly once in a single log.
-                joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-                joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-                joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-                joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+                // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+                // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+                // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+                // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
                 // reset the field-centric heading on left bumper press
                 joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
