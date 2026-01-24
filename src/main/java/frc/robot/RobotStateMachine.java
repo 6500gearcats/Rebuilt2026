@@ -14,6 +14,8 @@ public final class RobotStateMachine {
     private static RobotStateMachine instance;
 
     private RobotState state = RobotState.INACTIVE;
+    private String gameData = "";
+    private boolean gotData = false;
 
     private Pose2d pose = new Pose2d();
     private Supplier<Pose2d> visionPoseSupplier;
@@ -135,6 +137,16 @@ public final class RobotStateMachine {
         } else {
             return FieldZone.NEUTRAL;
         }
+    }
+    public String getGameData() {
+        return gameData;
+    } 
+    public void setGameData(String data) {
+        gameData = data;
+        gotData = true;
+    }
+    public boolean hasData() {
+        return gotData;
     }
 
     enum RobotState {
