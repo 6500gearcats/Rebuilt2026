@@ -38,7 +38,7 @@ import frc.robot.Constants.RobotConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
-import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
@@ -73,9 +73,9 @@ public class RobotContainer {
 
         private LedCANdle m_candle = new LedCANdle();
 
-        private final SendableChooser<Command> autoChooser;
+        private final Hopper hopper = new Hopper();
 
-        private final Turret m_turret = new Turret();
+        private final SendableChooser<Command> autoChooser;
 
         // private final Feeder m_feeder = new Feeder();
         // private final Intake m_intake = new Intake();
@@ -172,10 +172,6 @@ public class RobotContainer {
                 // joystick.getLeftTriggerAxis()
                 // )));
 
-                new Trigger(() -> joystick.getLeftTriggerAxis() > 0.1)
-                                .onTrue(new InstantCommand(() -> m_turret.setTurnSpeed(joystick.getLeftTriggerAxis()))
-                                                .andThen(new InstantCommand(() -> System.out.println("hey there"))));
-                joystick.pov(180).onTrue(new RunCommand(() -> m_turret.stopMotor()));
                 new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
                                 .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
                                                 () -> joystick2.getLeftTriggerAxis())));
