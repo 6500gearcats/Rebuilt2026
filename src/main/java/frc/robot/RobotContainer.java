@@ -70,7 +70,7 @@ public class RobotContainer {
         private final Telemetry logger = new Telemetry(MaxSpeed);
 
         private final CommandXboxController joystick = new CommandXboxController(0);
-        private final CommandPS4Controller pranav = new CommandPS4Controller(3);
+        private final CommandPS4Controller pranav = new CommandPS4Controller(0);
 
         private final XboxController joystick2 = new XboxController(1);
 
@@ -85,7 +85,7 @@ public class RobotContainer {
         // private final Shooter m_shooter = new Shooter();
 
         // Vision
-         PhotonVisionIO photonVisionIO;
+        PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
 
         public RobotContainer() {
@@ -94,12 +94,12 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", true,
-                                                 new Translation3d(0.1, 0, 0.5),
-                                                 new Rotation3d(0, Math.toRadians(-15), 0));
-                                                 PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", true,
-                                                 new Translation3d(0.2, 0, 0.5),
-                                                 new Rotation3d(0, Math.toRadians(-15), 0));
+                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", true,
+                                                new Translation3d(0.1, 0, 0.5),
+                                                new Rotation3d(0, Math.toRadians(-15), 0));
+                                PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", true,
+                                                new Translation3d(0.2, 0, 0.5),
+                                                new Rotation3d(0, Math.toRadians(-15), 0));
                                 LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
@@ -141,48 +141,22 @@ public class RobotContainer {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
-        // drivetrain.setDefaultCommand(
-        //         // Drivetrain will execute this command periodically
+        drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
                                 .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate)); // Drive counterclockwise with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
-                // // neutral mode is applied to the drive motors while disabled.
-                // final var idle = new SwerveRequest.Idle();
-                // RobotModeTriggers.disabled().whileTrue(
-                //                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
+                // neutral mode is applied to the drive motors while disabled.
+                final var idle = new SwerveRequest.Idle();
+                RobotModeTriggers.disabled().whileTrue(
+                                drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
                 // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
                 // joystick.b().whileTrue(drivetrain.applyRequest(
-                //                 () -> point.withModuleDirection(
-                //                                 new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
-
-                // // LED test controls
-                // joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40))); // gearcat teal!
-                // joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
-                // joystick.y().onTrue(new IntakeFuel(m_intake, 1));
-                // joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
-                // joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
-                // joystick.pov(90).whileTrue(new IntakeFuel(m_intake, 1));
-                // joystick.rightBumper().whileTrue(new RunCommand(() ->
-                // m_candle.colorWithBrightness(
-                // Math.sqrt(Math.pow(joystick.getLeftX(), 2) + Math.pow(joystick.getLeftY(),
-                // 2))
-                // )));
-
-                // joystick.leftTrigger().whileTrue(new RunCommand(() ->
-                // m_candle.colorWithBrightness(
-                // joystick.getLeftTriggerAxis()
-                // )));
-
-                // new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
-                //                 .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-                //                                 () -> joystick2.getLeftTriggerAxis())));
-
-                // // Change input str to
-                // joystick.rightBumper().onTrue(Commands.runOnce(() -> m_candle.cycleFlag()));
+                // () -> point.withModuleDirection(
+                // new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
 
                 // Run SysId routines when holding back/start and X/Y.
                 // Note that each routine should be run exactly once in a single log.
@@ -194,15 +168,10 @@ public class RobotContainer {
                 // reset the field-centric heading on left bumper press
                 joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-                // drivetrain.registerTelemetry(logger::telemeterize);
+                drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> resetRobotGyroAndOrientation()));
-                // Print the robot pose
-                // pranav.circle().onTrue(new InstantCommand(
-                // () -> System.out.println("\n \n \n \n" +
-                // RobotStateMachine.getInstance().getPose()
-                // + "\n \n \n \n")));
         }
 
         public Command getAutonomousCommand() {
@@ -219,12 +188,16 @@ public class RobotContainer {
                 if (alliance.isPresent()) {
                         if (alliance.get().equals(Alliance.Blue)) {
                                 drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.368, 0, 0.1, 0, 18, 0);
                         } else {
                                 drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0, 0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6, 180);
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6,
+                                                180);
                         }
                 }
         }
