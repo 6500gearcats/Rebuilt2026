@@ -24,6 +24,7 @@ import org.photonvision.simulation.SimCameraProperties;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -36,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
+import frc.robot.commands.AlignToAngle;
 import frc.robot.commands.MoveTurret;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -82,9 +84,7 @@ public class RobotContainer {
 
         private final Turret m_turret = new Turret();
 
-        private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
 
-        private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
         // private final Feeder m_feeder = new Feeder();
         // private final Intake m_intake = new Intake();
@@ -205,7 +205,8 @@ public class RobotContainer {
                 // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-                joystick.a().onTrue(new RunCommand(() -> alignToTag()));
+                joystick.a().whileTrue(new AlignToAngle(drivetrain, drive));
+                
 
                 // reset the field-centric heading on left bumper press
                 joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -229,22 +230,5 @@ public class RobotContainer {
         public void setRobotOrientation() {
                 // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.36, 0, 0.05, 0, 18, 0);
-        }
-
-        public void alignToTag() {
-                // This method will be called once per scheduler run
-
-                double rectW = (tagPose.getX() + 1 - robotStateMachine.getPose().getX());
-                double rectH = (tagPose.getY() + 1 - robotStateMachine.getPose().getY());
-
-                double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
-                                                                              // oriented
-
-                double newAngleRate = (newAngle - robotStateMachine.getPose().getRotation().getDegrees()) * 0.07;
-                // setPosition(newAngle);
-
-                drivetrain.applyRequest(
-                                () -> drive.withRotationalRate(newAngleRate));
-
         }
 }
