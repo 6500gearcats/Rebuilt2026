@@ -8,14 +8,22 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Robot;
+import frc.robot.RobotStateMachine;
 import frc.robot.generated.TunerConstants;
 
 public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(50, TunerConstants.kCANBus);
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
+  private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
+  private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
+  // private double tagRot = 0 - tagPose.getRotation().getAngle();
 
   public Turret() {
     // in init function, set slot 0 gains
@@ -32,6 +40,14 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    double rectW = (tagPose.getX() + 1 - robotStateMachine.getPose().getX());
+    double rectH = (tagPose.getY() + 1 - robotStateMachine.getPose().getY());
+
+    double newAngle = Math.atan2(rectH, rectW); // gets wanted angle for robot field oriented
+
+    // setPosition(newAngle);
+
     SmartDashboard.putNumber("Turret Position", getPosition());
   }
 

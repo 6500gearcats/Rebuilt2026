@@ -37,6 +37,8 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
 
+  public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+
   public static class RobotConstants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
   }
