@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -81,6 +82,10 @@ public class RobotContainer {
 
         private final Turret m_turret = new Turret();
 
+        private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
+
+        private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
+
         // private final Feeder m_feeder = new Feeder();
         // private final Intake m_intake = new Intake();
         // private final Shooter m_shooter = new Shooter();
@@ -140,12 +145,12 @@ public class RobotContainer {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
-        // drivetrain.setDefaultCommand(
-        //         // Drivetrain will execute this command periodically
-        //         drivetrain.applyRequest(
-        //                 () -> drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-        //                         .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-        //                         .withRotationalRate(MathUtil.applyDeadband(joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
+        drivetrain.setDefaultCommand(
+                // Drivetrain will execute this command periodically
+                drivetrain.applyRequest(
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
@@ -180,6 +185,7 @@ public class RobotContainer {
                 new Trigger(() -> joystick.getLeftTriggerAxis() > 0.1)
                                 .whileTrue(new RunCommand(() -> m_flywheel.setTurnSpeed(1))
                                                 .andThen(new InstantCommand(() -> System.out.println("hey there"))));
+
                 joystick.pov(180).whileTrue(new RunCommand(() -> m_flywheel.stopMotor()));
 
                 new Trigger(() -> joystick2.getRightX() > 0.1)
@@ -198,6 +204,8 @@ public class RobotContainer {
                 // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
                 // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+                joystick.a().onTrue(new RunCommand(() -> alignToTag()));
 
                 // reset the field-centric heading on left bumper press
                 joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -221,5 +229,22 @@ public class RobotContainer {
         public void setRobotOrientation() {
                 // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.36, 0, 0.05, 0, 18, 0);
+        }
+
+        public void alignToTag() {
+                // This method will be called once per scheduler run
+
+                double rectW = (tagPose.getX() + 1 - robotStateMachine.getPose().getX());
+                double rectH = (tagPose.getY() + 1 - robotStateMachine.getPose().getY());
+
+                double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
+                                                                              // oriented
+
+                double newAngleRate = (newAngle - robotStateMachine.getPose().getRotation().getDegrees()) * 0.07;
+                // setPosition(newAngle);
+
+                drivetrain.applyRequest(
+                                () -> drive.withRotationalRate(newAngleRate));
+
         }
 }
