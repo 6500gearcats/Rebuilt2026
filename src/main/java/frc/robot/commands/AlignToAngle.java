@@ -20,7 +20,7 @@ public class AlignToAngle extends Command {
   /** Creates a new AlignToAngle. */
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
 
-  private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
+  
   private CommandSwerveDrivetrain drivetrain;
   private SwerveRequest.FieldCentric drive;
  
@@ -39,29 +39,9 @@ public class AlignToAngle extends Command {
   @Override
   public void execute() {
     System.out.println("Aligning to tag");
-    // This method will be called once per scheduler run
-    double rectW = (tagPose.getX() + 1 - robotStateMachine.getPose().getX());
-    double rectH = (tagPose.getY() + 1 - robotStateMachine.getPose().getY());
-    
-    SmartDashboard.putNumber("rectH", rectH);
-    SmartDashboard.putNumber("rectW", rectW);
     
 
-    double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
-                                                                  // oriented
-
-    SmartDashboard.putNumber("newAngle", newAngle);
-
-    double newAngleRate = (newAngle - robotStateMachine.getPose().getRotation().getDegrees()) ;
-
-    double kP = 0.3;
-
-    double newNewAngleRate = newAngleRate * kP;
-    // setPosition(newAngle);
-    SmartDashboard.putNumber("newAngleRate", newAngleRate);
-
-    CommandScheduler.getInstance().schedule(drivetrain.applyRequest(
-                    () -> drive.withRotationalRate(newNewAngleRate)));
+    CommandScheduler.getInstance().schedule();
     
   }
 

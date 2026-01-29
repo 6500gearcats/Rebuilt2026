@@ -84,7 +84,8 @@ public class RobotContainer {
 
         private final Turret m_turret = new Turret();
 
-
+        private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
+        private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
         // private final Feeder m_feeder = new Feeder();
         // private final Intake m_intake = new Intake();
@@ -205,8 +206,7 @@ public class RobotContainer {
                 // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-                joystick.a().whileTrue(new AlignToAngle(drivetrain, drive));
-                
+                joystick.a().whileTrue(drivetrain.applyRequest(() -> drive.withRotationalRate(getAlignRate())));
 
                 // reset the field-centric heading on left bumper press
                 joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -230,5 +230,33 @@ public class RobotContainer {
         public void setRobotOrientation() {
                 // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.36, 0, 0.05, 0, 18, 0);
+        }
+
+        public double getAlignRate() {
+                // This method will be called once per scheduler run
+                double rectW = (tagPose.getX() + 1 - robotStateMachine.getPose().getX());
+                double rectH = (tagPose.getY() - robotStateMachine.getPose().getY());
+                
+                SmartDashboard.putNumber("rectH", rectH);
+                SmartDashboard.putNumber("rectW", rectW);
+                double poseRot = robotStateMachine.getPose().getRotation().getDegrees();
+                
+                double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
+                                                                                // oriented
+
+                SmartDashboard.putNumber("newAngle", newAngle);
+                double newAngleRate;
+                if(poseRot > 0){
+                        newAngleRate = ((newAngle - poseRot));
+                } else {
+                        newAngleRate = ((poseRot - newAngle));
+                }
+
+                double kP = 0.3;
+
+                double newNewAngleRate = newAngleRate * kP;
+                // setPosition(newAngle);
+                SmartDashboard.putNumber("newAngleRate", newAngleRate);
+                return newNewAngleRate;
         }
 }
