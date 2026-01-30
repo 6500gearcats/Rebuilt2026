@@ -33,8 +33,6 @@ public class Turret extends SubsystemBase {
     slot0Configs.kD = 0; // A velocity of 1 rps results in 0.1 V output
 
     m_motor.getConfigurator().apply(slot0Configs);
-
-    SmartDashboard.putNumber("Turret Position", getPosition());
   }
 
   @Override
@@ -48,16 +46,23 @@ public class Turret extends SubsystemBase {
 
     // setPosition(newAngle);
 
-    SmartDashboard.putNumber("Turret Position", getPosition());
+    SmartDashboard.putNumber("Motor Position", getMotorPosition());
+    SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
   }
 
   public void setSpeed(double speed) {
     m_motor.set(speed);
   }
 
-  public double getPosition() {
+  public double getMotorPosition() {
     return m_motor.getPosition().getValueAsDouble();
   }
+
+  /** Turns motor position units into rotating turret in degrees */
+  public double getConvertedTurretPosition() {
+    return getMotorPosition() /90;
+  }
+
 
   public void setPosition(double position) {
     // set position to 10 rotations
