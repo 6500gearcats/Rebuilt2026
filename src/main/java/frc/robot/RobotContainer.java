@@ -19,8 +19,12 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.util.Optional;
+
 import org.photonvision.simulation.SimCameraProperties;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -214,7 +218,8 @@ public class RobotContainer {
                 // drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Reset the field-centric heading on left bumper press.
-                joystick.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+                //joystick.start().onTrue(new InstantCommand(() -> resetRobotGyroAndOrientation()));
+                joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
                 // Print the robot pose
                 // pranav.circle().onTrue(new InstantCommand(
@@ -229,7 +234,23 @@ public class RobotContainer {
 
         public void setRobotOrientation() {
                 // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
-                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.36, 0, 0.05, 0, 18, 0);
+                System.out.println("hi");
+                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.356, 0.2794, 0.1523, 0, 50, 0);
+        }
+
+        public void resetRobotGyroAndOrientation() {
+                Optional<Alliance> alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                        if (alliance.get().equals(Alliance.Blue)) {
+                                drivetrain.getPigeon().reset();
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.279, -0.279, 0.1, 0, 50, 0);
+                        } else {
+                                drivetrain.getPigeon().reset();
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0, 0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6, 180);
+                        }
+                }
         }
 
         public double getAlignRate() {
