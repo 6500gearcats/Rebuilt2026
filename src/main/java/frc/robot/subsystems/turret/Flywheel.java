@@ -12,12 +12,15 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
 
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
-  TalonFX m_motor = new TalonFX(40, TunerConstants.kCANBus);
+  TalonFX m_motor = new TalonFX(Constants.MotorConstants.kShooterMotorRightID, TunerConstants.kCANBus);
   final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
+
+  TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID, TunerConstants.kCANBus);
 
   public Flywheel() {
     var talonFXConfigs = new TalonFXConfiguration();
@@ -44,10 +47,13 @@ public class Flywheel extends SubsystemBase {
     // m_motor.set(speed);
 
     // set velocity to rps, add 0.5 V to overcome gravity
+    speed /= 2.0;
     m_motor.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
+    m_motor2.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
   }
 
   public void stopMotor() {
     m_motor.set(0);
+    m_motor2.set(0);
   }
 }

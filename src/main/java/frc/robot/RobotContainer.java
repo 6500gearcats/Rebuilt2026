@@ -210,7 +210,7 @@ public class RobotContainer {
                 // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-                joystick.a().whileTrue(drivetrain.applyRequest(() -> drive.withRotationalRate(getAlignRate())));
+                joystick.a().whileTrue(drivetrain.applyRequest(() -> drive.withRotationalRate(getAlignRate() * 0.1)));
 
                 // reset the field-centric heading on left bumper press
                 joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -218,7 +218,8 @@ public class RobotContainer {
                 // drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Reset the field-centric heading on left bumper press.
-                //joystick.start().onTrue(new InstantCommand(() -> resetRobotGyroAndOrientation()));
+                // joystick.start().onTrue(new InstantCommand(() ->
+                // resetRobotGyroAndOrientation()));
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
                 // Print the robot pose
@@ -235,7 +236,7 @@ public class RobotContainer {
         public void setRobotOrientation() {
                 // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
                 System.out.println("hi");
-                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.356, 0.2794, 0.1523, 0, 50, 0);
+                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.356, 0.2794, 0.1523, 0, 50, 180);
         }
 
         public void resetRobotGyroAndOrientation() {
@@ -243,31 +244,36 @@ public class RobotContainer {
                 if (alliance.isPresent()) {
                         if (alliance.get().equals(Alliance.Blue)) {
                                 drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.279, -0.279, 0.1, 0, 50, 0);
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.279, -0.279, 0.1, 0, 50,
+                                                0);
                         } else {
                                 drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0, 0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6, 180);
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6,
+                                                180);
                         }
                 }
         }
 
         public double getAlignRate() {
                 // This method will be called once per scheduler run
-                double rectW = (tagPose.getX() + 1 - robotStateMachine.getPose().getX());
-                double rectH = (tagPose.getY() - robotStateMachine.getPose().getY());
-                
+                double rectW = (tagPose.getX() - robotStateMachine.getPose().getX());
+                double rectH = (tagPose.getY() - 1 - robotStateMachine.getPose().getY());
+
                 SmartDashboard.putNumber("rectH", rectH);
                 SmartDashboard.putNumber("rectW", rectW);
                 double poseRot = robotStateMachine.getPose().getRotation().getDegrees();
-                
+
                 double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
-                                                                                // oriented
+                                                                              // oriented
 
                 SmartDashboard.putNumber("newAngle", newAngle);
                 double newAngleRate;
-                if(poseRot > 0){
+                if (poseRot > 0) {
                         newAngleRate = ((newAngle - poseRot));
                 } else {
                         newAngleRate = ((poseRot - newAngle));

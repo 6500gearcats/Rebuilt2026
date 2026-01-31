@@ -19,7 +19,7 @@ import frc.robot.generated.TunerConstants;
 
 public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
-  private final TalonFX m_motor = new TalonFX(50, TunerConstants.kCANBus);
+  private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID, TunerConstants.kCANBus);
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
@@ -60,9 +60,8 @@ public class Turret extends SubsystemBase {
 
   /** Turns motor position units into rotating turret in degrees */
   public double getConvertedTurretPosition() {
-    return getMotorPosition() /90;
+    return getMotorPosition() / 90;
   }
-
 
   public void setPosition(double position) {
     // set position to 10 rotations

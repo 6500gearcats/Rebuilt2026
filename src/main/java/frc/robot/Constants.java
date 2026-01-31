@@ -37,7 +37,8 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
 
-  public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
+  public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout
+      .loadField(AprilTagFields.k2026RebuiltAndymark);
 
   public static class RobotConstants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
@@ -218,5 +219,16 @@ public final class Constants {
     // How far from the target we want to be
     public static final double GOAL_RANGE_METERS = Units.feetToMeters(3);
 
+  }
+
+  public static class MotorConstants {
+    public static final int kTurretYawMotorID = 12;
+    public static final int kShooterMotorRightID = 13;
+    public static final int kShooterMotorLeftID = 14;
+
+    public static final int kIntakeMotorID = 20;
+    public static final int kIntakeDeployMotorID = 21;
+    public static final int kIndexerMotorID = 22;
+    public static final int kKickerMotorID = 23;
   }
 }
