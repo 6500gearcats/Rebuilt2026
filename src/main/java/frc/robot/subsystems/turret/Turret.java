@@ -52,8 +52,8 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
   }
 
-  public void setSpeed(DoubleSupplier speed) {
-    m_motor.set(speed.getAsDouble());
+  public void setSpeed(double speed) {
+    m_motor.set(speed);
   }
 
   public double getMotorPosition() {

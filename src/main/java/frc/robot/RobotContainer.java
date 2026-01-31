@@ -14,13 +14,25 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
+import javax.crypto.ShortBufferException;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.photonvision.simulation.SimCameraProperties;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -54,6 +67,7 @@ import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
+import frc.robot.utility.ShooterValuesSenable;
 
 public class RobotContainer {
         @SuppressWarnings("unused")
@@ -94,6 +108,13 @@ public class RobotContainer {
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
+        private final File logDir;
+        private final File logFile;
+        private BufferedWriter writer = null;
+        private final SendableChooser<Boolean> closeLogSendable = new SendableChooser<Boolean>();
+        private final SendableChooser<Boolean> shooterSendableChooser = new SendableChooser<Boolean>();
+        private final Sendable shooterSendable = new ShooterValuesSenable();
+
         // private final Feeder m_feeder = new Feeder();
         // private final Intake m_intake = new Intake();
         // private final Shooter m_shooter = new Shooter();
@@ -104,6 +125,24 @@ public class RobotContainer {
         private final Vision m_vision;
 
         public RobotContainer() {
+                logDir = new File("log");
+                logDir.mkdirs();
+                logFile = new File(logDir, "shootFile.json");
+                logFile.setWritable(true);
+                closeLogSendable.setDefaultOption("false", false);
+                closeLogSendable.addOption("true", true);
+                SmartDashboard.putData("Close Buffer", closeLogSendable);
+
+                SmartDashboard.putData("Shooter Values", shooterSendable);
+
+                try {
+                        writer = Files.newBufferedWriter(logFile.toPath(), StandardOpenOption.CREATE,
+                                        StandardOpenOption.WRITE);
+                } catch (IOException e) {
+                        System.err.println("Could not open the JSON log file.");
+                        e.printStackTrace();
+                }
+
                 autoChooser = AutoBuilder.buildAutoChooser("Tests");
                 configureBindings();
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
@@ -226,7 +265,7 @@ public class RobotContainer {
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
                 new Trigger(() -> joystick2.getRightX() > 0.1)
-                                .whileTrue(new RunCommand(() -> m_turret.setSpeed(() -> joystick2.getRightX() * 0.1)));
+                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.1));
                 new Trigger(() -> joystick2.getRightTriggerAxis() > 0.1).whileTrue(
                                 new RunCommand(() -> m_flywheel.setSpeed(() -> joystick2.getRightTriggerAxis() * 0.1)));
 
@@ -235,6 +274,13 @@ public class RobotContainer {
                 // () -> System.out.println("\n \n \n \n" +
                 // RobotStateMachine.getInstance().getPose()
                 // + "\n \n \n \n")));
+
+                closeLogSendable.onChange(closeLog -> {
+                        if (closeLog) {
+                                this.closeLogFile();
+                        }
+                });
+
         }
 
         public Command getAutonomousCommand() {
@@ -293,5 +339,29 @@ public class RobotContainer {
                 // setPosition(newAngle);
                 SmartDashboard.putNumber("newAngleRate", newAngleRate);
                 return newNewAngleRate;
+        }
+
+        public void LogValues(double shooterSpeed, double dist) {
+                JSONObject entry = new JSONObject();
+                entry.put("shooterSpeed", shooterSpeed);
+                entry.put("distance", dist);
+                try {
+                        if (writer != null) {
+                                writer.write(entry.toJSONString());
+                        }
+                } catch (IOException e) {
+                        System.err.println("Could not write to JSON log file.");
+                        e.printStackTrace();
+                }
+        }
+
+        public void closeLogFile() {
+                try {
+                        writer.close();
+                        writer = null;
+                } catch (IOException e) {
+                        System.err.println("Could not close JSON log file.");
+                        e.printStackTrace();
+                }
         }
 }
