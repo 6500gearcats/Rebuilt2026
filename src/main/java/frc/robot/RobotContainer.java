@@ -47,7 +47,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
-import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
@@ -81,6 +81,8 @@ public class RobotContainer {
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
         private LedCANdle m_candle = new LedCANdle();
+
+        private final Hopper hopper = new Hopper();
 
         private final SendableChooser<Command> autoChooser;
 
