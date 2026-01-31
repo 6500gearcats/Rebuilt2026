@@ -19,10 +19,10 @@ import frc.robot.generated.TunerConstants;
 
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
-  TalonFX m_motor = new TalonFX(Constants.MotorConstants.kShooterMotorRightID, TunerConstants.kCANBus);
+  TalonFX m_motor = new TalonFX(Constants.MotorConstants.kShooterMotorRightID);
   final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
 
-  TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID, TunerConstants.kCANBus);
+  TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
 
   public Flywheel() {
     var talonFXConfigs = new TalonFXConfiguration();

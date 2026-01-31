@@ -21,7 +21,7 @@ import frc.robot.generated.TunerConstants;
 
 public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
-  private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID, TunerConstants.kCANBus);
+  private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();

@@ -205,7 +205,7 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(0.1, 0.1), hopper));
+                hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6, 1.7), hopper));
 
                 // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
                 // joystick.b().whileTrue(drivetrain.applyRequest(
@@ -230,13 +230,6 @@ public class RobotContainer {
                 // m_candle.colorWithBrightness(
                 // joystick.getLeftTriggerAxis()
                 // )));
-
-                new Trigger(() -> joystick.getLeftTriggerAxis() > 0.1)
-                                .whileTrue(new RunCommand(() -> m_flywheel.setSpeed(() -> 0.1))
-                                                .andThen(new InstantCommand(() -> System.out.println("hey there"))));
-
-                new Trigger(() -> joystick2.getRightX() > 0.1)
-                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.1));
 
                 // new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
                 // .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
@@ -265,9 +258,9 @@ public class RobotContainer {
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
                 new Trigger(() -> joystick2.getRightX() > 0.1)
-                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.1));
+                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.7));
                 new Trigger(() -> joystick2.getRightTriggerAxis() > 0.1).whileTrue(
-                                new RunCommand(() -> m_flywheel.setSpeed(() -> joystick2.getRightTriggerAxis() * 0.1)));
+                                new RunCommand(() -> m_flywheel.setSpeed(() -> joystick2.getRightTriggerAxis() * 0.7)));
 
                 // Print the robot pose
                 // pranav.circle().onTrue(new InstantCommand(
