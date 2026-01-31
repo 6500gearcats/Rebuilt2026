@@ -56,6 +56,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignToAngle;
 import frc.robot.commands.MoveTurret;
+import frc.robot.commands.ShootFuel;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
@@ -268,11 +269,14 @@ public class RobotContainer {
 
                 // joystick.leftBumper().whileTrue(new RunCommand(() -> m_turret.setSpeed(0.6),
                 // m_turret));
-                new Trigger(() -> joystick2.getRightX() > 0.1)
-                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.1));
+                new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
+                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
-                new Trigger(() -> joystick2.getLeftX() > 0.1)
-                                .whileTrue(new RunCommand(() -> hopper.startAllMotors(1, 1), hopper));
+                // new Trigger(() -> joystick2.getLeftX() > 0.1)
+                //                 .whileTrue(new RunCommand(() -> hopper.startAllMotors(1, 1), hopper));
+                joystick.rightBumper().whileTrue(new RunCommand(() -> hopper.startAllMotors(5, 5), hopper));
+
+                new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1).whileTrue(new ShootFuel(m_flywheel, () -> 11));
                 // Print the robot pose
                 // pranav.circle().onTrue(new InstantCommand(
                 // () -> System.out.println("\n \n \n \n" +
