@@ -91,7 +91,7 @@ public class RobotContainer {
         private final CommandXboxController joystick = new CommandXboxController(0);
         private final CommandPS4Controller pranav = new CommandPS4Controller(3);
 
-        private final XboxController joystick2 = new XboxController(1);
+        private final CommandXboxController joystick2 = new CommandXboxController(1);
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -205,7 +205,8 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6, 1.7), hopper));
+                // hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6,
+                // 1.7), hopper));
 
                 // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
                 // joystick.b().whileTrue(drivetrain.applyRequest(
@@ -245,10 +246,12 @@ public class RobotContainer {
                 // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-                joystick.a().whileTrue(drivetrain.applyRequest(() -> drive.withRotationalRate(getAlignRate() * 0.1)));
+                // joystick.a().whileTrue(drivetrain.applyRequest(() ->
+                // drive.withRotationalRate(getAlignRate() * 0.1)));
 
                 // reset the field-centric heading on left bumper press
-                joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+                // joystick.leftBumper().onTrue(drivetrain.runOnce(() ->
+                // drivetrain.seedFieldCentric()));
 
                 // drivetrain.registerTelemetry(logger::telemeterize);
 
@@ -257,11 +260,19 @@ public class RobotContainer {
                 // resetRobotGyroAndOrientation()));
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
-                new Trigger(() -> joystick2.getRightX() > 0.1)
-                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.7));
-                new Trigger(() -> joystick2.getRightTriggerAxis() > 0.1).whileTrue(
-                                new RunCommand(() -> m_flywheel.setSpeed(() -> joystick2.getRightTriggerAxis() * 0.7)));
+                // new Trigger(() -> joystick2.getRightX() > 0.1)
+                // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.7));
+                // new Trigger(() -> joystick2.getRightTriggerAxis() > 0.1).whileTrue(
+                // new RunCommand(() -> m_flywheel.setSpeed(() ->
+                // joystick2.getRightTriggerAxis() * 0.7)));
 
+                // joystick.leftBumper().whileTrue(new RunCommand(() -> m_turret.setSpeed(0.6),
+                // m_turret));
+                new Trigger(() -> joystick2.getRightX() > 0.1)
+                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.1));
+
+                new Trigger(() -> joystick2.getLeftX() > 0.1)
+                                .whileTrue(new RunCommand(() -> hopper.startAllMotors(1, 1), hopper));
                 // Print the robot pose
                 // pranav.circle().onTrue(new InstantCommand(
                 // () -> System.out.println("\n \n \n \n" +

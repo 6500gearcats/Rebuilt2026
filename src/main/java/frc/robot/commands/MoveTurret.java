@@ -36,7 +36,8 @@ public class MoveTurret extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_turret.setSpeed(speedSupplier.getAsDouble());
+    // m_turret.setSpeed(speedSupplier.getAsDouble());
+    System.out.println(speedSupplier.getAsDouble());
   }
 
   // Called once the command ends or is interrupted.
