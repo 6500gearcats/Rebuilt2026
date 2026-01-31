@@ -47,6 +47,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
+import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
@@ -165,6 +166,8 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
+                hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(0.1, 0.1), hopper));
+
                 // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
                 // joystick.b().whileTrue(drivetrain.applyRequest(
                 // () -> point.withModuleDirection(
@@ -190,13 +193,11 @@ public class RobotContainer {
                 // )));
 
                 new Trigger(() -> joystick.getLeftTriggerAxis() > 0.1)
-                                .whileTrue(new RunCommand(() -> m_flywheel.setTurnSpeed(1))
+                                .whileTrue(new RunCommand(() -> m_flywheel.setSpeed(() -> 0.1))
                                                 .andThen(new InstantCommand(() -> System.out.println("hey there"))));
 
-                joystick.pov(180).whileTrue(new RunCommand(() -> m_flywheel.stopMotor()));
-
                 new Trigger(() -> joystick2.getRightX() > 0.1)
-                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX()));
+                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.1));
 
                 // new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
                 // .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
@@ -223,6 +224,11 @@ public class RobotContainer {
                 // joystick.start().onTrue(new InstantCommand(() ->
                 // resetRobotGyroAndOrientation()));
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
+
+                new Trigger(() -> joystick2.getRightX() > 0.1)
+                                .whileTrue(new RunCommand(() -> m_turret.setSpeed(() -> joystick2.getRightX() * 0.1)));
+                new Trigger(() -> joystick2.getRightTriggerAxis() > 0.1).whileTrue(
+                                new RunCommand(() -> m_flywheel.setSpeed(() -> joystick2.getRightTriggerAxis() * 0.1)));
 
                 // Print the robot pose
                 // pranav.circle().onTrue(new InstantCommand(

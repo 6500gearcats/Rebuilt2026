@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.turret;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -42,14 +44,14 @@ public class Flywheel extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void setTurnSpeed(double speed) {
+  public void setSpeed(DoubleSupplier speed) {
     // create a velocity closed-loop request, voltage output, slot 0 configs
     // m_motor.set(speed);
 
     // set velocity to rps, add 0.5 V to overcome gravity
-    speed /= 2.0;
-    m_motor.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
-    m_motor2.setControl(m_request.withVelocity(speed).withFeedForward(0.5));
+    double speedValue = speed.getAsDouble() / 2.0;
+    m_motor.setControl(m_request.withVelocity(speedValue).withFeedForward(0.5));
+    m_motor2.setControl(m_request.withVelocity(speedValue).withFeedForward(0.5));
   }
 
   public void stopMotor() {

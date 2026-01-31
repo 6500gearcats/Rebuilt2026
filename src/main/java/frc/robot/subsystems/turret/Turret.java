@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.turret;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -50,8 +52,8 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
   }
 
-  public void setSpeed(double speed) {
-    m_motor.set(speed);
+  public void setSpeed(DoubleSupplier speed) {
+    m_motor.set(speed.getAsDouble());
   }
 
   public double getMotorPosition() {
