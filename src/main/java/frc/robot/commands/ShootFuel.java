@@ -10,10 +10,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.turret.Flywheel;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+/**
+ * Command that runs the flywheel at a supplied speed.
+ */
 public class ShootFuel extends Command {
   /** Creates a new ShootFuel. */
   Flywheel m_Flywheel;
   DoubleSupplier supplier;
+
+  /**
+   * Creates a new ShootFuel command.
+   *
+   * @param flywheel      flywheel subsystem
+   * @param speedSupplier speed command supplier
+   */
   public ShootFuel(Flywheel flywheel, DoubleSupplier speedSupplier) {
     m_Flywheel = flywheel;
     supplier = speedSupplier;
@@ -23,7 +33,8 @@ public class ShootFuel extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override

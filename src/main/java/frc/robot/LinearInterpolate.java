@@ -2,10 +2,20 @@ package frc.robot;
 
 import java.util.HashMap;
 
+/**
+ * Performs linear interpolation between calibration points.
+ */
 public class LinearInterpolate {
 
+    /** Lookup table of calibration points keyed by distance. */
     HashMap<Double, Double> points;
 
+    /**
+     * Finds the two nearest points and linearly interpolates between them.
+     *
+     * @param dist input distance
+     * @return interpolated value
+     */
     public double findAndInterpolate(double dist) {
         double lowerKey;
         double upperKey;
@@ -21,6 +31,14 @@ public class LinearInterpolate {
         return interpolate(points.get(lowerKey), points.get(upperKey), (dist - lowerKey) / (upperKey - lowerKey));
     }
 
+    /**
+     * Linearly interpolates between two values.
+     *
+     * @param start  start value
+     * @param end    end value
+     * @param amount normalized amount in the range [0, 1]
+     * @return interpolated value
+     */
     public double interpolate(double start, double end, double amount) {
         return start + (end - start) * amount;
     }

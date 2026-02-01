@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.vision.Vision;
 
+/**
+ * Singleton state machine that tracks robot state, pose, and field zone.
+ */
 public final class RobotStateMachine {
     private static RobotStateMachine instance;
 
@@ -28,6 +31,11 @@ public final class RobotStateMachine {
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
 
+    /**
+     * Returns the shared state machine instance.
+     *
+     * @return singleton instance
+     */
     public static RobotStateMachine getInstance() {
         if (instance == null) {
             instance = new RobotStateMachine();
@@ -35,6 +43,9 @@ public final class RobotStateMachine {
         return instance;
     }
 
+    /**
+     * Updates pose, field zone, and publishes telemetry.
+     */
     public void periodic() {
         refreshPoseFromVision();
         currentZone = checkZone();
@@ -43,10 +54,20 @@ public final class RobotStateMachine {
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
 
+    /**
+     * Returns the currently computed field zone.
+     *
+     * @return field zone classification
+     */
     public FieldZone getCurrentZone() {
         return currentZone;
     }
 
+    /**
+     * Sets the current field zone override.
+     *
+     * @param currentZone new field zone
+     */
     public void setCurrentZone(FieldZone currentZone) {
         this.currentZone = currentZone;
     }
@@ -85,12 +106,22 @@ public final class RobotStateMachine {
         }
     }
 
+    /**
+     * Returns the current robot state.
+     *
+     * @return current state enum
+     */
     public RobotState getState() {
         return state;
     }
 
     /**
      * Update state and refresh pose from vision.
+     */
+    /**
+     * Requests a transition to the specified state.
+     *
+     * @param next next state to apply
      */
     public void setState(RobotState next) {
         if (next == state)
@@ -99,6 +130,11 @@ public final class RobotStateMachine {
         update(next);
     }
 
+    /**
+     * Applies the requested state transition.
+     *
+     * @param s state to apply
+     */
     public void update(RobotState s) {
         switch (s) {
             case ACTIVE:
@@ -124,6 +160,11 @@ public final class RobotStateMachine {
         }
     }
 
+    /**
+     * Determines the field zone based on the current pose and alliance.
+     *
+     * @return field zone classification
+     */
     public FieldZone checkZone() {
         // < 4.52 m is the blue alliance's trench, > 11.63 m is the red alliance's
         // trench, and in between is the neutral zone

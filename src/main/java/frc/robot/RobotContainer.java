@@ -70,6 +70,9 @@ import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.utility.ShooterValuesSenable;
 
+/**
+ * Central robot wiring for subsystems, commands, and operator bindings.
+ */
 public class RobotContainer {
         @SuppressWarnings("unused")
 
@@ -125,6 +128,9 @@ public class RobotContainer {
                         new Rotation3d(0, Math.toRadians(-15), 0));
         private final Vision m_vision;
 
+        /**
+         * Creates the container, initializes logging, chooser options, and vision.
+         */
         public RobotContainer() {
                 logDir = new File("log");
                 logDir.mkdirs();
@@ -189,6 +195,9 @@ public class RobotContainer {
                 setRobotOrientation();
         }
 
+        /**
+         * Configures controller bindings and default commands.
+         */
         private void configureBindings() {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
@@ -254,34 +263,18 @@ public class RobotContainer {
                 // joystick.leftBumper().onTrue(drivetrain.runOnce(() ->
                 // drivetrain.seedFieldCentric()));
 
-                // drivetrain.registerTelemetry(logger::telemeterize);
+                drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Reset the field-centric heading on left bumper press.
-                // joystick.start().onTrue(new InstantCommand(() ->
-                // resetRobotGyroAndOrientation()));
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
-                // new Trigger(() -> joystick2.getRightX() > 0.1)
-                // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.7));
-                // new Trigger(() -> joystick2.getRightTriggerAxis() > 0.1).whileTrue(
-                // new RunCommand(() -> m_flywheel.setSpeed(() ->
-                // joystick2.getRightTriggerAxis() * 0.7)));
-
-                // joystick.leftBumper().whileTrue(new RunCommand(() -> m_turret.setSpeed(0.6),
-                // m_turret));
                 new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
                                 .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
-                // new Trigger(() -> joystick2.getLeftX() > 0.1)
-                //                 .whileTrue(new RunCommand(() -> hopper.startAllMotors(1, 1), hopper));
-                joystick.rightBumper().whileTrue(new RunCommand(() -> hopper.startAllMotors(5, 5), hopper));
+                joystick.rightBumper().whileTrue(new RunCommand(() -> hopper.startAllMotors(0.2, 0.5), hopper));
 
-                new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1).whileTrue(new ShootFuel(m_flywheel, () -> 11));
-                // Print the robot pose
-                // pranav.circle().onTrue(new InstantCommand(
-                // () -> System.out.println("\n \n \n \n" +
-                // RobotStateMachine.getInstance().getPose()
-                // + "\n \n \n \n")));
+                new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1)
+                                .whileTrue(new ShootFuel(m_flywheel, () -> 11));
 
                 closeLogSendable.onChange(closeLog -> {
                         if (closeLog) {
@@ -291,16 +284,27 @@ public class RobotContainer {
 
         }
 
+        /**
+         * Returns the currently selected autonomous command.
+         *
+         * @return selected command from the auto chooser
+         */
         public Command getAutonomousCommand() {
                 return autoChooser.getSelected();
         }
 
+        /**
+         * Sets the initial robot and camera orientation for the primary Limelight.
+         */
         public void setRobotOrientation() {
                 // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
                 System.out.println("hi");
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.356, 0.2794, 0.1523, 0, 50, 180);
         }
 
+        /**
+         * Resets the gyro and updates Limelight robot orientation based on alliance.
+         */
         public void resetRobotGyroAndOrientation() {
                 Optional<Alliance> alliance = DriverStation.getAlliance();
                 if (alliance.isPresent()) {
@@ -321,6 +325,11 @@ public class RobotContainer {
                 }
         }
 
+        /**
+         * Computes an alignment rate based on the robot pose and target tag pose.
+         *
+         * @return angular rate command used to align to the target
+         */
         public double getAlignRate() {
                 // This method will be called once per scheduler run
                 double rectW = (tagPose.getX() - robotStateMachine.getPose().getX());
@@ -349,6 +358,12 @@ public class RobotContainer {
                 return newNewAngleRate;
         }
 
+        /**
+         * Logs shooter speed and distance values to the JSON log file.
+         *
+         * @param shooterSpeed shooter wheel speed
+         * @param dist         measured distance to target
+         */
         public void LogValues(double shooterSpeed, double dist) {
                 JSONObject entry = new JSONObject();
                 entry.put("shooterSpeed", shooterSpeed);
@@ -363,6 +378,9 @@ public class RobotContainer {
                 }
         }
 
+        /**
+         * Closes the JSON log file and releases the writer.
+         */
         public void closeLogFile() {
                 try {
                         writer.close();

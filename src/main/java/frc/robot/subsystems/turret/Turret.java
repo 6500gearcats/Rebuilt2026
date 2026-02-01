@@ -19,6 +19,9 @@ import frc.robot.Robot;
 import frc.robot.RobotStateMachine;
 import frc.robot.generated.TunerConstants;
 
+/**
+ * Turret subsystem that controls the yaw motor and tracks its position.
+ */
 public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
@@ -39,15 +42,6 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-
-    double rectW = (tagPose.getX() + 1 - robotStateMachine.getPose().getX());
-    double rectH = (tagPose.getY() + 1 - robotStateMachine.getPose().getY());
-
-    double newAngle = Math.atan2(rectH, rectW); // gets wanted angle for robot field oriented
-
-    // setPosition(newAngle);
-
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
   }
@@ -56,15 +50,29 @@ public class Turret extends SubsystemBase {
     m_motor.set(speed);
   }
 
+  /**
+   * Returns the raw motor position in rotations.
+   *
+   * @return motor sensor position
+   */
   public double getMotorPosition() {
     return m_motor.getPosition().getValueAsDouble();
   }
 
-  /** Turns motor position units into rotating turret in degrees */
+  /**
+   * Returns the turret position converted to degrees.
+   *
+   * @return turret angle in degrees
+   */
   public double getConvertedTurretPosition() {
     return getMotorPosition() / 90;
   }
 
+  /**
+   * Moves the turret to the given position setpoint.
+   *
+   * @param position desired position in motor rotations
+   */
   public void setPosition(double position) {
     // set position to 10 rotations
     m_motor.setControl(m_request.withPosition(position));

@@ -16,11 +16,19 @@ import frc.robot.RobotStateMachine;
 import frc.robot.subsystems.turret.Turret;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+/**
+ * Command that drives the turret at a supplied speed.
+ */
 public class MoveTurret extends Command {
   private Turret m_turret;
   private DoubleSupplier speedSupplier;
 
-  /** Creates a new MoveTurret. */
+  /**
+   * Creates a new MoveTurret command.
+   *
+   * @param turret turret subsystem to control
+   * @param speed  supplier for the desired turret speed
+   */
   public MoveTurret(Turret turret, DoubleSupplier speed) {
     m_turret = turret;
     this.speedSupplier = speed;

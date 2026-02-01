@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
+/**
+ * Hopper subsystem that controls the indexer and kicker motors.
+ */
 public class Hopper extends SubsystemBase {
   /** Creates a new Hopper. */
   SparkMax m_hopperMotor = new SparkMax(Constants.MotorConstants.kIndexerMotorID, MotorType.kBrushless);
@@ -23,6 +26,12 @@ public class Hopper extends SubsystemBase {
   public void periodic() {
   }
 
+  /**
+   * Starts both hopper and kicker motors.
+   *
+   * @param hopperSpeed speed for the hopper motor
+   * @param kickerSpeed speed for the kicker motor
+   */
   public void startAllMotors(double hopperSpeed, double kickerSpeed) {
     m_hopperMotor.set(hopperSpeed);
     m_kickerMotor.set(kickerSpeed);

@@ -27,6 +27,9 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.subsystems.vision.VisionIO;
 
+/**
+ * VisionIO implementation for PhotonVision simulation cameras.
+ */
 public class PhotonVisionSimIO implements VisionIO {
     // Simulation
     private PhotonCameraSim cameraSim;
@@ -45,6 +48,15 @@ public class PhotonVisionSimIO implements VisionIO {
     private double lastEstTimestamp = 0;
     public boolean isNewResult = false;
 
+    /**
+     * Creates a simulated PhotonVision IO instance.
+     *
+     * @param cameraName        camera name
+     * @param forPoseEstimation true to use for pose estimation
+     * @param cameraProp        simulation camera properties
+     * @param robotToCameraTrl  translation from robot to camera
+     * @param robotToCameraRot  rotation from robot to camera
+     */
     public PhotonVisionSimIO(String cameraName, boolean forPoseEstimation, SimCameraProperties cameraProp,
             Translation3d robotToCameraTrl, Rotation3d robotToCameraRot) {
         this.forPoseEstimation = forPoseEstimation;

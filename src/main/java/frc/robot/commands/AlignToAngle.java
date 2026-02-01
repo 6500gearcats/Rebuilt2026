@@ -20,10 +20,9 @@ public class AlignToAngle extends Command {
   /** Creates a new AlignToAngle. */
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
 
-  
   private CommandSwerveDrivetrain drivetrain;
   private SwerveRequest.FieldCentric drive;
- 
+
   public AlignToAngle(CommandSwerveDrivetrain drivetrain, SwerveRequest.FieldCentric drive) {
     this.drivetrain = drivetrain;
     this.drive = drive;
@@ -33,16 +32,16 @@ public class AlignToAngle extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     System.out.println("Aligning to tag");
-    
 
     CommandScheduler.getInstance().schedule();
-    
+
   }
 
   // Called once the command ends or is interrupted.
