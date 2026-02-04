@@ -97,7 +97,7 @@ public class RobotContainer {
         private final Telemetry logger = new Telemetry(MaxSpeed);
 
         private final CommandXboxController joystick = new CommandXboxController(0);
-        private final CommandPS4Controller pranav = new CommandPS4Controller(3);
+        private final CommandPS4Controller pranav = new CommandPS4Controller(0);
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
 
@@ -130,8 +130,7 @@ public class RobotContainer {
         // private final Shooter m_shooter = new Shooter();
 
         // Vision
-        PhotonVisionIO photonVisionIO = new PhotonVisionIO("photonvision", false, new Translation3d(0.1, 0, 0.5),
-                        new Rotation3d(0, Math.toRadians(-15), 0));
+        PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
 
         /**
@@ -161,9 +160,12 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", false,
-                                                new Translation3d(0.254, 0.254, 0.2032),
-                                                new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
+                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", true,
+                                                new Translation3d(0.1, 0, 0.5),
+                                                new Rotation3d(0, Math.toRadians(-15), 0));
+                                PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", true,
+                                                new Translation3d(0.2, 0, 0.5),
+                                                new Rotation3d(0, Math.toRadians(-15), 0));
                                 LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
@@ -171,7 +173,7 @@ public class RobotContainer {
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
-                                                m_photonVisionIO,
+                                                // m_photonVisionIO,
                                                 m_ll);
                                 break;
                         case SIM:
@@ -209,7 +211,6 @@ public class RobotContainer {
                 // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
         drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
                                 .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
@@ -319,8 +320,7 @@ public class RobotContainer {
                                 drivetrain.getPigeon().reset();
                                 LimelightHelpers.SetRobotOrientation("limelight-gcc",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.279, -0.279, 0.1, 0, 50,
-                                                0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.368, 0, 0.1, 0, 18, 0);
                         } else {
                                 drivetrain.getPigeon().reset();
                                 LimelightHelpers.SetRobotOrientation("limelight-gcc",
