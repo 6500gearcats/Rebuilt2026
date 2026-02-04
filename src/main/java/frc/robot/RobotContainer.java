@@ -56,13 +56,17 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignToAngle;
 import frc.robot.commands.MoveTurret;
+import frc.robot.commands.RunHopper;
+import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootFuel;
+import frc.robot.commands.ShootingSequence;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
@@ -108,6 +112,8 @@ public class RobotContainer {
         private final Flywheel m_flywheel = new Flywheel();
 
         private final Turret m_turret = new Turret();
+
+        private final Intake m_intake = new Intake();
 
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
@@ -156,8 +162,8 @@ public class RobotContainer {
                 switch (RobotConstants.currentMode) {
                         case REAL:
                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", false,
-                                                new Translation3d(0.1, 0, 0.5),
-                                                new Rotation3d(0, Math.toRadians(-15), 0));
+                                                new Translation3d(0.254, 0.254, 0.2032),
+                                                new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
                                 LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
@@ -266,15 +272,16 @@ public class RobotContainer {
                 drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Reset the field-centric heading on left bumper press.
-                joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
+                joystick.start().onTrue(new InstantCommand(() -> resetRobotGyroAndOrientation()));
 
                 new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
                                 .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
-                joystick.rightBumper().whileTrue(new RunCommand(() -> hopper.startAllMotors(0.2, 0.5), hopper));
+                // joystick.rightBumper().onTrue(new RunHopper(hopper));
+                joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ShootFuel(m_flywheel, () -> 11));
+                                .whileTrue(new ShootingSequence(hopper, m_flywheel, 6));
 
                 closeLogSendable.onChange(closeLog -> {
                         if (closeLog) {
