@@ -112,8 +112,8 @@ public class RobotContainer {
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
-        private final File logDir;
-        private final File logFile;
+        private File logDir = null;
+        private File logFile = null;
         private BufferedWriter writer = null;
         private final SendableChooser<Boolean> closeLogSendable = new SendableChooser<Boolean>();
         private final SendableChooser<Boolean> shooterSendableChooser = new SendableChooser<Boolean>();
@@ -132,29 +132,15 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
-                logDir = new File("log");
-                logDir.mkdirs();
-                logFile = new File(logDir, "shootFile.json");
-                logFile.setWritable(true);
-                closeLogSendable.setDefaultOption("false", false);
-                closeLogSendable.addOption("true", true);
-                SmartDashboard.putData("Close Buffer", closeLogSendable);
-
-                SmartDashboard.putData("Shooter Values", shooterSendable);
-
-                try {
-                        writer = Files.newBufferedWriter(logFile.toPath(), StandardOpenOption.CREATE,
-                                        StandardOpenOption.WRITE);
-                } catch (IOException e) {
-                        System.err.println("Could not open the JSON log file.");
-                        e.printStackTrace();
-                }
-
                 autoChooser = AutoBuilder.buildAutoChooser("Tests");
                 configureBindings();
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+
+                SmartDashboard.putData("Shooter Values", shooterSendable);
+
                 switch (RobotConstants.currentMode) {
                         case REAL:
+                                // TODO: Add Real Camera Constants to use here
                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("photonvision", false,
                                                 new Translation3d(0.1, 0, 0.5),
                                                 new Rotation3d(0, Math.toRadians(-15), 0));
@@ -167,6 +153,23 @@ public class RobotContainer {
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_ll);
+                                logDir = new File("log");
+                                logDir.mkdirs();
+                                logFile = new File(logDir, "shootFile.json");
+                                logFile.setWritable(true);
+                                closeLogSendable.setDefaultOption("false", false);
+                                closeLogSendable.addOption("true", true);
+                                SmartDashboard.putData("Close Buffer", closeLogSendable);
+
+                                SmartDashboard.putData("Shooter Values", shooterSendable);
+
+                                try {
+                                        writer = Files.newBufferedWriter(logFile.toPath(), StandardOpenOption.CREATE,
+                                                        StandardOpenOption.WRITE);
+                                } catch (IOException e) {
+                                        System.err.println("Could not open the JSON log file.");
+                                        e.printStackTrace();
+                                }
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -215,47 +218,6 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                // hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6,
-                // 1.7), hopper));
-
-                // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-                // joystick.b().whileTrue(drivetrain.applyRequest(
-                // () -> point.withModuleDirection(
-                // new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
-
-                // LED test controls
-                // joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40)));
-                // // gearcat teal!
-                // joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
-                // joystick.y().onTrue(new IntakeFuel(m_intake, 1));
-                // joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
-                // joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
-                // joystick.pov(90).whileTrue(new IntakeFuel(m_intake, 1));
-                // joystick.rightBumper().whileTrue(new RunCommand(() ->
-                // m_candle.colorWithBrightness(
-                // Math.sqrt(Math.pow(joystick.getLeftX(), 2) + Math.pow(joystick.getLeftY(),
-                // 2))
-                // )));
-
-                // joystick.leftTrigger().whileTrue(new RunCommand(() ->
-                // m_candle.colorWithBrightness(
-                // joystick.getLeftTriggerAxis()
-                // )));
-
-                // new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
-                // .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-                // () -> joystick2.getLeftTriggerAxis())));
-
-                // Change input str to
-                // joystick.rightBumper().onTrue(Commands.runOnce(() -> m_candle.cycleFlag()));
-
-                // Run SysId routines when holding back/start and X/Y.
-                // Note that each routine should be run exactly once in a single log.
-                // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-                // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-                // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-                // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
                 // joystick.a().whileTrue(drivetrain.applyRequest(() ->
                 // drive.withRotationalRate(getAlignRate() * 0.1)));
 
@@ -282,6 +244,8 @@ public class RobotContainer {
                         }
                 });
 
+                CommandScheduler.getInstance().schedule(
+                                new RunCommand(() -> System.out.println("hi")));
         }
 
         /**

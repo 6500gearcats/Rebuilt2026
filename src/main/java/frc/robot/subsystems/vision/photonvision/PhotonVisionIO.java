@@ -228,9 +228,8 @@ public class PhotonVisionIO implements VisionIO {
     }
 
     /**
-     * The standard deviations of the estimated pose from
-     * {@link #getEstimatedGlobalPose()}, for use
-     * with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
+     * The standard deviations of the estimated pose from {@link #getVisionEst()},
+     * for use with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
      * SwerveDrivePoseEstimator}.
      * This should only be used when there are targets visible.
      *
@@ -268,7 +267,7 @@ public class PhotonVisionIO implements VisionIO {
      * empty. This should
      * only be called once per loop.
      *
-     * @return An {@link Optional<Pose2D>>} with an estimated pose, estimate
+     * @return An {@link Optional<VisionEstimate>} with an estimated pose, estimate
      *         timestamp, and targets
      *         used for estimation.
      */
