@@ -30,7 +30,7 @@ public class Turret extends SubsystemBase {
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
 
-  // BOUNDS: 0.0 to 0.55
+  // BOUNDS: 0.0 to 55
 
   public Turret() {
     // in init function, set slot 0 gains
@@ -46,10 +46,21 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
-    
+
+    SmartDashboard.putNumber("AlignRate", getAlignRate());
   }
 
   public void setSpeed(double speed) {
+    if((getMotorPosition() < 2)) {
+      if(speed < 0) {
+        speed = 0;
+      }
+    }
+    else if((getMotorPosition() > 53)) {
+      if(speed > 0) {
+        speed = 0;
+      }
+    }
     m_motor.set(speed);
   }
 
@@ -72,7 +83,8 @@ public class Turret extends SubsystemBase {
    * @return turret angle in degrees
    */
   public double getConvertedTurretPosition() {
-    return getMotorPosition() / 90;
+
+    return -((getMotorPosition() * 4) - 110);
   }
 
   /**
@@ -91,7 +103,7 @@ public class Turret extends SubsystemBase {
 
                 SmartDashboard.putNumber("rectH", rectH);
                 SmartDashboard.putNumber("rectW", rectW);
-                double poseRot = robotStateMachine.getPose().getRotation().getDegrees();
+                double poseRot = robotStateMachine.getPose().getRotation().getDegrees() + getConvertedTurretPosition();
 
                 double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
                                                                               // oriented
@@ -110,5 +122,5 @@ public class Turret extends SubsystemBase {
                 // setPosition(newAngle);
                 SmartDashboard.putNumber("newAngleRate", newAngleRate);
                 return newNewAngleRate;
-        }
+              }
 }

@@ -11,12 +11,10 @@ import frc.robot.subsystems.turret.Turret;
 public class AlignTurretToHub extends Command {
   /** Creates a new AlignTurretToHub. */
   private Turret m_turret;
-  // TODO: bounds are 0 to 0.55
-  private static double lowerBound = 0.0; // TODO: These bounds are arbitrary numbers, not real positions. Update them ASAP.
-  private static double upperBound = 180.0;
 
   public AlignTurretToHub(Turret turret) {
     m_turret = turret;
+    addRequirements(m_turret);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -26,16 +24,9 @@ public class AlignTurretToHub extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
+  public void execute() {   //TODO: Fix turret alignment and angle measurment, currently jumping from ~-40 to 40 or vice versa
     double rate = m_turret.getAlignRate();
-    double pos = m_turret.getMotorPosition();
-
-    // check if turning will cause the turret to hit the boundaries
-    if(!((pos + rate <= lowerBound) || (pos + rate >= upperBound))) {
-      m_turret.setSpeed(rate);
-    } else {
-      m_turret.setSpeed(0);
-    }
+    m_turret.setSpeed(rate);
   }
 
   // Called once the command ends or is interrupted.

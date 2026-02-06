@@ -55,6 +55,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignToAngle;
+import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
@@ -291,6 +292,7 @@ public class RobotContainer {
                         if (closeLog) {
                                 this.closeLogFile();
                         }
+                joystick2.a().whileTrue(new AlignTurretToHub(m_turret));
                 });
 
         }
