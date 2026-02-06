@@ -161,11 +161,11 @@ public class RobotContainer {
                 switch (RobotConstants.currentMode) {
                         case REAL:
                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", true,
-                                                new Translation3d(0.1, 0, 0.5),
-                                                new Rotation3d(0, Math.toRadians(-15), 0));
+                                                new Translation3d(0.254, 0.254, 0.2032),
+                                                new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
                                 PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", true,
-                                                new Translation3d(0.2, 0, 0.5),
-                                                new Rotation3d(0, Math.toRadians(-15), 0));
+                                                new Translation3d(0.254, 0.254, 0.2032),
+                                                new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
                                 LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
@@ -173,7 +173,8 @@ public class RobotContainer {
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
-                                                // m_photonVisionIO,
+                                                m_photonVisionIO,
+                                                m_photonVisionIO2,
                                                 m_ll);
                                 break;
                         case SIM:
@@ -273,7 +274,7 @@ public class RobotContainer {
                 drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Reset the field-centric heading on left bumper press.
-                joystick.start().onTrue(new InstantCommand(() -> resetRobotGyroAndOrientation()));
+                joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
                 new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
                                 .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
@@ -283,6 +284,8 @@ public class RobotContainer {
 
                 new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ShootingSequence(hopper, m_flywheel, 6));
+
+                joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
 
                 closeLogSendable.onChange(closeLog -> {
                         if (closeLog) {
@@ -305,9 +308,9 @@ public class RobotContainer {
          * Sets the initial robot and camera orientation for the primary Limelight.
          */
         public void setRobotOrientation() {
-                // TODO set pose for EVERY LIMELIGHT. Put this code in the IO instead of here.
-                System.out.println("hi");
-                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.356, 0.2794, 0.1523, 0, 50, 180);
+                // New LL
+                drivetrain.getPigeon().reset();
+                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.3, 0.25, 0.15, 180, 0, 180);
         }
 
         /**
