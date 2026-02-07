@@ -21,6 +21,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.derive;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,6 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import javax.crypto.ShortBufferException;
 
@@ -296,7 +299,9 @@ public class RobotContainer {
                         }
                 });
 
-                //joystick2.a().whileTrue( drivetrain.applyRequest(() -> drive.withRotationalRate(getAlignRate())));
+                joystick2.a().whileTrue( drivetrain.applyRequest(() -> {
+                        return drive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(), () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees()));
+                }));
 
         }
 
@@ -343,14 +348,24 @@ public class RobotContainer {
                 }
         }
 
+        //!  ROTATION THAT WEE ARE GETTING IS WRONG
+        public double getCommandAlignRate(Supplier<Pose2d> tagPose2d, Supplier<Pose2d> robotPose, DoubleSupplier robotRotDeg){
+                return getAlignRate(tagPose.toPose2d(), robotStateMachine.getPose(), drivetrain.getRotation3d().toRotation2d().getDegrees());
+        }
         /**
          * Computes an alignment rate based on the robot pose and target tag pose.
          *
          * @return angular rate command used to align to the target
          */
         // Todo Add FOC powered knowsnkback button 
-        public double getAlignRate(Pose2d tagPose2d, Pose2d robotPose) {
-                return AlignRateMath(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(), robotPose.getY(), robotPose.getRotation());
+        public static double getAlignRate(Pose2d tagPose2d, Pose2d robotPose, double robotRotDeg) {
+                //return AlignRateMath(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(), robotPose.getY(), robotPose.getRotation());
+                System.out.println("Robot POse " + robotPose);
+                System.out.println("Tag Pose" + tagPose2d);
+                System.out.println("Rotation " + robotRotDeg);
+                double robotToTag = getRobotAngleToTag(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(), robotPose.getY());
+                double angleAdj = getAngleAdjustment(tagPose2d.getY(), robotPose.getY());
+                return alignRateNewMath(angleAdj, robotToTag, robotRotDeg);
         }
 
         public static double AlignRateMath(double tagePoseX, double tagePoseY, double botPoseX, double botPoseY, Rotation2d botRot) {
@@ -377,6 +392,34 @@ public class RobotContainer {
                 System.out.println("newAngle " + newAngle);
                 System.out.println("New New Angle Rate " + newNewAngleRate);
                 return newNewAngleRate;
+        }
+        
+        public static double getRobotAngleToTag(double tagePoseX, double tagePoseY, double botPoseX, double botPoseY) {
+                double triangleH = tagePoseY - botPoseY;
+                double triangleW = tagePoseX - botPoseX;
+                double robotToTagAng = Math.toDegrees(Math.atan2(triangleH, triangleW));
+                return robotToTagAng;
+        }
+
+        public static double getAngleAdjustment( double tagPoseY, double botPoseY) {
+                double dist = tagPoseY - botPoseY;
+                if(dist > 0) {
+                        return 90;
+                } else {
+                        return -90;
+                }
+        }
+
+        public static double alignRateNewMath(double angleAdjustment, double angleToTag, double robotRot) {
+                double angleError;
+                if(robotRot < 0) {
+                        angleError = angleToTag + Math.abs(robotRot) + angleAdjustment;
+                } else {
+                        angleError = angleToTag + Math.abs(angleAdjustment - robotRot);
+                }
+                double kP = 0.001;
+                double angleRate = angleError * kP;
+                return angleRate;
         }
 
         /**
