@@ -312,7 +312,9 @@ public class RobotContainer {
         public void setRobotOrientation() {
                 // New LL
                 drivetrain.getPigeon().reset();
-                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.3, 0.25, 0.15, 180, 0, 180);
+                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+
+                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, 0.25, 0.15, 180, 0, 180);
         }
 
         /**
