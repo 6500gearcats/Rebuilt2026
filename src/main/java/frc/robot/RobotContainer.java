@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -161,10 +162,10 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", true,
+                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", false,
                                                 new Translation3d(0.254, 0.254, 0.2032),
                                                 new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
-                                PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", true,
+                                PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", false,
                                                 new Translation3d(0.254, 0.254, 0.2032),
                                                 new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
                                 LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
@@ -277,6 +278,7 @@ public class RobotContainer {
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
+
                 new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
                                 .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
@@ -292,8 +294,10 @@ public class RobotContainer {
                         if (closeLog) {
                                 this.closeLogFile();
                         }
-                joystick2.a().whileTrue(new AlignTurretToHub(m_turret));
                 });
+
+                joystick2.a().whileTrue( drivetrain.applyRequest(() -> drive.withRotationalRate(getAlignRate())));
+                
 
         }
 
@@ -311,7 +315,8 @@ public class RobotContainer {
          */
         public void setRobotOrientation() {
                 // New LL
-                drivetrain.getPigeon().reset();
+                drivetrain.resetPose(new Pose2d());
+                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
                 LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, 0.25, 0.15, 180, 0, 180);
@@ -344,6 +349,7 @@ public class RobotContainer {
          *
          * @return angular rate command used to align to the target
          */
+        // Todo Add FOC powered knowsnkback button 
         public double getAlignRate() {
                 // This method will be called once per scheduler run
                 double rectW = (tagPose.getX() - robotStateMachine.getPose().getX());
@@ -351,20 +357,17 @@ public class RobotContainer {
 
                 SmartDashboard.putNumber("rectH", rectH);
                 SmartDashboard.putNumber("rectW", rectW);
-                double poseRot = robotStateMachine.getPose().getRotation().getDegrees();
-
+                //double poseRot = robotStateMachine.getPose().rotateBy(new Rotation2d(180)).getRotation().getDegrees();
+                double poseRot = new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees();
                 double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
                                                                               // oriented
 
-                SmartDashboard.putNumber("newAngle", newAngle);
-                double newAngleRate;
-                if (poseRot > 0) {
-                        newAngleRate = ((newAngle - poseRot));
-                } else {
-                        newAngleRate = ((poseRot - newAngle));
-                }
+                //SmartDashboard.putNumber("newAngle", newAngle);
 
-                double kP = 0.3;
+                double newAngleRate;
+                newAngleRate = ((newAngle - poseRot));
+
+                double kP = 0.01;
 
                 double newNewAngleRate = newAngleRate * kP;
                 // setPosition(newAngle);

@@ -46,6 +46,7 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
+    SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
 
     SmartDashboard.putNumber("AlignRate", getAlignRate());
   }
@@ -83,8 +84,8 @@ public class Turret extends SubsystemBase {
    * @return turret angle in degrees
    */
   public double getConvertedTurretPosition() {
-
     return -((getMotorPosition() * 4) - 110);
+
   }
 
   /**
@@ -103,24 +104,27 @@ public class Turret extends SubsystemBase {
 
                 SmartDashboard.putNumber("rectH", rectH);
                 SmartDashboard.putNumber("rectW", rectW);
-                double poseRot = robotStateMachine.getPose().getRotation().getDegrees() + getConvertedTurretPosition();
+                double poseRot = robotStateMachine.getPose().getRotation().getDegrees();// + getConvertedTurretPosition();
+                SmartDashboard.putNumber("Turret on field", poseRot);
 
-                double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
+                double newAngle = Math.toDegrees( Math.atan2(rectH, rectW)); // gets wanted angle for robot field
                                                                               // oriented
-
-                SmartDashboard.putNumber("newAngle", newAngle);
+                
+                //SmartDashboard.putNumber("newAngle", newAngle);
                 double newAngleRate;
-                if (poseRot > 0) {
-                        newAngleRate = ((newAngle - poseRot));
-                } else {
-                        newAngleRate = ((poseRot - newAngle));
-                }
+                
+                newAngleRate = ((newAngle - poseRot));
+                // if (poseRot > 0) {
+                //         newAngleRate = ((newAngle - poseRot));
+                // } else {
+                //         newAngleRate = ((poseRot - newAngle));
+                // }
 
-                double kP = 0.3;
+                double kP = 0.003;
 
                 double newNewAngleRate = newAngleRate * kP;
                 // setPosition(newAngle);
-                SmartDashboard.putNumber("newAngleRate", newAngleRate);
+                //SmartDashboard.putNumber("newAngleRate", newAngleRate);
                 return newNewAngleRate;
               }
 }
