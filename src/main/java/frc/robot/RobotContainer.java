@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -134,6 +135,10 @@ public class RobotContainer {
         PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
 
+        SlewRateLimiter filterXlLimiter = new SlewRateLimiter(10);
+        SlewRateLimiter filterYLimiter = new SlewRateLimiter(10);
+        SlewRateLimiter filterRotationLimiter = new SlewRateLimiter(10);
+
         /**
          * Creates the container, initializes logging, chooser options, and vision.
          */
@@ -214,9 +219,9 @@ public class RobotContainer {
         // @formatter:off
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
+                        () -> drive.withVelocityX(filterYLimiter.calculate(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed)) // Drive forward with negative Y (forward)
+                                .withVelocityY(filterXlLimiter.calculate(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed))// Drive left with negative X (left)
+                                .withRotationalRate(filterRotationLimiter.calculate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate)))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
@@ -292,7 +297,7 @@ public class RobotContainer {
                         if (closeLog) {
                                 this.closeLogFile();
                         }
-                joystick2.a().whileTrue(new AlignTurretToHub(m_turret));
+                        joystick2.a().whileTrue(new AlignTurretToHub(m_turret));
                 });
 
         }
