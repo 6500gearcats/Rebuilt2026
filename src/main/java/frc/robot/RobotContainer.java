@@ -417,7 +417,7 @@ public class RobotContainer {
                 } else {
                         angleError = angleToTag + Math.abs(angleAdjustment - robotRot);
                 }
-                double kP = 0.001;
+                double kP = 0.01;
                 double angleRate = angleError * kP;
                 return angleRate;
         }
