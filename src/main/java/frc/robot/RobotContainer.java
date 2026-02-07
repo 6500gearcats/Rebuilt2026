@@ -296,8 +296,7 @@ public class RobotContainer {
                         }
                 });
 
-                joystick2.a().whileTrue( drivetrain.applyRequest(() -> drive.withRotationalRate(getAlignRate())));
-                
+                //joystick2.a().whileTrue( drivetrain.applyRequest(() -> drive.withRotationalRate(getAlignRate())));
 
         }
 
@@ -350,28 +349,33 @@ public class RobotContainer {
          * @return angular rate command used to align to the target
          */
         // Todo Add FOC powered knowsnkback button 
-        public double getAlignRate() {
-                // This method will be called once per scheduler run
-                double rectW = (tagPose.getX() - robotStateMachine.getPose().getX());
-                double rectH = (tagPose.getY() - 1 - robotStateMachine.getPose().getY());
+        public double getAlignRate(Pose2d tagPose2d, Pose2d robotPose) {
+                return AlignRateMath(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(), robotPose.getY(), robotPose.getRotation());
+        }
 
-                SmartDashboard.putNumber("rectH", rectH);
-                SmartDashboard.putNumber("rectW", rectW);
-                //double poseRot = robotStateMachine.getPose().rotateBy(new Rotation2d(180)).getRotation().getDegrees();
-                double poseRot = new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees();
-                double newAngle = Math.atan2(rectH, rectW) * (180 / Math.PI); // gets wanted angle for robot field
-                                                                              // oriented
+        public static double AlignRateMath(double tagePoseX, double tagePoseY, double botPoseX, double botPoseY, Rotation2d botRot) {
+                double rectW = tagePoseX - botPoseX;
+                double rectH = tagePoseY - botPoseY;
+                double newAngle = Math.toDegrees(Math.atan2(rectH, rectW)); // gets wanted angle for robot field
+                                                                        // oriented
 
-                //SmartDashboard.putNumber("newAngle", newAngle);
 
                 double newAngleRate;
-                newAngleRate = ((newAngle - poseRot));
+                // [-180, 180] to [0, 360]
+                double normNewAngle = (newAngle + 180) % 360;
+                double normRobotRot = (botRot.getDegrees() + 180) % 360;
+
+                newAngleRate = Math.min(Math.abs(normNewAngle - normRobotRot), 360 - Math.abs(normNewAngle - normRobotRot));
 
                 double kP = 0.01;
 
                 double newNewAngleRate = newAngleRate * kP;
-                // setPosition(newAngle);
-                SmartDashboard.putNumber("newAngleRate", newAngleRate);
+
+                System.out.println("Signed Pre " + newAngleRate);
+                System.out.println("Rect H " + rectH);
+                System.out.println("Rect W " + rectW);
+                System.out.println("newAngle " + newAngle);
+                System.out.println("New New Angle Rate " + newNewAngleRate);
                 return newNewAngleRate;
         }
 

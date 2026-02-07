@@ -117,7 +117,7 @@ public class Turret extends SubsystemBase {
                 // if (poseRot > 0) {
                 //         newAngleRate = ((newAngle - poseRot));
                 // } else {
-                //         newAngleRate = ((poseRot - newAngle));
+                //         newAngleRate = ((poseRot + newAngle));
                 // }
 
                 double kP = 0.003;
