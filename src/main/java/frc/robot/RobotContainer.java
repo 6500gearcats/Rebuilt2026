@@ -350,7 +350,8 @@ public class RobotContainer {
 
         //!  ROTATION THAT WEE ARE GETTING IS WRONG
         public double getCommandAlignRate(Supplier<Pose2d> tagPose2d, Supplier<Pose2d> robotPose, DoubleSupplier robotRotDeg){
-                return getAlignRate(tagPose.toPose2d(), robotStateMachine.getPose(), drivetrain.getRotation3d().toRotation2d().getDegrees());
+                Pose2d pose = robotStateMachine.getPose();
+                return getAlignRate(tagPose.toPose2d(), pose, drivetrain.getRotation3d().toRotation2d().getDegrees());
         }
         /**
          * Computes an alignment rate based on the robot pose and target tag pose.
@@ -360,53 +361,37 @@ public class RobotContainer {
         // Todo Add FOC powered knowsnkback button 
         public static double getAlignRate(Pose2d tagPose2d, Pose2d robotPose, double robotRotDeg) {
                 //return AlignRateMath(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(), robotPose.getY(), robotPose.getRotation());
-                System.out.println("Robot POse " + robotPose);
-                System.out.println("Tag Pose" + tagPose2d);
-                System.out.println("Rotation " + robotRotDeg);
+                SmartDashboard.putNumber("robot-rotation-drivestationget", robotRotDeg);
                 double robotToTag = getRobotAngleToTag(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(), robotPose.getY());
-                double angleAdj = getAngleAdjustment(tagPose2d.getY(), robotPose.getY());
+                double angleAdj = getAngleAdjustment(tagPose2d.getX(), tagPose2d.getY(),robotPose.getX(), robotPose.getY());
                 return alignRateNewMath(angleAdj, robotToTag, robotRotDeg);
         }
 
-        public static double AlignRateMath(double tagePoseX, double tagePoseY, double botPoseX, double botPoseY, Rotation2d botRot) {
-                double rectW = tagePoseX - botPoseX;
-                double rectH = tagePoseY - botPoseY;
-                double newAngle = Math.toDegrees(Math.atan2(rectH, rectW)); // gets wanted angle for robot field
-                                                                        // oriented
-
-
-                double newAngleRate;
-                // [-180, 180] to [0, 360]
-                double normNewAngle = (newAngle + 180) % 360;
-                double normRobotRot = (botRot.getDegrees() + 180) % 360;
-
-                newAngleRate = Math.min(Math.abs(normNewAngle - normRobotRot), 360 - Math.abs(normNewAngle - normRobotRot));
-
-                double kP = 0.01;
-
-                double newNewAngleRate = newAngleRate * kP;
-
-                System.out.println("Signed Pre " + newAngleRate);
-                System.out.println("Rect H " + rectH);
-                System.out.println("Rect W " + rectW);
-                System.out.println("newAngle " + newAngle);
-                System.out.println("New New Angle Rate " + newNewAngleRate);
-                return newNewAngleRate;
-        }
         
         public static double getRobotAngleToTag(double tagePoseX, double tagePoseY, double botPoseX, double botPoseY) {
-                double triangleH = tagePoseY - botPoseY;
-                double triangleW = tagePoseX - botPoseX;
+                double triangleH = Math.abs(tagePoseY - botPoseY);
+                double triangleW = Math.abs(tagePoseX - botPoseX);
                 double robotToTagAng = Math.toDegrees(Math.atan2(triangleH, triangleW));
+                SmartDashboard.putNumber("Robot To Tag", robotToTagAng);
                 return robotToTagAng;
         }
 
-        public static double getAngleAdjustment( double tagPoseY, double botPoseY) {
-                double dist = tagPoseY - botPoseY;
-                if(dist > 0) {
-                        return 90;
+        public static double getAngleAdjustment( double tagPoseX, double tagPoseY, double botPoseX, double botPoseY) {
+                double distX = tagPoseX - botPoseX;
+                double distY = tagPoseY - botPoseY;
+                if(distX > 0) {
+                        if(distY >= 0) {
+                                return 90;
+                        }
+                        else {
+                                return -90;
+                        }
                 } else {
-                        return -90;
+                        if(distY > 0) {
+                                return -90;
+                        } else {
+                                return 90;
+                        }
                 }
         }
 
