@@ -97,16 +97,13 @@ public class RobotContainer {
                         .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
                         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
                                                                                  // motors
-        private final SwerveRequest.FieldCentric alignDrive = new SwerveRequest.FieldCentric()
-                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(0.0)
-                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
         private final Telemetry logger = new Telemetry(MaxSpeed);
 
         private final CommandXboxController joystick = new CommandXboxController(0);
-        private final CommandPS4Controller pranav = new CommandPS4Controller(3);
+        private final CommandPS4Controller pranav = new CommandPS4Controller(0);
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
 
@@ -204,7 +201,6 @@ public class RobotContainer {
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 camSim);
-                                RobotStateMachine.getInstance().bindVision(m_vision);
                                 break;
                         default:
                                 m_vision = new Vision();
@@ -223,9 +219,9 @@ public class RobotContainer {
         // @formatter:off
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-pranav.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-pranav.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-pranav.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
@@ -303,8 +299,8 @@ public class RobotContainer {
                         }
                 });
 
-                pranav.cross().whileTrue(drivetrain.applyRequest(() -> {
-                        return alignDrive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(),
+                joystick2.a().whileTrue(drivetrain.applyRequest(() -> {
+                        return drive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(),
                                         () -> robotStateMachine.getPose(),
                                         () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees()));
                 }));
@@ -355,130 +351,11 @@ public class RobotContainer {
                 }
         }
 
-<<<<<<< Updated upstream
-        //!  ROTATION THAT WEE ARE GETTING IS WRONG
-        public double getCommandAlignRate(Supplier<Pose2d> tagPose2d, Supplier<Pose2d> robotPose, DoubleSupplier robotRotDeg){
-                Pose2d pose = robotStateMachine.getPose();
-                return getAlignRate(tagPose.toPose2d(), pose, drivetrain.getRotation3d().toRotation2d().getDegrees());
-=======
         public double getCommandAlignRate(Supplier<Pose2d> tagPose2d, Supplier<Pose2d> robotPose,
                         DoubleSupplier robotRotDeg) {
                 Translation2d robotToTarget = tagPose2d.get().getTranslation().minus(robotPose.get().getTranslation());
                 Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(robotPose.get().getRotation());
                 return turretToTargetAngle.getDegrees();
->>>>>>> Stashed changes
-        }
-
-        /**
-         * Computes an alignment rate based on the robot pose and target tag pose.
-         *
-         * @return angular rate command used to align to the target
-         */
-        // Todo Add FOC powered knowsnkback button
-        public static double getAlignRate(Pose2d tagPose2d, Pose2d robotPose, double robotRotDeg) {
-<<<<<<< Updated upstream
-                //return AlignRateMath(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(), robotPose.getY(), robotPose.getRotation());
-                SmartDashboard.putNumber("robot-rotation-drivestationget", robotRotDeg);
-                double robotToTag = getRobotAngleToTag(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(), robotPose.getY());
-                double angleAdj = getAngleAdjustment(tagPose2d.getX(), tagPose2d.getY(),robotPose.getX(), robotPose.getY());
-                return alignRateNewMath(angleAdj, robotToTag, robotRotDeg);
-        }
-
-        
-=======
-                // return AlignRateMath(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(),
-                // robotPose.getY(), robotPose.getRotation());
-                System.out.println("Robot POse " + robotPose);
-                System.out.println("Tag Pose" + tagPose2d);
-                System.out.println("Rotation " + robotRotDeg);
-                double robotToTag = getRobotAngleToTag(tagPose2d.getX(), tagPose2d.getY(), robotPose.getX(),
-                                robotPose.getY());
-                double angleAdj = getAngleAdjustment(tagPose2d.getY(), robotPose.getY());
-                return alignRateNewMath(angleAdj, robotToTag, robotRotDeg);
-        }
-
-        public static double AlignRateMath(double tagePoseX, double tagePoseY, double botPoseX, double botPoseY,
-                        Rotation2d botRot) {
-                double rectW = tagePoseX - botPoseX;
-                double rectH = tagePoseY - botPoseY;
-                double newAngle = Math.toDegrees(Math.atan2(rectH, rectW)); // gets wanted angle for robot field
-                                                                            // oriented
-
-                double newAngleRate;
-                // [-180, 180] to [0, 360]
-                double normNewAngle = (newAngle + 180) % 360;
-                double normRobotRot = (botRot.getDegrees() + 180) % 360;
-
-                newAngleRate = Math.min(Math.abs(normNewAngle - normRobotRot),
-                                360 - Math.abs(normNewAngle - normRobotRot));
-
-                double kP = 0.01;
-
-                double newNewAngleRate = newAngleRate * kP;
-
-                System.out.println("Signed Pre " + newAngleRate);
-                System.out.println("Rect H " + rectH);
-                System.out.println("Rect W " + rectW);
-                System.out.println("newAngle " + newAngle);
-                System.out.println("New New Angle Rate " + newNewAngleRate);
-                return newNewAngleRate;
-        }
-
->>>>>>> Stashed changes
-        public static double getRobotAngleToTag(double tagePoseX, double tagePoseY, double botPoseX, double botPoseY) {
-                double triangleH = Math.abs(tagePoseY - botPoseY);
-                double triangleW = Math.abs(tagePoseX - botPoseX);
-                double robotToTagAng = Math.toDegrees(Math.atan2(triangleH, triangleW));
-                SmartDashboard.putNumber("Robot To Tag", robotToTagAng);
-                return robotToTagAng;
-        }
-
-<<<<<<< Updated upstream
-        public static double getAngleAdjustment( double tagPoseX, double tagPoseY, double botPoseX, double botPoseY) {
-                double distX = tagPoseX - botPoseX;
-                double distY = tagPoseY - botPoseY;
-                if(distX > 0) {
-                        if(distY >= 0) {
-                                return 90;
-                        }
-                        else {
-                                return -90;
-                        }
-=======
-        public static double getAngleAdjustment(double tagPoseY, double botPoseY) {
-                double dist = tagPoseY - botPoseY;
-                if (dist > 0) {
-                        return 90;
->>>>>>> Stashed changes
-                } else {
-                        if(distY > 0) {
-                                return -90;
-                        } else {
-                                return 90;
-                        }
-                }
-        }
-
-        public static double alignRateNewMath(double angleAdjustment, double angleToTag, double robotRot) {
-                angleToTag = 180 - angleToTag;
-                double angleErrorDeg;
-                if (robotRot < 0) {
-                        angleErrorDeg = (angleToTag) + Math.abs(robotRot) + angleAdjustment;
-                } else {
-                        angleErrorDeg = angleToTag + Math.abs(angleAdjustment - robotRot);
-                }
-<<<<<<< Updated upstream
-                double kP = 0.01;
-                double angleRate = angleError * kP;
-=======
-                SmartDashboard.putNumber("Angle To Tag", angleToTag);
-                SmartDashboard.putNumber("Angle Adjustment", angleAdjustment);
-                SmartDashboard.putNumber("Angle Error", angleErrorDeg);
-                double angleErrorRad = Math.toRadians(angleErrorDeg);
-                double kP = 1.0; // radians/sec per radian of error
-                double angleRate = angleErrorRad * kP;
->>>>>>> Stashed changes
-                return angleRate;
         }
 
         /**
