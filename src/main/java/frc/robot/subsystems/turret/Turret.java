@@ -29,7 +29,7 @@ public class Turret extends SubsystemBase {
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
-  private boolean overridden = true;
+  private boolean overridden = false;
   // BOUNDS: 0.0 to 55
 
   public Turret() {
@@ -50,7 +50,7 @@ public class Turret extends SubsystemBase {
   }
 
   public void setSpeed(double speed) {
-    if (overridden) {
+    if (!overridden) {
       if ((getMotorPosition() < 2)) {
         if (speed < 0) {
           speed = 0;

@@ -292,6 +292,7 @@ public class RobotContainer {
                                 .whileTrue(new ShootingSequence(hopper, m_flywheel, 6));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+                joystick2.start().onTrue(new InstantCommand(() -> m_turret.toggleOverride())).onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 closeLogSendable.onChange(closeLog -> {
                         if (closeLog) {
