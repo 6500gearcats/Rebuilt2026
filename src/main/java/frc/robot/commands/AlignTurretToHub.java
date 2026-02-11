@@ -4,14 +4,21 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotStateMachine;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.turret.Turret;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignTurretToHub extends Command {
   /** Creates a new AlignTurretToHub. */
   private Turret m_turret;
+  private Pose3d m_tagpose = TurretConstants.HUB_POSE2D;
+  private RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
 
   public AlignTurretToHub(Turret turret) {
     m_turret = turret;
@@ -26,7 +33,15 @@ public class AlignTurretToHub extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {   //TODO: Fix turret alignment and angle measurment, currently jumping from ~-40 to 40 or vice versa
-    double rate = m_turret.getAlignRate();
+   
+    Translation2d robotToTarget = m_tagpose.toPose2d().getTranslation().minus(m_StateMachine.getPose().getTranslation());
+    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(m_StateMachine.getPose().getRotation().plus(new Rotation2d(m_turret.getConvertedTurretPosition())));
+    SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
+    double convertedDeg = (180 - turretToTargetAngle.getDegrees()) * (turretToTargetAngle.getDegrees()/Math.abs(turretToTargetAngle.getDegrees()));
+    SmartDashboard.putNumber("turretConvertedError", convertedDeg);
+    double rate = convertedDeg * 0.05;
+
+    SmartDashboard.putNumber("turretTurnRate", rate);
     m_turret.setSpeed(rate);
   }
 

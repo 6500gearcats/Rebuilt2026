@@ -11,6 +11,8 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -230,5 +232,9 @@ public final class Constants {
     public static final int kIntakeDeployMotorID = 22;
     public static final int kIndexerMotorID = 21;
     public static final int kKickerMotorID = 23;
+  }
+
+  public static class TurretConstants {
+    public static final Pose3d HUB_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();  // !TODO: Translate tag to hub position for aim
   }
 }

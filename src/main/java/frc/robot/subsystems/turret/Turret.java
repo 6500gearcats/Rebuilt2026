@@ -47,8 +47,6 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
-
-    SmartDashboard.putNumber("AlignRate", getAlignRate());
   }
 
   public void setSpeed(double speed) {
@@ -101,36 +99,5 @@ public class Turret extends SubsystemBase {
   public void setPosition(double position) {
     // set position to 10 rotations
     m_motor.setControl(m_request.withPosition(position));
-  }
-
-  public double getAlignRate() {
-    // This method will be called once per scheduler run
-    double rectW = (tagPose.getX() - robotStateMachine.getPose().getX());
-    double rectH = (tagPose.getY() - 1 - robotStateMachine.getPose().getY());
-
-    SmartDashboard.putNumber("rectH", rectH);
-    SmartDashboard.putNumber("rectW", rectW);
-    double poseRot = robotStateMachine.getPose().getRotation().getDegrees();// + getConvertedTurretPosition();
-    SmartDashboard.putNumber("Turret on field", poseRot);
-
-    double newAngle = Math.toDegrees(Math.atan2(rectH, rectW)); // gets wanted angle for robot field
-                                                                // oriented
-
-    // SmartDashboard.putNumber("newAngle", newAngle);
-    double newAngleRate;
-
-    newAngleRate = ((newAngle - poseRot));
-    // if (poseRot > 0) {
-    // newAngleRate = ((newAngle - poseRot));
-    // } else {
-    // newAngleRate = ((poseRot + newAngle));
-    // }
-
-    double kP = 0.003;
-
-    double newNewAngleRate = newAngleRate * kP;
-    // setPosition(newAngle);
-    // SmartDashboard.putNumber("newAngleRate", newAngleRate);
-    return newNewAngleRate;
   }
 }

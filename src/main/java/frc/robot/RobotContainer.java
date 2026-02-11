@@ -299,14 +299,11 @@ public class RobotContainer {
                         }
                 });
 
-                joystick2.start().whileTrue(new RunCommand(() -> m_turret.toggleOverride()));
-
-                joystick2.a().whileTrue(drivetrain.applyRequest(() -> {
-                        return drive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(),
-                                        () -> robotStateMachine.getPose(),
-                                        () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees()));
-                }));
-
+                // joystick2.a().whileTrue( drivetrain.applyRequest(() -> {
+                //         return drive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(), () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees()));
+                // }));
+                joystick2.a().whileTrue(new AlignTurretToHub(m_turret));
+                //new JoystickButton(jason, XboxController.Button.kA.value).whileTrue(new AlignRobotToHub(drivetrain, () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees(), drive));
         }
 
         /**
@@ -356,20 +353,15 @@ public class RobotContainer {
         public double getCommandAlignRate(Supplier<Pose2d> tagPose2d, Supplier<Pose2d> robotPose,
                         DoubleSupplier robotRotDeg) {
                 Translation2d robotToTarget = tagPose2d.get().getTranslation().minus(robotPose.get().getTranslation());
-                Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(robotPose.get().getRotation()); // !
-                                                                                                                // Remove
-                                                                                                                // this
-                                                                                                                // line
-                                                                                                                // ... I
-                                                                                                                // don't
-                                                                                                                // know
-                                                                                                                // why
-                                                                                                                // it
-                                                                                                                // works
-                                                                                                                // with
-                                                                                                                // this
-                                                                                                                // in
-                return turretToTargetAngle.getDegrees();
+                Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(robotPose.get().getRotation());
+                double convertedDeg = (180 - turretToTargetAngle.getDegrees()) * (turretToTargetAngle.getDegrees()/Math.abs(turretToTargetAngle.getDegrees()));
+                if (true) {//Math.abs(convertedDeg)) {
+                        SmartDashboard.putNumber("Error", convertedDeg);
+                        return convertedDeg * 0.05;
+                }
+                else {
+                        return 0;
+                }
         }
 
         /**
