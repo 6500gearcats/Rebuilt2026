@@ -55,7 +55,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -105,7 +104,6 @@ public class RobotContainer {
 
         private final CommandXboxController joystick = new CommandXboxController(0);
         private final CommandPS4Controller pranav = new CommandPS4Controller(0);
-        private final XboxController jason = new XboxController(0);
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
 
@@ -284,7 +282,6 @@ public class RobotContainer {
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
-
                 new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
                                 .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
@@ -302,10 +299,14 @@ public class RobotContainer {
                         }
                 });
 
-                joystick2.a().whileTrue( drivetrain.applyRequest(() -> {
-                        return drive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(), () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees()));
+                joystick2.start().whileTrue(new RunCommand(() -> m_turret.toggleOverride()));
+
+                joystick2.a().whileTrue(drivetrain.applyRequest(() -> {
+                        return drive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(),
+                                        () -> robotStateMachine.getPose(),
+                                        () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees()));
                 }));
-                //new JoystickButton(jason, XboxController.Button.kA.value).whileTrue(new AlignRobotToHub(drivetrain, () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees(), drive));
+
         }
 
         /**
@@ -324,7 +325,8 @@ public class RobotContainer {
                 // New LL
                 drivetrain.resetPose(new Pose2d());
                 drivetrain.setOperatorPerspectiveForward(new Rotation2d());
-                LimelightHelpers.SetRobotOrientation("limelight-gcc", drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, 0.25, 0.15, 180, 0, 180);
         }
@@ -351,20 +353,25 @@ public class RobotContainer {
                 }
         }
 
-        //!  ROTATION THAT WE ARE GETTING IS WRONG
-        public double getCommandAlignRate(Supplier<Pose2d> tagPose2d, Supplier<Pose2d> robotPose, DoubleSupplier robotRotDeg){
-
+        public double getCommandAlignRate(Supplier<Pose2d> tagPose2d, Supplier<Pose2d> robotPose,
+                        DoubleSupplier robotRotDeg) {
                 Translation2d robotToTarget = tagPose2d.get().getTranslation().minus(robotPose.get().getTranslation());
-                Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(robotPose.get().getRotation());
-                if (Math.abs(turretToTargetAngle.getDegrees())<176) {
-                        SmartDashboard.putNumber("Error", turretToTargetAngle.getDegrees());
-                        return turretToTargetAngle.getDegrees() * 0.01;
-                }
-                else {
-                        return 0;
-                }
+                Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(robotPose.get().getRotation()); // !
+                                                                                                                // Remove
+                                                                                                                // this
+                                                                                                                // line
+                                                                                                                // ... I
+                                                                                                                // don't
+                                                                                                                // know
+                                                                                                                // why
+                                                                                                                // it
+                                                                                                                // works
+                                                                                                                // with
+                                                                                                                // this
+                                                                                                                // in
+                return turretToTargetAngle.getDegrees();
         }
-       
+
         /**
          * Logs shooter speed and distance values to the JSON log file.
          *
