@@ -35,13 +35,13 @@ public class AlignTurretToHub extends Command {
   public void execute() {   //TODO: Fix turret alignment and angle measurment, currently jumping from ~-40 to 40 or vice versa
    
     Translation2d robotToTarget = m_tagpose.toPose2d().getTranslation().minus(m_StateMachine.getPose().getTranslation());
-    Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation().plus(new Rotation2d(m_turret.getConvertedTurretPosition()));
+    Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation().plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
     Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot);
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
-    double convertedDeg = (180 - turretToTargetAngle.getDegrees()) * (turretToTargetAngle.getDegrees()/Math.abs(turretToTargetAngle.getDegrees()));
+    double convertedDeg = (180 - Math.abs(turretToTargetAngle.getDegrees())) * (turretToTargetAngle.getDegrees()/Math.abs(turretToTargetAngle.getDegrees()));
     SmartDashboard.putNumber("turretConvertedError", convertedDeg);
-    double rate = convertedDeg * 0.005;
+    double rate = convertedDeg * 0.05;
 
     SmartDashboard.putNumber("turretTurnRate", rate);
     m_turret.setSpeed(rate);
