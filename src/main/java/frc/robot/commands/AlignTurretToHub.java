@@ -4,9 +4,12 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
@@ -17,11 +20,17 @@ import frc.robot.subsystems.turret.Turret;
 public class AlignTurretToHub extends Command {
   /** Creates a new AlignTurretToHub. */
   private Turret m_turret;
-  private Pose3d m_tagpose = TurretConstants.HUB_POSE2D;
+  private Pose2d m_tagpose = TurretConstants.HubPose;
   private RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
+
+  private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
+            .getTable("StateMachinePose")
+            .getStructTopic("Hub Pose", Pose2d.struct)
+            .publish();
 
   public AlignTurretToHub(Turret turret) {
     m_turret = turret;
+    posePublisher.set(m_tagpose);
     addRequirements(m_turret);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -34,7 +43,7 @@ public class AlignTurretToHub extends Command {
   @Override
   public void execute() {   //TODO: Fix turret alignment and angle measurment, currently jumping from ~-40 to 40 or vice versa
    
-    Translation2d robotToTarget = m_tagpose.toPose2d().getTranslation().minus(m_StateMachine.getPose().getTranslation());
+    Translation2d robotToTarget = m_tagpose.getTranslation().minus(m_StateMachine.getPose().getTranslation());
     Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation().plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
     Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot);

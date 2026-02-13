@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meter;
+
 import com.pathplanner.lib.config.RobotConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -13,7 +15,9 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -22,7 +26,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -235,6 +239,7 @@ public final class Constants {
   }
 
   public static class TurretConstants {
-    public static final Pose3d HUB_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();  // !TODO: Translate tag to hub position for aim
+    public static final Pose3d Tag_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();  // !TODO: Translate tag to hub position for aim
+    public static final Pose2d HubPose = Tag_POSE2D.toPose2d().transformBy(new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter), new Rotation2d()));
   }
 }
