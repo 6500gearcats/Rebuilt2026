@@ -239,6 +239,9 @@ public final class Constants {
   }
 
   public static class TurretConstants {
+    public static final double kTurretTransformMetersX =  0.1524;
+    public static final double kTurretTransformIMetersY =  0.0635; 
+
     public static final Pose3d Tag_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();  // !TODO: Translate tag to hub position for aim
     public static final Pose2d HubPose = Tag_POSE2D.toPose2d().transformBy(new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter), new Rotation2d()));
   }

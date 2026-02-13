@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -42,9 +43,11 @@ public class AlignTurretToHub extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {   //TODO: Fix turret alignment and angle measurment, currently jumping from ~-40 to 40 or vice versa
-   
-    Translation2d robotToTarget = m_tagpose.getTranslation().minus(m_StateMachine.getPose().getTranslation());
-    Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation().plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));
+    Pose2d badRobotPose = m_StateMachine.getPose();
+    Pose2d goodRobotPose = new Pose2d(badRobotPose.getX() + 0.1524, badRobotPose.getY() + 0.0635, new Rotation2d(0)).rotateAround(badRobotPose.getTranslation(), badRobotPose.getRotation());
+
+    Translation2d robotToTarget = m_tagpose.getTranslation().minus(goodRobotPose.getTranslation());
+    Rotation2d turretAndRobot = goodRobotPose.getRotation().plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
     Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot);
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
