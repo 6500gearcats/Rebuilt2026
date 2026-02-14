@@ -299,12 +299,14 @@ public class RobotContainer {
                                 this.closeLogFile();
                         }
                 });
+                joystick.a().onTrue(new InstantCommand(() -> { 
+                        ShooterValuesSenable data = (ShooterValuesSenable) SmartDashboard.getData("Shooter Values");
+                        if(data != null) {
+                                LogValues(data.getDist(), data.getShooterSpeed());
+                        }
 
-                // joystick2.a().whileTrue( drivetrain.applyRequest(() -> {
-                //         return drive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(), () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees()));
-                // }));
+                }));
                 joystick2.a().whileTrue(new AlignTurretToHub(m_turret));
-                //new JoystickButton(jason, XboxController.Button.kA.value).whileTrue(new AlignRobotToHub(drivetrain, () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees(), drive));
         }
 
         /**
@@ -390,8 +392,10 @@ public class RobotContainer {
          */
         public void closeLogFile() {
                 try {
-                        writer.close();
-                        writer = null;
+                        if(writer != null) {
+                                writer.close();
+                                writer = null;
+                        }
                 } catch (IOException e) {
                         System.err.println("Could not close JSON log file.");
                         e.printStackTrace();

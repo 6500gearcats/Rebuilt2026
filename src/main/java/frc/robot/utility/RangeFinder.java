@@ -5,21 +5,25 @@
 package frc.robot.utility;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotStateMachine;
 
 public class RangeFinder extends SubsystemBase {
-
+  private RobotStateMachine robot;
   private InterpolatingDoubleTreeMap m_map;
   /** Creates a new RangeFinder. */
   public RangeFinder() {
     m_map = new InterpolatingDoubleTreeMap();
-
+    robot = RobotStateMachine.getInstance();
     //its programmings fault
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    
+    //robot.getPose();
+    //SmartDashboard.putData("Distance to Hub", )
   }
 
   public double getShooterSpeed(double distance){

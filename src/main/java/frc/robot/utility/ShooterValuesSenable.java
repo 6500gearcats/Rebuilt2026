@@ -10,8 +10,8 @@ public class ShooterValuesSenable implements Sendable {
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("Shooter Sendable");
-        builder.addDoubleProperty("Distance", null, this::setDist);
-        builder.addDoubleProperty("Shooter Speed", null, this::setShooterSpeed);
+        builder.addDoubleProperty("Distance", this::getDist, this::setDist);
+        builder.addDoubleProperty("Shooter Speed", this::getShooterSpeed, this::setShooterSpeed);
     }
 
     public void setDist(double dist) {
@@ -20,5 +20,13 @@ public class ShooterValuesSenable implements Sendable {
 
     public void setShooterSpeed(double speed) {
         this.shooterSpeed = speed;
+    }
+
+    public double getDist() {
+        return distance;
+    }
+
+    public double getShooterSpeed() {
+        return shooterSpeed;
     }
 }
