@@ -40,49 +40,34 @@ public class AlignTurretToHub extends Command {
   public void initialize() {
   }
 
+  public static double calculateAlignmentConvertedDegrees(Translation2d tagTranslation, Translation2d robotTranslation,
+      Rotation2d robotRotation, double turretPosition) {
+    Translation2d robotToTarget = tagTranslation
+        .minus(robotTranslation); // gets x and y difference between robot and april tag
+    Rotation2d turretAndRobot = robotRotation
+        .plus(new Rotation2d(Math.toRadians(turretPosition)));// gets rotation of motor in relation to field
+    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); // angle of x and y difference
+                                                                                     // minue rotation between tag/robot
+    return (180 - Math.abs(turretToTargetAngle.getDegrees()))
+        * (turretToTargetAngle.getDegrees() / Math.abs(turretToTargetAngle.getDegrees())); // converts it into usable
+                                                                                           // error for rotation
+  }
+
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() { // TODO: Fix turret alignment and angle measurment, currently jumping from ~-40
                           // to 40 or vice versa
 
-    Translation2d robotToTarget = m_tagpose.toPose2d().getTranslation()
-        .minus(m_StateMachine.getPose().getTranslation()); //gets x and y difference between robot and april tag
-    Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation()
-        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));//gets rotation of motor in relation to field
-    
-    SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
+    double convertedDeg = calculateAlignmentConvertedDegrees(m_tagpose.toPose2d().getTranslation(),
+        m_StateMachine.getPose().getTranslation(), m_StateMachine.getPose().getRotation(),
+        m_turret.getConvertedTurretPosition());
 
-    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); //angle of x and y difference minue rotation between tag/robot
-    SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
-
-    double convertedDeg = (180 - Math.abs(turretToTargetAngle.getDegrees()))
-        * (turretToTargetAngle.getDegrees() / Math.abs(turretToTargetAngle.getDegrees())); //converts it into usable error for rotation
-    SmartDashboard.putNumber("rate", driveTrain.getAngularVel().get());
-    // //limit the error of the turret target angle to turret angle
-    // double unconvertedDeg = convertedDeg + turretAndRobot.getDegrees();
-
-    // if(Math.abs(unconvertedDeg) > 110){
-    //   unconvertedDeg = (100 * unconvertedDeg/Math.abs(unconvertedDeg));
-    // }
-
-    // convertedDeg = unconvertedDeg - turretAndRobot.getDegrees();
-    
-    //SmartDashboard.putNumber("turretConvertedError", convertedDeg);
-    // //double rate = convertedDeg * 0.05; //sets rate to converted degrees
-
-    //double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
-    // newError = (180 - Math.abs(newError)) * (newError/Math.abs(newError));
-    // if(Math.abs(newError) > 110){
-    //   newError = 110 * (Math.abs(newError)/newError);
-    // }
-    //m_turret.setPosition(newError);
     if (driveTrain.getAngularVel().get() < 130) {
       double error = pid.calculate(m_turret.getConvertedTurretPosition(), convertedDeg); // sets turret speed
       m_turret.setSpeed(error);
+    } else {
+      m_turret.setSpeed(0);
     }
-    //SmartDashboard.putNumber("tunring_pos_setpoint", newError);
-    //SmartDashboard.putNumber("turretTurnRate", rate);
-    //m_turret.setSpeed(rate);
   }
 
   // Called once the command ends or is interrupted.
