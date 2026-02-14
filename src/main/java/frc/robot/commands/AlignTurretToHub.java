@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,6 +17,11 @@ import frc.robot.subsystems.turret.Turret;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignTurretToHub extends Command {
   /** Creates a new AlignTurretToHub. */
+  private double kP;
+  private double kI;
+  private double kD;
+
+  private PIDController pid = new PIDController(kP, kI, kD);
   private Turret m_turret;
   private Pose3d m_tagpose = TurretConstants.HUB_POSE2D;
   private RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
@@ -28,20 +34,36 @@ public class AlignTurretToHub extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {   //TODO: Fix turret alignment and angle measurment, currently jumping from ~-40 to 40 or vice versa
-   
-    Translation2d robotToTarget = m_tagpose.toPose2d().getTranslation().minus(m_StateMachine.getPose().getTranslation());
-    Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation().plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));
+  public void execute() { // TODO: Fix turret alignment and angle measurment, currently jumping from ~-40
+                          // to 40 or vice versa
+
+    Translation2d robotToTarget = m_tagpose.toPose2d().getTranslation()
+        .minus(m_StateMachine.getPose().getTranslation());
+    Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation()
+        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
     Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot);
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
-    double convertedDeg = (180 - Math.abs(turretToTargetAngle.getDegrees())) * (turretToTargetAngle.getDegrees()/Math.abs(turretToTargetAngle.getDegrees()));
+    double convertedDeg = (180 - Math.abs(turretToTargetAngle.getDegrees()))
+        * (turretToTargetAngle.getDegrees() / Math.abs(turretToTargetAngle.getDegrees()));
     SmartDashboard.putNumber("turretConvertedError", convertedDeg);
     double rate = convertedDeg * 0.05;
+
+    double error = robotToTarget.getAngle().minus(turretAndRobot).getDegrees(); // converts a rotation2d to a double
+
+    m_turret.setSpeed(pid.calculate(m_turret.getConvertedTurretPosition(), error)); // sets turret speed
+
+    // Sets the error tolerance to 5, and the error derivative tolerance to 10 per
+    // second
+    pid.setTolerance(5, 10); // this is from wpilib, i havent changed it at all so it is very wrong
+    // Returns true if the error is less than 5 units, and the
+    // error derivative is less than 10 units
+    pid.atSetpoint();
 
     SmartDashboard.putNumber("turretTurnRate", rate);
     m_turret.setSpeed(rate);

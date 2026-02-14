@@ -33,13 +33,7 @@ public class Turret extends SubsystemBase {
   // BOUNDS: 0.0 to 55
 
   public Turret() {
-    // in init function, set slot 0 gains
-    var slot0Configs = new Slot0Configs();
-    slot0Configs.kP = 0; // An error of 1 rotation results in 2.4 V output
-    slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0; // A velocity of 1 rps results in 0.1 V output
-
-    m_motor.getConfigurator().apply(slot0Configs);
+    m_motor.getConfigurator();
   }
 
   @Override
