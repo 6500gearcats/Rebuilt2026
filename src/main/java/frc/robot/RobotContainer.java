@@ -303,7 +303,7 @@ public class RobotContainer {
                 // joystick2.a().whileTrue( drivetrain.applyRequest(() -> {
                 //         return drive.withRotationalRate(getCommandAlignRate(() -> tagPose.toPose2d(), () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees()));
                 // }));
-                joystick2.a().whileTrue(new AlignTurretToHub(m_turret));
+                joystick2.a().whileTrue(new AlignTurretToHub(m_turret, drivetrain));
                 //new JoystickButton(jason, XboxController.Button.kA.value).whileTrue(new AlignRobotToHub(drivetrain, () -> robotStateMachine.getPose(), () -> new Rotation2d(drivetrain.getRotation3d().getAngle()).getDegrees(), drive));
         }
 
