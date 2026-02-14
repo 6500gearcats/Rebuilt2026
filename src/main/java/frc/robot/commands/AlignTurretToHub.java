@@ -17,9 +17,9 @@ import frc.robot.subsystems.turret.Turret;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignTurretToHub extends Command {
   /** Creates a new AlignTurretToHub. */
-  private double kP;
-  private double kI;
-  private double kD;
+  private double kP = 0.05;
+  private double kI = 0;
+  private double kD = 0;
 
   private PIDController pid = new PIDController(kP, kI, kD);
   private Turret m_turret;
@@ -43,30 +43,41 @@ public class AlignTurretToHub extends Command {
                           // to 40 or vice versa
 
     Translation2d robotToTarget = m_tagpose.toPose2d().getTranslation()
-        .minus(m_StateMachine.getPose().getTranslation());
+        .minus(m_StateMachine.getPose().getTranslation()); //gets x and y difference between robot and april tag
     Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation()
-        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));
+        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));//gets rotation of motor in relation to field
+    
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
-    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot);
+
+    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); //angle of x and y difference minue rotation between tag/robot
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
-    double convertedDeg = (180 - Math.abs(turretToTargetAngle.getDegrees()))
-        * (turretToTargetAngle.getDegrees() / Math.abs(turretToTargetAngle.getDegrees()));
-    SmartDashboard.putNumber("turretConvertedError", convertedDeg);
-    double rate = convertedDeg * 0.05;
 
-    double error = robotToTarget.getAngle().minus(turretAndRobot).getDegrees(); // converts a rotation2d to a double
+    //double convertedDeg = (180 - Math.abs(turretToTargetAngle.getDegrees()))
+    //    * (turretToTargetAngle.getDegrees() / Math.abs(turretToTargetAngle.getDegrees())); //converts it into usable error for rotation
+    
+    // //limit the error of the turret target angle to turret angle
+    // double unconvertedDeg = convertedDeg + turretAndRobot.getDegrees();
 
-    m_turret.setSpeed(pid.calculate(m_turret.getConvertedTurretPosition(), error)); // sets turret speed
+    // if(Math.abs(unconvertedDeg) > 110){
+    //   unconvertedDeg = (100 * unconvertedDeg/Math.abs(unconvertedDeg));
+    // }
 
-    // Sets the error tolerance to 5, and the error derivative tolerance to 10 per
-    // second
-    pid.setTolerance(5, 10); // this is from wpilib, i havent changed it at all so it is very wrong
-    // Returns true if the error is less than 5 units, and the
-    // error derivative is less than 10 units
-    pid.atSetpoint();
+    // convertedDeg = unconvertedDeg - turretAndRobot.getDegrees();
+    
+    //SmartDashboard.putNumber("turretConvertedError", convertedDeg);
+    // //double rate = convertedDeg * 0.05; //sets rate to converted degrees
 
-    SmartDashboard.putNumber("turretTurnRate", rate);
-    m_turret.setSpeed(rate);
+    double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
+    // newError = (180 - Math.abs(newError)) * (newError/Math.abs(newError));
+    if(Math.abs(newError) > 110){
+      newError = 110 * (Math.abs(newError)/newError);
+    }
+    m_turret.setPosition(newError);
+    // double error = pid.calculate(m_turret.getConvertedTurretPosition(), newError); // sets turret speed
+    // m_turret.setSpeed(error);
+    SmartDashboard.putNumber("tunring_pos_setpoint", newError);
+    //SmartDashboard.putNumber("turretTurnRate", rate);
+    //m_turret.setSpeed(rate);
   }
 
   // Called once the command ends or is interrupted.
