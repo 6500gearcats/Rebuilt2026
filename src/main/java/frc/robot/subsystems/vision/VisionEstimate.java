@@ -4,6 +4,9 @@ import frc.robot.subsystems.vision.limelight.LimelightHelpers.PoseEstimate;
 import org.photonvision.EstimatedRobotPose;
 import edu.wpi.first.math.geometry.Pose2d;
 
+/**
+ * Wrapper that normalizes pose estimates from PhotonVision and Limelight.
+ */
 public class VisionEstimate {
     PoseEstimate poseEstimate;
     EstimatedRobotPose pose;

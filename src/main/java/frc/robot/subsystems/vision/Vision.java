@@ -77,6 +77,14 @@ public class Vision extends SubsystemBase {
 
   public Field2d m_field = new Field2d();
 
+  /**
+   * Creates a vision subsystem with live camera IO.
+   *
+   * @param rotationSupplier             drivetrain rotation supplier
+   * @param swerveModulePositionSupplier drivetrain module positions
+   * @param poseSupplier                 drivetrain pose supplier
+   * @param io                           vision IO instances
+   */
   public Vision(Supplier<Rotation2d> rotationSupplier,
       Supplier<SwerveModulePosition[]> swerveModulePositionSupplier, Supplier<Pose2d> poseSupplier, VisionIO... io) {
 

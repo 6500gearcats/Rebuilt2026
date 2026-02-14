@@ -11,6 +11,9 @@ import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers.LimelightResults;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers.LimelightTarget_Fiducial;
 
+/**
+ * VisionIO implementation for Limelight cameras.
+ */
 public class LimelightIO implements VisionIO {
 
     private String name;
@@ -20,6 +23,15 @@ public class LimelightIO implements VisionIO {
     private boolean useMegaTag2;
     private boolean forPoseEstimation;
 
+    /**
+     * Creates a Limelight IO instance.
+     *
+     * @param theName                 limelight network table name
+     * @param forPoseEstimation       true to use for pose estimation
+     * @param rotationSupplier        robot rotation supplier
+     * @param angularVelocitySupplier angular velocity supplier
+     * @param useMegaTag2             true to use MegaTag2 pipeline
+     */
     public LimelightIO(String theName, boolean forPoseEstimation, Supplier<Rotation2d> rotationSupplier,
             Supplier<Double> angularVelocitySupplier, boolean useMegaTag2) {
         name = theName;

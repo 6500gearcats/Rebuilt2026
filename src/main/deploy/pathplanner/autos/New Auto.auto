@@ -9,6 +9,30 @@
           "data": {
             "pathName": "Example Path"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ItsProgrammingFaults"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "New Path"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "New New Path"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Climb"
+          }
         }
       ]
     }

@@ -24,6 +24,9 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.subsystems.vision.VisionIO;
 
+/**
+ * VisionIO implementation backed by PhotonVision cameras.
+ */
 public class PhotonVisionIO implements VisionIO {
     private final PhotonCamera m_camera;
     public Translation3d robotToCameraTrl;
@@ -37,6 +40,14 @@ public class PhotonVisionIO implements VisionIO {
     private double lastEstTimestamp = 0;
     public boolean isNewResult = false;
 
+    /**
+     * Creates a PhotonVision IO instance.
+     *
+     * @param cameraName        camera name as configured in PhotonVision
+     * @param forPoseEstimation true to use for pose estimation
+     * @param robotToCameraTrl  translation from robot to camera
+     * @param robotToCameraRot  rotation from robot to camera
+     */
     public PhotonVisionIO(String cameraName, boolean forPoseEstimation, Translation3d robotToCameraTrl,
             Rotation3d robotToCameraRot) {
         this.forPoseEstimation = forPoseEstimation;
