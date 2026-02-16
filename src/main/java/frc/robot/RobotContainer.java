@@ -292,16 +292,17 @@ public class RobotContainer {
                                 .whileTrue(new ShootingSequence(hopper, m_flywheel, 6));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-                joystick2.start().onTrue(new InstantCommand(() -> m_turret.toggleOverride())).onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
+                joystick2.start().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
+                                .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 closeLogSendable.onChange(closeLog -> {
                         if (closeLog) {
                                 this.closeLogFile();
                         }
                 });
-                joystick.a().onTrue(new InstantCommand(() -> { 
+                joystick.a().onTrue(new InstantCommand(() -> {
                         ShooterValuesSenable data = (ShooterValuesSenable) SmartDashboard.getData("Shooter Values");
-                        if(data != null) {
+                        if (data != null) {
                                 LogValues(data.getDist(), data.getShooterSpeed());
                         }
 
@@ -357,12 +358,12 @@ public class RobotContainer {
                         DoubleSupplier robotRotDeg) {
                 Translation2d robotToTarget = tagPose2d.get().getTranslation().minus(robotPose.get().getTranslation());
                 Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(robotPose.get().getRotation());
-                double convertedDeg = (180 - turretToTargetAngle.getDegrees()) * (turretToTargetAngle.getDegrees()/Math.abs(turretToTargetAngle.getDegrees()));
-                if (true) {//Math.abs(convertedDeg)) {
+                double convertedDeg = (180 - turretToTargetAngle.getDegrees())
+                                * (turretToTargetAngle.getDegrees() / Math.abs(turretToTargetAngle.getDegrees()));
+                if (true) {// Math.abs(convertedDeg)) {
                         SmartDashboard.putNumber("Error", convertedDeg);
                         return convertedDeg * 0.05;
-                }
-                else {
+                } else {
                         return 0;
                 }
         }
@@ -392,7 +393,7 @@ public class RobotContainer {
          */
         public void closeLogFile() {
                 try {
-                        if(writer != null) {
+                        if (writer != null) {
                                 writer.close();
                                 writer = null;
                         }
