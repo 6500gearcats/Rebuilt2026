@@ -68,11 +68,22 @@ public class AlignTurretToHub extends Command {
     // //double rate = convertedDeg * 0.05; //sets rate to converted degrees
 
     double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
-    // newError = (180 - Math.abs(newError)) * (newError/Math.abs(newError));
-    if(Math.abs(newError) > 110){
-      newError = 110 * (Math.abs(newError)/newError);
+    newError = ( Math.abs(newError) - 180) * (newError/Math.abs(newError));
+    if(newError > 0) {
+      if(Math.abs(newError) > 110){
+        newError = 110 * (Math.abs(newError)/newError);
+      }
     }
-    m_turret.setPosition(newError);
+    else {
+      if(Math.abs(newError) > 103){
+        newError = 110 * (Math.abs(newError)/newError);
+      }
+    }
+    
+    if(Math.abs(newError) > 1) {
+      m_turret.setPosition(newError);
+    }
+    
     // double error = pid.calculate(m_turret.getConvertedTurretPosition(), newError); // sets turret speed
     // m_turret.setSpeed(error);
     SmartDashboard.putNumber("tunring_pos_setpoint", newError);
