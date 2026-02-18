@@ -10,12 +10,24 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotStateMachine;
 
 public class RangeFinder extends SubsystemBase {
-  private RobotStateMachine robot;
   private InterpolatingDoubleTreeMap m_map;
   /** Creates a new RangeFinder. */
   public RangeFinder() {
     m_map = new InterpolatingDoubleTreeMap();
-    robot = RobotStateMachine.getInstance();
+    m_map.put(2.467, 4.75);
+
+    m_map.put(2.732, 4.75);
+
+    m_map.put(3.017, 4.79);
+
+    m_map.put(3.785, 5.2);
+
+    m_map.put(5.005, 5.6);
+
+    m_map.put(4.679, 5.7);
+
+    m_map.put(5.250, 6.4);
+
     //its programmings fault
   }
 

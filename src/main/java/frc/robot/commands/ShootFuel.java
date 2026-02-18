@@ -6,8 +6,14 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.hal.simulation.RoboRioDataJNI;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
+import frc.robot.RobotStateMachine;
 import frc.robot.subsystems.turret.Flywheel;
+import frc.robot.utility.RangeFinder;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 /**
@@ -17,6 +23,8 @@ public class ShootFuel extends Command {
   /** Creates a new ShootFuel. */
   Flywheel m_Flywheel;
   DoubleSupplier supplier;
+  RangeFinder rangeFinder;
+  RobotStateMachine stateMachine = RobotStateMachine.getInstance();
 
   /**
    * Creates a new ShootFuel command.
@@ -24,10 +32,11 @@ public class ShootFuel extends Command {
    * @param flywheel      flywheel subsystem
    * @param speedSupplier speed command supplier
    */
-  public ShootFuel(Flywheel flywheel, DoubleSupplier speedSupplier) {
+  public ShootFuel(Flywheel flywheel, RangeFinder rangeFinder){
     m_Flywheel = flywheel;
-    supplier = speedSupplier;
-    addRequirements(m_Flywheel);
+    this.rangeFinder = rangeFinder;
+    addRequirements(m_Flywheel, rangeFinder);
+    
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -39,7 +48,8 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_Flywheel.setSpeed(supplier.getAsDouble());
+    m_Flywheel.setSpeed(rangeFinder.getShooterSpeed(stateMachine.getTurretPose().getTranslation().getDistance(Constants.TurretConstants.HubPose.getTranslation())));
+    //m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
 
   // Called once the command ends or is interrupted.

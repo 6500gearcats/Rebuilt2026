@@ -3,6 +3,7 @@ package frc.robot;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -18,6 +19,8 @@ public final class RobotStateMachine {
 
     private RobotState state = RobotState.INACTIVE;
 
+    private Pose2d turretPose = new Pose2d();
+
     private Pose2d pose = new Pose2d();
     private Supplier<Pose2d> visionPoseSupplier;
     private FieldZone currentZone = FieldZone.ALLIANCE;
@@ -25,6 +28,11 @@ public final class RobotStateMachine {
             .getTable("StateMachinePose")
             .getStructTopic("stateMachinePose", Pose2d.struct)
             .publish();
+
+    private final StructPublisher<Pose2d> turretPosePublisher = NetworkTableInstance.getDefault()
+    .getTable("StateMachinePose")
+    .getStructTopic("TuuretPose", Pose2d.struct)
+    .publish();
 
     private RobotStateMachine() {
         SmartDashboard.putString("RobotState", state.toString());
@@ -43,6 +51,10 @@ public final class RobotStateMachine {
         return instance;
     }
 
+    public Pose2d getTurretPose() {
+        return turretPose;
+    }
+
     /**
      * Updates pose, field zone, and publishes telemetry.
      */
@@ -50,6 +62,8 @@ public final class RobotStateMachine {
         refreshPoseFromVision();
         currentZone = checkZone();
         posePublisher.set(pose);
+        turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0)).rotateAround(pose.getTranslation(), pose.getRotation());
+        turretPosePublisher.set(turretPose);
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }

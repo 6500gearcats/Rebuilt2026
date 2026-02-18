@@ -78,6 +78,7 @@ import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
+import frc.robot.utility.RangeFinder;
 import frc.robot.utility.ShooterValuesSenable;
 
 /**
@@ -131,6 +132,8 @@ public class RobotContainer {
         private final SendableChooser<Boolean> shooterSendableChooser = new SendableChooser<Boolean>();
         private final Sendable shooterSendable = new ShooterValuesSenable();
 
+        private final RangeFinder rangeFinder = new RangeFinder();
+
         // private final Feeder m_feeder = new Feeder();
         // private final Intake m_intake = new Intake();
         // private final Shooter m_shooter = new Shooter();
@@ -182,6 +185,7 @@ public class RobotContainer {
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
                                                 m_ll);
+                                SmartDashboard.putNumber("Shoot Speed", 0);
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -289,7 +293,7 @@ public class RobotContainer {
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ShootingSequence(hopper, m_flywheel, 6));
+                                .whileTrue(new ShootingSequence(hopper, m_flywheel, rangeFinder));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
                 joystick2.start().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))

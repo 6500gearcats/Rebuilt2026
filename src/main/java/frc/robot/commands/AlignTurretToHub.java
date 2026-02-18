@@ -53,11 +53,13 @@ public class AlignTurretToHub extends Command {
                           // to 40 or vice versa
 
     Translation2d robotToTarget = m_tagpose.getTranslation()
-        .minus(m_StateMachine.getPose().getTranslation()); //gets x and y difference between robot and april tag
-    Rotation2d turretAndRobot = m_StateMachine.getPose().getRotation()
+        .minus(m_StateMachine.getTurretPose().getTranslation()); //gets x and y difference between robot and april tag
+    Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation()
         .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));//gets rotation of motor in relation to field
     
+    Pose2d newTurretPose = new Pose2d(m_StateMachine.getTurretPose().getTranslation(), turretAndRobot);
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
+    SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_tagpose.getTranslation()));
 
     Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); //angle of x and y difference minue rotation between tag/robot
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());

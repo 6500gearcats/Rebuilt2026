@@ -7,15 +7,16 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.turret.Flywheel;
+import frc.robot.utility.RangeFinder;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ShootingSequence extends ParallelCommandGroup {
   /** Creates a new ShootingSequence. */
-  public ShootingSequence(Hopper hopper, Flywheel m_flywheel, double shootSpeed) {
+  public ShootingSequence(Hopper hopper, Flywheel m_flywheel, RangeFinder rangeFinder) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new RunHopper(hopper), new ShootFuel(m_flywheel, () -> shootSpeed));
+    addCommands(new RunHopper(hopper), new ShootFuel(m_flywheel, rangeFinder));
   }
 }
