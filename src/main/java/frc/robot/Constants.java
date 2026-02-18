@@ -233,8 +233,8 @@ public final class Constants {
     public static final int kShooterMotorLeftID = 14;
 
     public static final int kIntakeMotorID = 20;
-    public static final int kIntakeDeployMotorID = 22;
-    public static final int kIndexerMotorID = 21;
+    public static final int kIntakeDeployMotorID = 21;
+    public static final int kIndexerMotorID = 22;
     public static final int kKickerMotorID = 23;
   }
 

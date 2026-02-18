@@ -11,7 +11,8 @@ import frc.robot.Constants.MotorConstants;
 
 public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
-  private final TalonFX m_instakeMotor = new TalonFX(MotorConstants.kIntakeMotorID);
+  private final TalonFX m_intakeMotor = new TalonFX(MotorConstants.kIntakeMotorID);
+  private final TalonFX m_intakeDeployMotor = new TalonFX(MotorConstants.kIntakeDeployMotorID);
   public Intake() {}
 
   @Override
@@ -20,6 +21,9 @@ public class Intake extends SubsystemBase {
   }
 
   public void setIntakeSpeed(double speed) {
-    m_instakeMotor.set(speed);
+    m_intakeMotor.set(speed);
+  }
+  public void deployIntake(double speed){
+    m_intakeDeployMotor.set(speed);
   }
 }
