@@ -185,7 +185,6 @@ public class RobotContainer {
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
                                                 m_ll);
-                                SmartDashboard.putNumber("Shoot Speed", 0);
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -289,14 +288,17 @@ public class RobotContainer {
                 new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
                                 .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
-                // joystick.rightBumper().onTrue(new RunHopper(hopper));
-                joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
+                joystick.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                joystick.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
-                new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1)
+                // joystick.rightBumper().onTrue(new RunHopper(hopper));
+                // joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
+
+                new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ShootingSequence(hopper, m_flywheel, rangeFinder));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-                joystick2.start().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
+                joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 closeLogSendable.onChange(closeLog -> {
@@ -304,14 +306,15 @@ public class RobotContainer {
                                 this.closeLogFile();
                         }
                 });
-                joystick.a().onTrue(new InstantCommand(() -> {
-                        ShooterValuesSenable data = (ShooterValuesSenable) SmartDashboard.getData("Shooter Values");
-                        if (data != null) {
-                                LogValues(data.getDist(), data.getShooterSpeed());
-                        }
+                // joystick.a().onTrue(new InstantCommand(() -> {
+                // ShooterValuesSenable data = (ShooterValuesSenable)
+                // SmartDashboard.getData("Shooter Values");
+                // if (data != null) {
+                // LogValues(data.getDist(), data.getShooterSpeed());
+                // }
 
-                }));
-                joystick2.a().whileTrue(new AlignTurretToHub(m_turret));
+                // }));
+                joystick.a().whileTrue(new AlignTurretToHub(m_turret));
         }
 
         /**
