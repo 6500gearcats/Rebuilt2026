@@ -52,10 +52,11 @@ public class ShootFuel extends Command {
     //m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
 
+
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_Flywheel.setSpeed(0);
+    m_Flywheel.setSpeed(0.7);
   }
 
   // Returns true when the command should end.
