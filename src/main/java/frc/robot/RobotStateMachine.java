@@ -30,9 +30,9 @@ public final class RobotStateMachine {
             .publish();
 
     private final StructPublisher<Pose2d> turretPosePublisher = NetworkTableInstance.getDefault()
-    .getTable("StateMachinePose")
-    .getStructTopic("TuuretPose", Pose2d.struct)
-    .publish();
+            .getTable("StateMachinePose")
+            .getStructTopic("TuuretPose", Pose2d.struct)
+            .publish();
 
     private RobotStateMachine() {
         SmartDashboard.putString("RobotState", state.toString());
@@ -62,7 +62,8 @@ public final class RobotStateMachine {
         refreshPoseFromVision();
         currentZone = checkZone();
         posePublisher.set(pose);
-        turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0)).rotateAround(pose.getTranslation(), pose.getRotation());
+        turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635 + 0.013, new Rotation2d(0))
+                .rotateAround(pose.getTranslation(), pose.getRotation());
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
