@@ -50,7 +50,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
-    
+
     // This method will be called once per scheduler run
   }
 

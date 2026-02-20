@@ -14,9 +14,9 @@ import frc.robot.utility.RangeFinder;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ShootingSequence extends ParallelCommandGroup {
   /** Creates a new ShootingSequence. */
-  public ShootingSequence(Hopper hopper, Flywheel m_flywheel, RangeFinder rangeFinder) {
+  public ShootingSequence(Hopper hopper, Flywheel m_flywheel) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new RunHopper(hopper), new ShootFuel(m_flywheel, rangeFinder));
+    addCommands(new RunHopper(hopper), new ShootFuel(m_flywheel));
   }
 }

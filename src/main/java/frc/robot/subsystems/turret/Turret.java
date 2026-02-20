@@ -11,8 +11,11 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -34,7 +37,7 @@ public class Turret extends SubsystemBase {
   // BOUNDS: 0.0 to 55
 
   public Turret() {
-    m_request =  new PositionVoltage(0).withSlot(0);
+    m_request = new PositionVoltage(0).withSlot(0);
     var talonFXConfigs = new TalonFXConfiguration();
 
     var slot0Configs = talonFXConfigs.Slot0;
@@ -100,7 +103,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double unconvertPosition(double pos) {
-    return ((-1 * pos)+ 110)/4;
+    return ((-1 * pos) + 110) / 4;
   }
 
   /**

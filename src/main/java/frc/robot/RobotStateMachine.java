@@ -4,12 +4,19 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.StructSubscriber;
+import edu.wpi.first.util.struct.StructFetcher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.utility.RangeFinder;
 
 /**
  * Singleton state machine that tracks robot state, pose, and field zone.
@@ -21,18 +28,29 @@ public final class RobotStateMachine {
 
     private Pose2d turretPose = new Pose2d();
 
+    private Pose2d hubPose = TurretConstants.HubPose;
+    private Pose2d targetPose = new Pose2d();
+
     private Pose2d pose = new Pose2d();
     private Supplier<Pose2d> visionPoseSupplier;
     private FieldZone currentZone = FieldZone.ALLIANCE;
+
+    private Supplier<ChassisSpeeds> chassisSpeedsSupplier;
+
     private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
-            .getTable("StateMachinePose")
-            .getStructTopic("stateMachinePose", Pose2d.struct)
+            .getTable("StateMachine")
+            .getStructTopic("RobotPose", Pose2d.struct)
             .publish();
 
     private final StructPublisher<Pose2d> turretPosePublisher = NetworkTableInstance.getDefault()
-    .getTable("StateMachinePose")
-    .getStructTopic("TuuretPose", Pose2d.struct)
-    .publish();
+            .getTable("StateMachine")
+            .getStructTopic("TurretPose", Pose2d.struct)
+            .publish();
+
+    private final StructPublisher<Pose2d> targetPosePublisher = NetworkTableInstance.getDefault()
+            .getTable("StateMachine")
+            .getStructTopic("TargetPose", Pose2d.struct)
+            .publish();
 
     private RobotStateMachine() {
         SmartDashboard.putString("RobotState", state.toString());
@@ -51,10 +69,6 @@ public final class RobotStateMachine {
         return instance;
     }
 
-    public Pose2d getTurretPose() {
-        return turretPose;
-    }
-
     /**
      * Updates pose, field zone, and publishes telemetry.
      */
@@ -62,10 +76,57 @@ public final class RobotStateMachine {
         refreshPoseFromVision();
         currentZone = checkZone();
         posePublisher.set(pose);
-        turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0)).rotateAround(pose.getTranslation(), pose.getRotation());
+        turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
+                .rotateAround(pose.getTranslation(), pose.getRotation());
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+        updateTargetPose();
+    }
+
+    public Pose2d getTurretPose() {
+        return turretPose;
+    }
+
+    // Not in periodic
+
+    public Pose2d getTargetPose() {
+        updateTargetPose();
+        return targetPose;
+    }
+
+    public void updateTargetPose() {
+        ChassisSpeeds speeds = getFieldSpeeds();
+        if (speeds == null) {
+            return;
+        }
+
+        SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
+
+        // ! TODO: Make a new methods for this TOF calculation
+        double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
+        double shotVelocity = RangeFinder.getShotVelocity(distance);
+        double timeOfFlight = 2 * Math.sin(shotVelocity) / 9.8;
+
+        targetPose = hubPose
+                .transformBy(new Transform2d(
+                        new Translation2d(-speeds.vxMetersPerSecond * timeOfFlight,
+                                -speeds.vyMetersPerSecond * timeOfFlight),
+                        new Rotation2d()));
+
+        targetPosePublisher.set(targetPose);
+    }
+
+    public ChassisSpeeds getFieldSpeeds() {
+        if (chassisSpeedsSupplier == null) {
+            return null;
+        }
+        return ChassisSpeeds.fromRobotRelativeSpeeds(chassisSpeedsSupplier.get(), pose.getRotation());
+    }
+
+    public void bindChassisSpeedsSupplier(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
+        this.chassisSpeedsSupplier = chassisSpeedsSupplier;
     }
 
     /**

@@ -23,7 +23,6 @@ public class ShootFuel extends Command {
   /** Creates a new ShootFuel. */
   Flywheel m_Flywheel;
   DoubleSupplier supplier;
-  RangeFinder rangeFinder;
   RobotStateMachine stateMachine = RobotStateMachine.getInstance();
 
   /**
@@ -32,11 +31,10 @@ public class ShootFuel extends Command {
    * @param flywheel      flywheel subsystem
    * @param speedSupplier speed command supplier
    */
-  public ShootFuel(Flywheel flywheel, RangeFinder rangeFinder){
+  public ShootFuel(Flywheel flywheel) {
     m_Flywheel = flywheel;
-    this.rangeFinder = rangeFinder;
-    addRequirements(m_Flywheel, rangeFinder);
-    
+    addRequirements(m_Flywheel);
+
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -48,10 +46,10 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_Flywheel.setSpeed(rangeFinder.getShooterSpeed(stateMachine.getTurretPose().getTranslation().getDistance(Constants.TurretConstants.HubPose.getTranslation())));
-    //m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+    m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+        stateMachine.getTurretPose().getTranslation().getDistance(Constants.TurretConstants.HubPose.getTranslation())));
+    // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
-
 
   // Called once the command ends or is interrupted.
   @Override

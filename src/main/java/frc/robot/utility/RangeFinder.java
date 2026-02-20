@@ -9,12 +9,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotStateMachine;
 
-public class RangeFinder extends SubsystemBase {
-  private InterpolatingDoubleTreeMap m_map;
-  /** Creates a new RangeFinder. */
-  public RangeFinder() {
-    m_map = new InterpolatingDoubleTreeMap();
-    
+public class RangeFinder {
+  private static InterpolatingDoubleTreeMap m_map = new InterpolatingDoubleTreeMap();
+
+  static {
     m_map.put(2.467, 4.75);
 
     m_map.put(2.732, 4.75);
@@ -38,18 +36,9 @@ public class RangeFinder extends SubsystemBase {
     m_map.put(5.250, 6.4);
 
     m_map.put(4.864, 6.8);
-
-    //its programmings fault
   }
 
-  @Override
-  public void periodic() {
-    
-    //robot.getPose();
-    //SmartDashboard.putData("Distance to Hub", )
-  }
-
-  public double getShooterSpeed(double distance){
+  public static double getShotVelocity(double distance) {
     return m_map.get(distance);
   }
 }

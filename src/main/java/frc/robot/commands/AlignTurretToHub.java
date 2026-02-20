@@ -27,17 +27,10 @@ public class AlignTurretToHub extends Command {
 
   private PIDController pid = new PIDController(kP, kI, kD);
   private Turret m_turret;
-  private Pose2d m_tagpose = TurretConstants.HubPose;
   private RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
-
-  private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
-            .getTable("StateMachinePose")
-            .getStructTopic("Hub Pose", Pose2d.struct)
-            .publish();
 
   public AlignTurretToHub(Turret turret) {
     m_turret = turret;
-    posePublisher.set(m_tagpose);
     addRequirements(m_turret);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -49,58 +42,45 @@ public class AlignTurretToHub extends Command {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() { // TODO: Fix turret alignment and angle measurment, currently jumping from ~-40
-                          // to 40 or vice versa
+  public void execute() {
+    Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
-    Translation2d robotToTarget = m_tagpose.getTranslation()
-        .minus(m_StateMachine.getTurretPose().getTranslation()); //gets x and y difference between robot and april tag
+    Translation2d robotToTarget = m_targetPose.getTranslation()
+        .minus(m_StateMachine.getTurretPose().getTranslation()); // gets x and y difference between robot and april tag
     Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation()
-        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));//gets rotation of motor in relation to field
-    
+        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));// gets rotation of motor in
+                                                                                     // relation to field
+
     Pose2d newTurretPose = new Pose2d(m_StateMachine.getTurretPose().getTranslation(), turretAndRobot);
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
-    SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_tagpose.getTranslation()));
+    SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_targetPose.getTranslation()));
 
-    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); //angle of x and y difference minue rotation between tag/robot
+    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); // angle of x and y difference
+                                                                                     // minue rotation between tag/robot
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
 
-    //double convertedDeg = (180 - Math.abs(turretToTargetAngle.getDegrees()))
-    //    * (turretToTargetAngle.getDegrees() / Math.abs(turretToTargetAngle.getDegrees())); //converts it into usable error for rotation
-    
-    // //limit the error of the turret target angle to turret angle
-    // double unconvertedDeg = convertedDeg + turretAndRobot.getDegrees();
-
-    // if(Math.abs(unconvertedDeg) > 110){
-    //   unconvertedDeg = (100 * unconvertedDeg/Math.abs(unconvertedDeg));
-    // }
-
-    // convertedDeg = unconvertedDeg - turretAndRobot.getDegrees();
-    
-    //SmartDashboard.putNumber("turretConvertedError", convertedDeg);
-    // //double rate = convertedDeg * 0.05; //sets rate to converted degrees
-
     double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
-    newError = ( Math.abs(newError) - 180) * (newError/Math.abs(newError));
-    if(newError > 0) {
-      if(Math.abs(newError) > 110){
-        newError = 110 * (Math.abs(newError)/newError);
+    newError = (Math.abs(newError) - 180) * (newError / Math.abs(newError));
+    if (newError > 0) {
+      if (Math.abs(newError) > 110) {
+        newError = 110 * (Math.abs(newError) / newError);
+      }
+    } else {
+      if (Math.abs(newError) > 103) {
+        newError = 110 * (Math.abs(newError) / newError);
       }
     }
-    else {
-      if(Math.abs(newError) > 103){
-        newError = 110 * (Math.abs(newError)/newError);
-      }
-    }
-    
-    if(Math.abs(newError) > 1) {
+
+    if (Math.abs(newError) > 1) {
       m_turret.setPosition(newError);
     }
-    
-    // double error = pid.calculate(m_turret.getConvertedTurretPosition(), newError); // sets turret speed
+
+    // double error = pid.calculate(m_turret.getConvertedTurretPosition(),
+    // newError); // sets turret speed
     // m_turret.setSpeed(error);
     SmartDashboard.putNumber("tunring_pos_setpoint", newError);
-    //SmartDashboard.putNumber("turretTurnRate", rate);
-    //m_turret.setSpeed(rate);
+    // SmartDashboard.putNumber("turretTurnRate", rate);
+    // m_turret.setSpeed(rate);
   }
 
   // Called once the command ends or is interrupted.
