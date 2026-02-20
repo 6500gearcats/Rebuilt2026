@@ -293,7 +293,7 @@ public class RobotContainer {
                 joystick.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
-                // joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
+                joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ShootingSequence(hopper, m_flywheel));
@@ -331,13 +331,27 @@ public class RobotContainer {
          * Sets the initial robot and camera orientation for the primary Limelight.
          */
         public void setRobotOrientation() {
-                // New LL
-                drivetrain.resetPose(new Pose2d());
-                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
-                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+                Optional<Alliance> alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                        if (alliance.get().equals(Alliance.Blue)) {
+                                drivetrain.resetPose(new Pose2d());
+                                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                LimelightHelpers.SetRobotOrientation("limelight-gcd",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
-                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, 0.25, 0.15, 0, 180, 0);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
+                                                45);
+                        } else {
+                                drivetrain.resetPose(new Pose2d());
+                                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                LimelightHelpers.SetRobotOrientation("limelight-gcd",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
+
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
+                                                45);
+                        }
+                }
         }
 
         /**

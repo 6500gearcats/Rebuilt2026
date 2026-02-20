@@ -4,10 +4,12 @@
 
 package frc.robot.subsystems.hopper;
 
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -16,8 +18,8 @@ import frc.robot.Constants;
  */
 public class Hopper extends SubsystemBase {
   /** Creates a new Hopper. */
-  SparkMax m_hopperMotor = new SparkMax(Constants.MotorConstants.kIndexerMotorID, MotorType.kBrushless);
-  SparkMax m_kickerMotor = new SparkMax(Constants.MotorConstants.kKickerMotorID, MotorType.kBrushless);
+  TalonFX m_hopperMotor = new TalonFX(Constants.MotorConstants.kIndexerMotorID);
+  TalonFX m_kickerMotor = new TalonFX(Constants.MotorConstants.kKickerMotorID);
 
   public Hopper() {
   }
