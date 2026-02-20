@@ -243,7 +243,7 @@ public final class RobotStateMachine {
     public FieldZone checkZone() {
         // < 4.52 m is the blue alliance's trench, > 11.63 m is the red alliance's
         // trench, and in between is the neutral zone
-        Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
+        Alliance alliance = getAlliance();
         if (pose.getX() < 4.52) {
             return alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
         } else if (pose.getX() > 11.63) {
@@ -251,6 +251,10 @@ public final class RobotStateMachine {
         } else {
             return FieldZone.NEUTRAL;
         }
+    }
+
+    public Alliance getAlliance() {
+        return DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
     }
 
     enum RobotState {

@@ -27,6 +27,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -239,10 +240,16 @@ public final class Constants {
   }
 
   public static class TurretConstants {
-    public static final double kTurretTransformMetersX =  0.1524;
-    public static final double kTurretTransformIMetersY =  0.0635; 
+    public static final double kTurretTransformMetersX = 0.1524;
+    public static final double kTurretTransformIMetersY = 0.0635;
+    public static Pose3d Tag_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
+    static {
+      if (RobotStateMachine.getInstance().getAlliance() == Alliance.Red) {
+        Tag_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
+      }
+    }
 
-    public static final Pose3d Tag_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();  // !TODO: Translate tag to hub position for aim
-    public static final Pose2d HubPose = Tag_POSE2D.toPose2d().transformBy(new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter), new Rotation2d()));
+    public static Pose2d HubPose = Tag_POSE2D.toPose2d().transformBy(
+        new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter), new Rotation2d()));
   }
 }

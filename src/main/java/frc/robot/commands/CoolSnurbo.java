@@ -5,16 +5,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.turret.Flywheel;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RunHopper extends Command {
-  /** Creates a new RunHopper. */
-  private Hopper m_hopper;
+public class CoolSnurbo extends Command {
+  /** Creates a new CoolSnurbo. */
+  Flywheel m_flywheel;
 
-  public RunHopper(Hopper hopper) {
-    m_hopper = hopper;
-    addRequirements(m_hopper);
+  public CoolSnurbo(Flywheel m_flywheel) {
+    this.m_flywheel = m_flywheel;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -26,13 +25,13 @@ public class RunHopper extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_hopper.startAllMotors(-0.8, 1);
+    m_flywheel.snurboEnable = true;
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_hopper.stopAllMotors();
+    m_flywheel.snurboEnable = false;
   }
 
   // Returns true when the command should end.

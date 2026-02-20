@@ -65,7 +65,7 @@ import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
-import frc.robot.generated.TunerConstants;
+import frc.robot.generated.TunerConstants2;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
@@ -85,9 +85,9 @@ import frc.robot.utility.ShooterValuesSenable;
  */
 public class RobotContainer {
         @SuppressWarnings("unused")
-
-        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
-                                                                                      // speed
+        private double speedModify = 1;
+        private double MaxSpeed = TunerConstants2.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+                                                                                       // speed
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
                                                                                           // max angular velocity
@@ -107,7 +107,7 @@ public class RobotContainer {
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
 
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
 
         private LedCANdle m_candle = new LedCANdle();
 
@@ -172,7 +172,7 @@ public class RobotContainer {
                                 PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", false,
                                                 new Translation3d(0.254, 0.254, 0.2032),
                                                 new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
-                                LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
+                                LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
                                 m_vision = new Vision(
@@ -223,8 +223,8 @@ public class RobotContainer {
         // @formatter:off
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed) // Drive left with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
                                 .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
@@ -296,7 +296,7 @@ public class RobotContainer {
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ShootingSequence(hopper, m_flywheel));
+                                .whileTrue(new ShootingSequence(hopper, m_flywheel, m_turret));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
@@ -351,42 +351,6 @@ public class RobotContainer {
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
                                                 45);
                         }
-                }
-        }
-
-        /**
-         * Resets the gyro and updates Limelight robot orientation based on alliance.
-         */
-        public void resetRobotGyroAndOrientation() {
-                Optional<Alliance> alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                        if (alliance.get().equals(Alliance.Blue)) {
-                                drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.368, 0, 0.1, 0, 18, 0);
-                        } else {
-                                drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                                0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6,
-                                                180);
-                        }
-                }
-        }
-
-        public double getCommandAlignRate(Supplier<Pose2d> tagPose2d, Supplier<Pose2d> robotPose,
-                        DoubleSupplier robotRotDeg) {
-                Translation2d robotToTarget = tagPose2d.get().getTranslation().minus(robotPose.get().getTranslation());
-                Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(robotPose.get().getRotation());
-                double convertedDeg = (180 - turretToTargetAngle.getDegrees())
-                                * (turretToTargetAngle.getDegrees() / Math.abs(turretToTargetAngle.getDegrees()));
-                if (true) {// Math.abs(convertedDeg)) {
-                        SmartDashboard.putNumber("Error", convertedDeg);
-                        return convertedDeg * 0.05;
-                } else {
-                        return 0;
                 }
         }
 

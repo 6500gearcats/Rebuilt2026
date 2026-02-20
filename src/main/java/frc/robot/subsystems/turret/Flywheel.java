@@ -25,7 +25,8 @@ public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
   TalonFX m_motor = new TalonFX(Constants.MotorConstants.kShooterMotorRightID);
   final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
-
+  public boolean snurboEnable = false;
+  public double speedModifier = 1;
   TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
 
   // TODO: Add a constant Spin to the motors to not have to fight static friction
@@ -48,6 +49,11 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (snurboEnable) {
+      speedModifier = 0.25;
+    } else {
+      speedModifier = 1;
+    }
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
 
     // This method will be called once per scheduler run

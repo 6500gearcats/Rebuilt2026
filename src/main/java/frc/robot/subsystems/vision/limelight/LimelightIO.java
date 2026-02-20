@@ -173,14 +173,7 @@ public class LimelightIO implements VisionIO {
              * FRC teams should always use botpose_wpiblue for pose-related functionality
              */
             LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(getName());
-            // Optional<Alliance> alliance = DriverStation.getAlliance();
-            // if (alliance.isPresent()) {
-            // if (alliance.get() == Alliance.Red) {
-            // mt1 = LimelightHelpers.getBotPoseEstimate_wpiRed("limelight-gcc");
-            // }
-            // else {
-            // mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-gcc");
-            // }
+
             if (mt1 != null) {
                 if (mt1.tagCount == 1 && mt1.rawFiducials.length == 1) {
                     if (mt1.rawFiducials[0].ambiguity > .7) {

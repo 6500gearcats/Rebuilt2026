@@ -37,6 +37,7 @@ public class RangeFinder {
 
     m_map.put(4.864, 6.8);
   }
+  
 
   public static double getShotVelocity(double distance) {
     return m_map.get(distance);
