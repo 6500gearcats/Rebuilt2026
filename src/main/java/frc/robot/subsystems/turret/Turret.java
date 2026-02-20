@@ -16,9 +16,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.RobotStateMachine;
-import frc.robot.generated.TunerConstants2;
 
 /**
  * Turret subsystem that controls the yaw motor and tracks its position.
@@ -34,7 +32,7 @@ public class Turret extends SubsystemBase {
   // BOUNDS: 0.0 to 55
 
   public Turret() {
-    m_request =  new PositionVoltage(0).withSlot(0);
+    m_request = new PositionVoltage(0).withSlot(0);
     var talonFXConfigs = new TalonFXConfiguration();
 
     var slot0Configs = talonFXConfigs.Slot0;
@@ -100,7 +98,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double unconvertPosition(double pos) {
-    return ((-1 * pos)+ 110)/4;
+    return ((-1 * pos) + 110) / 4;
   }
 
   /**

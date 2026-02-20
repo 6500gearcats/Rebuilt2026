@@ -66,7 +66,7 @@ import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
-import frc.robot.generated.TunerConstants2;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
@@ -87,8 +87,8 @@ import frc.robot.utility.ShooterValuesSenable;
 public class RobotContainer {
         @SuppressWarnings("unused")
 
-        private double MaxSpeed = TunerConstants2.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
-                                                                                       // speed
+        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+                                                                                      // speed
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
                                                                                           // max angular velocity
@@ -108,7 +108,7 @@ public class RobotContainer {
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
 
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
         private LedCANdle m_candle = new LedCANdle();
 
@@ -232,8 +232,6 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                
-
                 // hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6,
                 // 1.7), hopper));
 
@@ -340,7 +338,7 @@ public class RobotContainer {
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 120,
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
                                                 45);
                         } else {
                                 drivetrain.resetPose(new Pose2d());
@@ -349,7 +347,7 @@ public class RobotContainer {
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);
 
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 120,
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
                                                 45);
                         }
                 }
