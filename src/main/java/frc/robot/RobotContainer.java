@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
@@ -143,6 +144,8 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
+                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -3));
+
                 logDir = new File("log");
                 logDir.mkdirs();
                 logFile = new File(logDir, "shootFile.json");
@@ -161,7 +164,8 @@ public class RobotContainer {
                         e.printStackTrace();
                 }
 
-                autoChooser = AutoBuilder.buildAutoChooser("Tests");
+                autoChooser = AutoBuilder.buildAutoChooser("testAuto");
+                SmartDashboard.putData("Auto Chooser", autoChooser);
                 configureBindings();
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
@@ -175,13 +179,18 @@ public class RobotContainer {
                                 LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
+                                LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
+                                                drivetrain.rotationSupplier(),
+                                                drivetrain.getAngularVel(),
+                                                true);
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
-                                                m_ll);
+                                                m_ll,
+                                                m_ll2);
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -336,20 +345,40 @@ public class RobotContainer {
                         if (alliance.get().equals(Alliance.Blue)) {
                                 drivetrain.resetPose(new Pose2d());
                                 drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+
+                                // GCD
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
                                                 45);
+
+                                // GCC
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
+
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15, 0, 150,
+                                                -45);
                         } else {
                                 drivetrain.resetPose(new Pose2d());
                                 drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+
+                                // GCD
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);
 
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
                                                 45);
+
+                                // GCC
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
+
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15, 0, 150,
+                                                -45);
                         }
                 }
         }

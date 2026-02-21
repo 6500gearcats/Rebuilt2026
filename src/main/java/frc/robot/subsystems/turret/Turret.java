@@ -10,6 +10,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.config.LimitSwitchConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -29,10 +31,12 @@ public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private final PositionVoltage m_request;
+  private final DigitalInput m_switch = new DigitalInput(3);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
   private boolean overridden = false;
+  private boolean zeroedOnInit = false;
   // BOUNDS: 0.0 to 55
 
   public Turret() {
@@ -41,7 +45,7 @@ public class Turret extends SubsystemBase {
 
     var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 8; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kV = 13; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
     slot0Configs.kP = 6; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
@@ -50,6 +54,11 @@ public class Turret extends SubsystemBase {
     m_motor.getConfigurator().apply(talonFXConfigs);
 
     m_motor.getConfigurator();
+
+    if (m_switch.get()) {
+      zeroedOnInit = true;
+      zeroMotorPosition();
+    }
   }
 
   @Override
@@ -57,6 +66,16 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
+
+    if (!zeroedOnInit) {
+      if (!m_switch.get()) {
+        setSpeed(-0.4);
+      } else {
+        setSpeed(0);
+        zeroMotorPosition();
+        zeroedOnInit = true;
+      }
+    }
   }
 
   public void setSpeed(double speed) {
