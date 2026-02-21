@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
@@ -146,6 +147,7 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
+
                 logDir = new File("log");
                 logDir.mkdirs();
                 logFile = new File(logDir, "shootFile.json");
@@ -231,8 +233,6 @@ public class RobotContainer {
                 final var idle = new SwerveRequest.Idle();
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
-
-                
 
                 // hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6,
                 // 1.7), hopper));
@@ -424,5 +424,9 @@ public class RobotContainer {
                         System.err.println("Could not close JSON log file.");
                         e.printStackTrace();
                 }
+        }
+
+        public void nameCommands() {
+                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -3));
         }
 }
