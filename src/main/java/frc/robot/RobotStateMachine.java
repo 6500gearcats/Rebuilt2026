@@ -3,24 +3,53 @@ package frc.robot;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.StructSubscriber;
+import edu.wpi.first.util.struct.StructFetcher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.utility.RangeFinder;
 
+/**
+ * Singleton state machine that tracks robot state, pose, and field zone.
+ */
 public final class RobotStateMachine {
     private static RobotStateMachine instance;
 
     private RobotState state = RobotState.INACTIVE;
 
+    private Pose2d turretPose = new Pose2d();
+
+    private Pose2d hubPose = TurretConstants.HubPose;
+    private Pose2d targetPose = new Pose2d();
+
     private Pose2d pose = new Pose2d();
     private Supplier<Pose2d> visionPoseSupplier;
     private FieldZone currentZone = FieldZone.ALLIANCE;
+
+    private Supplier<ChassisSpeeds> chassisSpeedsSupplier;
+
     private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
-            .getTable("StateMachinePose")
-            .getStructTopic("stateMachinePose", Pose2d.struct)
+            .getTable("StateMachine")
+            .getStructTopic("RobotPose", Pose2d.struct)
+            .publish();
+
+    private final StructPublisher<Pose2d> turretPosePublisher = NetworkTableInstance.getDefault()
+            .getTable("StateMachine")
+            .getStructTopic("TurretPose", Pose2d.struct)
+            .publish();
+
+    private final StructPublisher<Pose2d> targetPosePublisher = NetworkTableInstance.getDefault()
+            .getTable("StateMachine")
+            .getStructTopic("TargetPose", Pose2d.struct)
             .publish();
 
     private RobotStateMachine() {
@@ -28,6 +57,11 @@ public final class RobotStateMachine {
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
 
+    /**
+     * Returns the shared state machine instance.
+     *
+     * @return singleton instance
+     */
     public static RobotStateMachine getInstance() {
         if (instance == null) {
             instance = new RobotStateMachine();
@@ -35,18 +69,80 @@ public final class RobotStateMachine {
         return instance;
     }
 
+    /**
+     * Updates pose, field zone, and publishes telemetry.
+     */
     public void periodic() {
         refreshPoseFromVision();
         currentZone = checkZone();
         posePublisher.set(pose);
+        turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
+                .rotateAround(pose.getTranslation(), pose.getRotation());
+        turretPosePublisher.set(turretPose);
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+        updateTargetPose();
     }
 
+    public Pose2d getTurretPose() {
+        return turretPose;
+    }
+
+    // Not in periodic
+
+    public Pose2d getTargetPose() {
+        updateTargetPose();
+        return targetPose;
+    }
+
+    public void updateTargetPose() {
+        ChassisSpeeds speeds = getFieldSpeeds();
+        if (speeds == null) {
+            return;
+        }
+
+        SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
+
+        // ! TODO: Make a new methods for this TOF calculation
+        double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
+        double shotVelocity = RangeFinder.getShotVelocity(distance);
+        double timeOfFlight = 9 * 2 * Math.sin(shotVelocity) / 9.8;
+
+        targetPose = hubPose
+                .transformBy(new Transform2d(
+                        new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
+                                speeds.vyMetersPerSecond * timeOfFlight),
+                        new Rotation2d()));
+
+        targetPosePublisher.set(targetPose);
+    }
+
+    public ChassisSpeeds getFieldSpeeds() {
+        if (chassisSpeedsSupplier == null) {
+            return null;
+        }
+        return ChassisSpeeds.fromRobotRelativeSpeeds(chassisSpeedsSupplier.get(), pose.getRotation());
+    }
+
+    public void bindChassisSpeedsSupplier(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
+        this.chassisSpeedsSupplier = chassisSpeedsSupplier;
+    }
+
+    /**
+     * Returns the currently computed field zone.
+     *
+     * @return field zone classification
+     */
     public FieldZone getCurrentZone() {
         return currentZone;
     }
 
+    /**
+     * Sets the current field zone override.
+     *
+     * @param currentZone new field zone
+     */
     public void setCurrentZone(FieldZone currentZone) {
         this.currentZone = currentZone;
     }
@@ -85,12 +181,22 @@ public final class RobotStateMachine {
         }
     }
 
+    /**
+     * Returns the current robot state.
+     *
+     * @return current state enum
+     */
     public RobotState getState() {
         return state;
     }
 
     /**
      * Update state and refresh pose from vision.
+     */
+    /**
+     * Requests a transition to the specified state.
+     *
+     * @param next next state to apply
      */
     public void setState(RobotState next) {
         if (next == state)
@@ -99,6 +205,11 @@ public final class RobotStateMachine {
         update(next);
     }
 
+    /**
+     * Applies the requested state transition.
+     *
+     * @param s state to apply
+     */
     public void update(RobotState s) {
         switch (s) {
             case ACTIVE:
@@ -124,10 +235,15 @@ public final class RobotStateMachine {
         }
     }
 
+    /**
+     * Determines the field zone based on the current pose and alliance.
+     *
+     * @return field zone classification
+     */
     public FieldZone checkZone() {
         // < 4.52 m is the blue alliance's trench, > 11.63 m is the red alliance's
         // trench, and in between is the neutral zone
-        Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
+        Alliance alliance = getAlliance();
         if (pose.getX() < 4.52) {
             return alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
         } else if (pose.getX() > 11.63) {
@@ -135,6 +251,10 @@ public final class RobotStateMachine {
         } else {
             return FieldZone.NEUTRAL;
         }
+    }
+
+    public Alliance getAlliance() {
+        return DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
     }
 
     enum RobotState {

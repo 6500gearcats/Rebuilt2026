@@ -17,6 +17,9 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * Controls the CTRE CANdle LED strip and animations.
+ */
 @SuppressWarnings("unused")
 public class LedCANdle extends SubsystemBase {
   private static CANdle candle = new CANdle(50, "Default Name");
@@ -54,16 +57,29 @@ public class LedCANdle extends SubsystemBase {
     timer.restart();
   }
 
+  /**
+   * Sets the LED strip to a solid RGB color.
+   *
+   * @param r red channel [0, 255]
+   * @param g green channel [0, 255]
+   * @param b blue channel [0, 255]
+   */
   public void setLedColor(int r, int g, int b) {
     candle.setControl(empty);
     candle.setControl(new SolidColor(0, END_INDEX).withColor(new RGBWColor(r, g, b)));
   }
 
+  /** Starts the built-in rainbow animation. */
   public void setRainbowAnimation() {
     candle.setControl(empty);
     candle.setControl(rainbow);
   }
 
+  /**
+   * Scales the current color by a brightness supplier.
+   *
+   * @param brightness supplier providing a scale factor in the range [0, 1]
+   */
   public void colorWithBrightness(DoubleSupplier brightness) {
     // System.out.println(brightness.getAsDouble());
     double scale = brightness.getAsDouble();
@@ -75,6 +91,11 @@ public class LedCANdle extends SubsystemBase {
             (int) (color[2] * scale))));
   }
 
+  /**
+   * Displays the specified pride or team flag pattern.
+   *
+   * @param flagStr key of the flag to display
+   */
   public void displayFlag(String flagStr) {
     RGBWColor[] flag = flags.get(flagStr);
     if (flag == null) {
@@ -93,6 +114,7 @@ public class LedCANdle extends SubsystemBase {
     }
   }
 
+  /** Cycles to the next flag pattern. */
   public void cycleFlag() {
     currentFlag = (currentFlag + 1) % flagOptions.length;
     displayFlag(flagOptions[currentFlag]);

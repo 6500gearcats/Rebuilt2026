@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meter;
+
 import com.pathplanner.lib.config.RobotConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -11,7 +13,11 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -20,7 +26,8 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -36,6 +43,9 @@ import edu.wpi.first.wpilibj.RobotBase;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+  public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout
+      .loadField(AprilTagFields.k2026RebuiltAndymark);
 
   public static class RobotConstants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
@@ -216,5 +226,30 @@ public final class Constants {
     // How far from the target we want to be
     public static final double GOAL_RANGE_METERS = Units.feetToMeters(3);
 
+  }
+
+  public static class MotorConstants {
+    public static final int kTurretYawMotorID = 12;
+    public static final int kShooterMotorRightID = 13;
+    public static final int kShooterMotorLeftID = 14;
+
+    public static final int kIntakeMotorID = 20;
+    public static final int kIntakeDeployMotorID = 21;
+    public static final int kIndexerMotorID = 22;
+    public static final int kKickerMotorID = 23;
+  }
+
+  public static class TurretConstants {
+    public static final double kTurretTransformMetersX = 0.1524;
+    public static final double kTurretTransformIMetersY = 0.0635;
+    public static Pose3d Tag_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
+    static {
+      if (RobotStateMachine.getInstance().getAlliance() == Alliance.Red) {
+        Tag_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
+      }
+    }
+
+    public static Pose2d HubPose = Tag_POSE2D.toPose2d().transformBy(
+        new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter), new Rotation2d()));
   }
 }
