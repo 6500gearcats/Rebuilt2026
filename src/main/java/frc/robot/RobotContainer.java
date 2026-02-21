@@ -167,6 +167,7 @@ public class RobotContainer {
                 }
 
                 autoChooser = AutoBuilder.buildAutoChooser("Tests");
+                SmartDashboard.putData("Auto Choosing", autoChooser);
                 configureBindings();
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
