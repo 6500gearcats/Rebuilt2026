@@ -4,6 +4,10 @@
 
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -17,10 +21,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
+import frc.robot.Constants.TurretConstants;
 
 /**
  * Turret subsystem that controls the yaw motor and tracks its position.
@@ -113,5 +122,12 @@ public class Turret extends SubsystemBase {
   public void setPosition(double deg) {
     SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
+  }
+
+  /**
+   * @return Turret Velocity in Degrees per Sec
+   */
+  public AngularVelocity getTurnSpeed() {
+    return m_motor.getVelocity().getValue().times(4);
   }
 }

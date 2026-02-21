@@ -4,10 +4,14 @@
 
 package frc.robot.utility;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotStateMachine;
+import frc.robot.Constants.TurretConstants;
 
 public class RangeFinder {
   private static InterpolatingDoubleTreeMap m_map = new InterpolatingDoubleTreeMap();
@@ -37,9 +41,14 @@ public class RangeFinder {
 
     m_map.put(4.864, 6.8);
   }
-  
 
-  public static double getShotVelocity(double distance) {
+  public static double getShotRPM(double distance) {
     return m_map.get(distance);
+  }
+
+  // tangential velocity = angular velocity * radius
+  public static LinearVelocity getShotTangentialVelocity(double distance) {
+    double rpm = getShotRPM(distance);
+    return LinearVelocity.ofBaseUnits(rpm * TurretConstants.kShooterWheelRadius, MetersPerSecond);
   }
 }

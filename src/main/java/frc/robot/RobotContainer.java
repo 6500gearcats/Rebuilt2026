@@ -28,36 +28,22 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
-import javax.crypto.ShortBufferException;
-
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.photonvision.simulation.SimCameraProperties;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.NetworkButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.MoveTurret;
@@ -152,7 +138,6 @@ public class RobotContainer {
                 SmartDashboard.putData("Close Buffer", closeLogSendable);
 
                 SmartDashboard.putData("Shooter Values", shooterSendable);
-
                 try {
                         writer = Files.newBufferedWriter(logFile.toPath(), StandardOpenOption.CREATE,
                                         StandardOpenOption.WRITE);
@@ -164,6 +149,8 @@ public class RobotContainer {
                 autoChooser = AutoBuilder.buildAutoChooser("Tests");
                 configureBindings();
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+
+                robotStateMachine.bindTurretTurnSupplier(() -> m_turret.getTurnSpeed());
                 switch (RobotConstants.currentMode) {
                         case REAL:
                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", false,

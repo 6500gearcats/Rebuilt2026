@@ -1,5 +1,8 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -7,9 +10,16 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.VelocityUnit;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.networktables.StructSubscriber;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.UnitBuilder.UnitConstructorFunction;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.util.struct.StructFetcher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -17,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.utility.RangeFinder;
+import frc.robot.utility.ShooterValuesSenable;
 
 /**
  * Singleton state machine that tracks robot state, pose, and field zone.
@@ -36,6 +47,8 @@ public final class RobotStateMachine {
     private FieldZone currentZone = FieldZone.ALLIANCE;
 
     private Supplier<ChassisSpeeds> chassisSpeedsSupplier;
+
+    private Supplier<AngularVelocity> turretSupplier;
 
     private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
             .getTable("StateMachine")
@@ -101,19 +114,34 @@ public final class RobotStateMachine {
             return;
         }
 
+        double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
-        // ! TODO: Make a new methods for this TOF calculation
-        double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
-        double shotVelocity = RangeFinder.getShotVelocity(distance);
-        double timeOfFlight = 9 * 2 * Math.sin(shotVelocity) / 9.8;
+        AngularVelocity robotAngVel = AngularVelocity.ofBaseUnits(speeds.omegaRadiansPerSecond, RadiansPerSecond);
+
+        double shooterTanVel = RangeFinder.getShotRPM(distance);
+
+        AngularVelocity turretVelocity = getTurretAngularVelocity(); // Deg per sec
+
+        double totalAngVelRad = robotAngVel.plus(turretVelocity).in(RadiansPerSecond);
+
+        Translation2d robotVel = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond); // Meters per
+                                                                                                        // sec
+        Translation2d shooterExitVel = new Translation2d(shooterTanVel, new Rotation2d(totalAngVelRad)); // Meters per
+                                                                                                         // sec
+
+        Translation2d shotVel = robotVel.plus(shooterExitVel);
+
+        double timeOfFlight = 2 * Math.sin(shotVel.getNorm()) / 9.8;
+
+        Translation2d finalShotPose = shotVel.times(timeOfFlight);
+
+        double hubToFinalDist = hubPose.getTranslation().getDistance(finalShotPose);
+        Rotation2d hubToFinalRot = hubPose.getRotation().minus(finalShotPose.getAngle());
 
         targetPose = hubPose
-                .transformBy(new Transform2d(
-                        new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
-                                speeds.vyMetersPerSecond * timeOfFlight),
-                        new Rotation2d()));
+                .transformBy(new Transform2d(new Translation2d(hubToFinalDist, new Rotation2d()), hubToFinalRot));
 
         targetPosePublisher.set(targetPose);
     }
@@ -127,6 +155,14 @@ public final class RobotStateMachine {
 
     public void bindChassisSpeedsSupplier(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
         this.chassisSpeedsSupplier = chassisSpeedsSupplier;
+    }
+
+    public void bindTurretTurnSupplier(Supplier<AngularVelocity> turretTurnSupplier) {
+        this.turretSupplier = turretTurnSupplier;
+    }
+
+    public AngularVelocity getTurretAngularVelocity() {
+        return this.turretSupplier.get();
     }
 
     /**

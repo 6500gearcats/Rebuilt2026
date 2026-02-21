@@ -240,8 +240,11 @@ public final class Constants {
   }
 
   public static class TurretConstants {
+    public static final double kShooterWheelRadius = 0.051; // 2 inch diameter wheel in meters
+
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
+    public static final double kTurretRadius = Units.inchesToMeters(9.843);
     public static Pose3d Tag_POSE2D = APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
     static {
       if (RobotStateMachine.getInstance().getAlliance() == Alliance.Red) {

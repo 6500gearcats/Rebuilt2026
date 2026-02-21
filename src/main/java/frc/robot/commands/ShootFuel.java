@@ -46,7 +46,7 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+    m_Flywheel.setSpeed(RangeFinder.getShotRPM(
         stateMachine.getTurretPose().getTranslation().getDistance(Constants.TurretConstants.HubPose.getTranslation())));
     // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
