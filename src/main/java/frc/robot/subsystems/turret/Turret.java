@@ -41,7 +41,7 @@ public class Turret extends SubsystemBase {
 
     var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 5; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kV = 8; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
     slot0Configs.kP = 6; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error

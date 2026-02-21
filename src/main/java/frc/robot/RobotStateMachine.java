@@ -107,12 +107,12 @@ public final class RobotStateMachine {
         // ! TODO: Make a new methods for this TOF calculation
         double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
-        double timeOfFlight = 2 * Math.sin(shotVelocity) / 9.8;
+        double timeOfFlight = 9 * 2 * Math.sin(shotVelocity) / 9.8;
 
         targetPose = hubPose
                 .transformBy(new Transform2d(
-                        new Translation2d(-speeds.vxMetersPerSecond * timeOfFlight,
-                                -speeds.vyMetersPerSecond * timeOfFlight),
+                        new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
+                                speeds.vyMetersPerSecond * timeOfFlight),
                         new Rotation2d()));
 
         targetPosePublisher.set(targetPose);
