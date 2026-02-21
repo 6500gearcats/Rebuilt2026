@@ -146,6 +146,7 @@ public class RobotContainer {
         public RobotContainer() {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -3));
 
+                SmartDashboard.putNumber("Shoot Speed", 0);
                 logDir = new File("log");
                 logDir.mkdirs();
                 logFile = new File(logDir, "shootFile.json");
@@ -302,6 +303,7 @@ public class RobotContainer {
                 joystick.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
+                joystick.rightBumper().whileTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)

@@ -55,10 +55,10 @@ public class Turret extends SubsystemBase {
 
     m_motor.getConfigurator();
 
-    if (m_switch.get()) {
-      zeroedOnInit = true;
-      zeroMotorPosition();
-    }
+    // if (m_switch.get()) {
+    // zeroedOnInit = true;
+    // zeroMotorPosition();
+    // }
   }
 
   @Override
@@ -67,15 +67,15 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
 
-    if (!zeroedOnInit) {
-      if (!m_switch.get()) {
-        setSpeed(-0.4);
-      } else {
-        setSpeed(0);
-        zeroMotorPosition();
-        zeroedOnInit = true;
-      }
-    }
+    // if (!zeroedOnInit) {
+    // if (!m_switch.get()) {
+    // setSpeed(-0.4);
+    // } else {
+    // setSpeed(0);
+    // zeroMotorPosition();
+    // zeroedOnInit = true;
+    // }
+    // }
   }
 
   public void setSpeed(double speed) {

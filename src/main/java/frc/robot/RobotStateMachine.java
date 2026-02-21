@@ -81,6 +81,8 @@ public final class RobotStateMachine {
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+        // SmartDashboard.putNumber("DistanceShoot",
+        // pose.getTranslation().getDistance(hubPose.getTranslation()));
         updateTargetPose();
     }
 
@@ -107,7 +109,7 @@ public final class RobotStateMachine {
         // ! TODO: Make a new methods for this TOF calculation
         double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
-        double timeOfFlight = 3* 2 * Math.sin(shotVelocity) / 9.8;
+        double timeOfFlight = 3 * 2 * Math.sin(shotVelocity) / 9.8;
 
         targetPose = hubPose
                 .transformBy(new Transform2d(
