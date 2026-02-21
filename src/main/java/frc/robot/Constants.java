@@ -252,4 +252,9 @@ public final class Constants {
     public static Pose2d HubPose = Tag_POSE2D.toPose2d().transformBy(
         new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter), new Rotation2d()));
   }
+
+  public static class ClimberConstants {
+    public static final int kClimberMotorID = 25;
+    public static final int kClimberLimitSwitchID = 4;
+  }
 }
