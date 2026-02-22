@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.networktables.StructSubscriber;
@@ -57,6 +58,9 @@ public final class RobotStateMachine {
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
 
+    // 1.926m, Y: 1.524m Blue Allience Target Right
+    //
+
     /**
      * Returns the shared state machine instance.
      *
@@ -81,16 +85,12 @@ public final class RobotStateMachine {
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
-        // SmartDashboard.putNumber("DistanceShoot",
-        // pose.getTranslation().getDistance(hubPose.getTranslation()));
         updateTargetPose();
     }
 
     public Pose2d getTurretPose() {
         return turretPose;
     }
-
-    // Not in periodic
 
     public Pose2d getTargetPose() {
         updateTargetPose();
@@ -109,7 +109,14 @@ public final class RobotStateMachine {
         // ! TODO: Make a new methods for this TOF calculation
         double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
-        double timeOfFlight = 3 * 2 * Math.sin(shotVelocity) / 9.8;
+        double shootAng = Units.degreesToRadians(65);
+        double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
+        double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
+                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2)) - 2 * 9.8 * dh) / 9.8; // 65 is
+        // the
+        // apx.
+        // launch
+        // angle
 
         targetPose = hubPose
                 .transformBy(new Transform2d(

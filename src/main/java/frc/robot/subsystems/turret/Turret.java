@@ -36,7 +36,7 @@ public class Turret extends SubsystemBase {
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
   private boolean overridden = false;
-  private boolean zeroedOnInit = false;
+  private boolean toZeroPos = false;
   // BOUNDS: 0.0 to 55
 
   public Turret() {
@@ -44,6 +44,22 @@ public class Turret extends SubsystemBase {
     var talonFXConfigs = new TalonFXConfiguration();
 
     var slot0Configs = talonFXConfigs.Slot0;
+    slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 5; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 3; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = 3; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kI = 0; // no output for integrated error
+    slot0Configs.kD = 0.4; // A velocity error of 1 rps results in 0.1 V output
+
+    var slot1Configs = talonFXConfigs.Slot1;
+    slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 8; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = 4; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kI = 0; // no output for integrated error
+    slot0Configs.kD = 0.7; // A velocity error of 1 rps results in 0.1 V output
+
+    var slot2Configs = talonFXConfigs.Slot2;
     slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
     slot0Configs.kV = 13; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
@@ -54,11 +70,6 @@ public class Turret extends SubsystemBase {
     m_motor.getConfigurator().apply(talonFXConfigs);
 
     m_motor.getConfigurator();
-
-    // if (m_switch.get()) {
-    // zeroedOnInit = true;
-    // zeroMotorPosition();
-    // }
   }
 
   @Override
@@ -67,15 +78,16 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
 
-    // if (!zeroedOnInit) {
-    // if (!m_switch.get()) {
-    // setSpeed(-0.4);
-    // } else {
-    // setSpeed(0);
-    // zeroMotorPosition();
-    // zeroedOnInit = true;
-    // }
-    // }
+    if (toZeroPos) {
+      if (!m_switch.get()) {
+        m_motor.set(-0.5);
+      } else {
+        m_motor.set(0);
+        zeroMotorPosition();
+        toZeroPos = false;
+      }
+
+    }
   }
 
   public void setSpeed(double speed) {
@@ -132,5 +144,9 @@ public class Turret extends SubsystemBase {
   public void setPosition(double deg) {
     SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
+  }
+
+  public void goToZero() {
+    toZeroPos = true;
   }
 }

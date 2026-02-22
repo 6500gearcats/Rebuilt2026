@@ -192,6 +192,7 @@ public class RobotContainer {
                                                 m_photonVisionIO2,
                                                 m_ll,
                                                 m_ll2);
+                                m_turret.goToZero();
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
