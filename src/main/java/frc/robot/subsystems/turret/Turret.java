@@ -129,7 +129,6 @@ public class Turret extends SubsystemBase {
    */
   public double getConvertedTurretPosition() {
     return -((getMotorPosition() * 4) - 110);
-
   }
 
   public double unconvertPosition(double pos) {

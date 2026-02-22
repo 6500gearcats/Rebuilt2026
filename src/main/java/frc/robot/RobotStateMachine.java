@@ -29,7 +29,7 @@ public final class RobotStateMachine {
 
     private Pose2d turretPose = new Pose2d();
 
-    private Pose2d hubPose = TurretConstants.HubPose;
+    private Pose2d hubPose = TurretConstants.HubPose; // new Pose2d(14.7, 2.29, new Rotation2d());
     private Pose2d targetPose = new Pose2d();
 
     private Pose2d pose = new Pose2d();
@@ -59,7 +59,7 @@ public final class RobotStateMachine {
     }
 
     // 1.926m, Y: 1.524m Blue Allience Target Right
-    //
+    // 14.7 m , 2.29 m Red alliance right
 
     /**
      * Returns the shared state machine instance.
@@ -106,8 +106,11 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
+        Pose2d nextPose = pose.plus(
+                new Transform2d(speeds.vxMetersPerSecond * 0.01, speeds.vyMetersPerSecond * 0.01, new Rotation2d()));
+
         // ! TODO: Make a new methods for this TOF calculation
-        double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
+        double distance = nextPose.getTranslation().getDistance(hubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
         double shootAng = Units.degreesToRadians(65);
         double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
