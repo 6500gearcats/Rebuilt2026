@@ -256,7 +256,7 @@ public final class RobotStateMachine {
         Alliance alliance = getAlliance();
         if (pose.getX() < 4.52) {
             currentZone = alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
-            return checkZone();
+            return currentZone;
         } else if (pose.getX() > 11.63) {
             currentZone = alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
             return currentZone;

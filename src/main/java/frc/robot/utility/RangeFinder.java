@@ -13,39 +13,23 @@ public class RangeFinder {
   private static InterpolatingDoubleTreeMap m_map = new InterpolatingDoubleTreeMap();
 
   static {
-    m_map.put(2.18, 4.5);
+    m_map.put(1.56, 4.45);
 
-    m_map.put(2.27, 4.55);
+    m_map.put(1.74, 4.5);
 
-    m_map.put(2.32, 4.575);
+    m_map.put(1.96, 4.8);
 
-    m_map.put(2.55, 4.65);
+    m_map.put(2.44, 5.0);
 
-    m_map.put(2.78, 4.75);
+    m_map.put(2.66, 5.1);
 
-    m_map.put(2.92, 4.85);
+    m_map.put(2.75, 5.2);
 
-    m_map.put(3.12, 5.05);
+    m_map.put(2.96, 6.15);
 
-    m_map.put(3.35, 5.2);
+    m_map.put(3.5, 6.1);
 
-    m_map.put(3.43, 5.3);
-
-    m_map.put(3.57, 5.35);
-
-    m_map.put(3.7, 5.5);
-
-    m_map.put(3.85, 5.55);
-
-    m_map.put(4.11, 5.6);
-
-    m_map.put(4.28, 5.65);
-
-    m_map.put(4.5, 6.0);
-
-    m_map.put(4.71, 6.35);
-
-    m_map.put(4.95, 6.5);
+    m_map.put(3.85, 6.7);
   }
   
 
