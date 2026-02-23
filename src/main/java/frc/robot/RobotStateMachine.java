@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.utility.RangeFinder;
 
@@ -36,7 +37,7 @@ public final class RobotStateMachine {
     private Supplier<Pose2d> visionPoseSupplier;
     private FieldZone currentZone = FieldZone.ALLIANCE;
 
-    private Supplier<ChassisSpeeds> chassisSpeedsSupplier;
+    private CommandSwerveDrivetrain drivetrain;
 
     private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
             .getTable("StateMachine")
@@ -109,7 +110,6 @@ public final class RobotStateMachine {
         Pose2d nextPose = pose.plus(
                 new Transform2d(speeds.vxMetersPerSecond * 0.01, speeds.vyMetersPerSecond * 0.01, new Rotation2d()));
 
-        // ! TODO: Make a new methods for this TOF calculation
         double distance = nextPose.getTranslation().getDistance(hubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
         double shootAng = Units.degreesToRadians(65);
@@ -131,23 +131,21 @@ public final class RobotStateMachine {
     }
 
     public ChassisSpeeds getFieldSpeeds() {
-        if (chassisSpeedsSupplier == null) {
+        if (drivetrain == null) {
             return null;
         }
-        return ChassisSpeeds.fromRobotRelativeSpeeds(chassisSpeedsSupplier.get(), pose.getRotation());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), pose.getRotation());
     }
 
-    public void bindChassisSpeedsSupplier(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
-        this.chassisSpeedsSupplier = chassisSpeedsSupplier;
+    public ChassisSpeeds getChassisSpeeds() {
+        return drivetrain.getKinematics().toChassisSpeeds(
+                drivetrain.getModule(0).getCurrentState(), drivetrain.getModule(1).getCurrentState(),
+                drivetrain.getModule(2).getCurrentState(),
+                drivetrain.getModule(3).getCurrentState());
     }
 
-    /**
-     * Returns the currently computed field zone.
-     *
-     * @return field zone classification
-     */
-    public FieldZone getCurrentZone() {
-        return currentZone;
+    public void bindDrivetrain(CommandSwerveDrivetrain drivetrain) {
+        this.drivetrain = drivetrain;
     }
 
     /**
@@ -250,16 +248,18 @@ public final class RobotStateMachine {
     /**
      * Determines the field zone based on the current pose and alliance.
      *
-     * @return field zone classification
+     * @return The {@link FieldZone} you are in, e.g, Allience or neutral
      */
     public FieldZone checkZone() {
         // < 4.52 m is the blue alliance's trench, > 11.63 m is the red alliance's
         // trench, and in between is the neutral zone
         Alliance alliance = getAlliance();
         if (pose.getX() < 4.52) {
-            return alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            currentZone = alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            return checkZone();
         } else if (pose.getX() > 11.63) {
-            return alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            currentZone = alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            return currentZone;
         } else {
             return FieldZone.NEUTRAL;
         }

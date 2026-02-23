@@ -218,10 +218,7 @@ public class RobotContainer {
                                 break;
                 }
                 robotStateMachine.bindVision(m_vision);
-                robotStateMachine.bindChassisSpeedsSupplier(() -> drivetrain.getKinematics().toChassisSpeeds(
-                                drivetrain.getModule(0).getCurrentState(), drivetrain.getModule(1).getCurrentState(),
-                                drivetrain.getModule(2).getCurrentState(),
-                                drivetrain.getModule(3).getCurrentState()));
+                robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();
         }
 
