@@ -108,7 +108,7 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
         Pose2d nextPose = pose.plus(
-                new Transform2d(speeds.vxMetersPerSecond * 0.01, speeds.vyMetersPerSecond * 0.01, new Rotation2d()));
+                new Transform2d(speeds.vxMetersPerSecond * 5, speeds.vyMetersPerSecond * 5, new Rotation2d()));
 
         double distance = nextPose.getTranslation().getDistance(hubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);

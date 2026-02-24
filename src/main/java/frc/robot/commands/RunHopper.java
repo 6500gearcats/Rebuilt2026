@@ -26,7 +26,7 @@ public class RunHopper extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_hopper.startAllMotors(-0.8, 1);
+    m_hopper.startAllMotors(-0.9, 1);
   }
 
   // Called once the command ends or is interrupted.

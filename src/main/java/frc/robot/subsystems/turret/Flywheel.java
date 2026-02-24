@@ -37,9 +37,9 @@ public class Flywheel extends SubsystemBase {
     // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 3; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kA = 3; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0Configs.kP = 0.2; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kV = 9; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = 0.45; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0; // A velocity error of 1 rps results in 0.1 V output
 
@@ -50,7 +50,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     if (snurboEnable) {
-      speedModifier = 0.25;
+      speedModifier = 0.15;
     } else {
       speedModifier = 1;
     }
