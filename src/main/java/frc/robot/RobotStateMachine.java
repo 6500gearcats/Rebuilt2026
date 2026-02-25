@@ -1,8 +1,11 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meter;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -10,8 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.networktables.StructSubscriber;
-import edu.wpi.first.util.struct.StructFetcher;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -30,7 +32,10 @@ public final class RobotStateMachine {
 
     private Pose2d turretPose = new Pose2d();
 
-    private Pose2d hubPose = TurretConstants.HubPose; // new Pose2d(14.7, 2.29, new Rotation2d());
+    public static Pose3d Tag_POSE2D;
+
+    public static Pose2d HubPose;
+
     private Pose2d targetPose = new Pose2d();
 
     private Pose2d pose = new Pose2d();
@@ -38,6 +43,8 @@ public final class RobotStateMachine {
     private FieldZone currentZone = FieldZone.ALLIANCE;
 
     private CommandSwerveDrivetrain drivetrain;
+
+    private Alliance alliance = Alliance.Blue; // Default
 
     private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
             .getTable("StateMachine")
@@ -55,6 +62,7 @@ public final class RobotStateMachine {
             .publish();
 
     private RobotStateMachine() {
+        checkAlliance();
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
@@ -78,6 +86,7 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        checkAlliance();
         refreshPoseFromVision();
         currentZone = checkZone();
         posePublisher.set(pose);
@@ -87,6 +96,17 @@ public final class RobotStateMachine {
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
         updateTargetPose();
+    }
+
+    private void checkAlliance() {
+        if (getAlliance() == Alliance.Red) {
+            Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
+        } else {
+            Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
+        }
+        HubPose = Tag_POSE2D.toPose2d().transformBy(
+                new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter),
+                        new Rotation2d()));
     }
 
     public Pose2d getTurretPose() {
@@ -110,18 +130,16 @@ public final class RobotStateMachine {
         Pose2d nextPose = pose.plus(
                 new Transform2d(speeds.vxMetersPerSecond * 5, speeds.vyMetersPerSecond * 5, new Rotation2d()));
 
-        double distance = nextPose.getTranslation().getDistance(hubPose.getTranslation());
+        double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
+
+        // Apx launch angle is 65 deg
         double shootAng = Units.degreesToRadians(65);
         double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
         double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
-                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2)) - 2 * 9.8 * dh) / 9.8; // 65 is
-        // the
-        // apx.
-        // launch
-        // angle
+                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2)) - 2 * 9.8 * dh) / 9.8;
 
-        targetPose = hubPose
+        targetPose = HubPose
                 .transformBy(new Transform2d(
                         new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
                                 speeds.vyMetersPerSecond * timeOfFlight),
