@@ -42,18 +42,15 @@ public class ShootFuel extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    counter = 0;
+    
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (counter > 3) {
-      m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
-          stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
-      // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
-    }
-    counter++;
+    m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+        stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+    // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
 
   // Called once the command ends or is interrupted.

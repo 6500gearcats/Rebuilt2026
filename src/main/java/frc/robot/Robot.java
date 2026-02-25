@@ -14,10 +14,12 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   Timer m_gcTimer = new Timer();
   private final RobotContainer m_robotContainer;
-
   public Robot() {
     m_robotContainer = new RobotContainer();
     PortForwarder.add(5800, "photonvision.local", 5800);
+    if(m_gcTimer.advanceIfElapsed(5)) {
+      System.gc();
+    }
   }
 
   @Override
