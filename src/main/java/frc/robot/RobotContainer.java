@@ -231,8 +231,8 @@ public class RobotContainer {
         // @formatter:off
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * 0.5 * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * 0.5 * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
                                 .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
