@@ -287,15 +287,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * This ensures driving behavior doesn't change until an explicit disable event
          * occurs during testing.
          */
-        if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                        allianceColor == Alliance.Red
-                                ? kRedAlliancePerspectiveRotation
-                                : kBlueAlliancePerspectiveRotation);
-                m_hasAppliedOperatorPerspective = true;
-            });
-        }
+        // if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
+        // DriverStation.getAlliance().ifPresent(allianceColor -> {
+        // setOperatorPerspectiveForward(
+        // allianceColor == Alliance.Red
+        // ? kRedAlliancePerspectiveRotation
+        // : kBlueAlliancePerspectiveRotation);
+        // m_hasAppliedOperatorPerspective = true;
+        // });
+        // }
     }
 
     private void startSimThread() {

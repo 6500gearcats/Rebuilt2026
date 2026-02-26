@@ -5,15 +5,41 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "center to right"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ShootingSequence"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "center to right"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "right to neutral zone"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "right to neutral zone"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "RunIntake"
+                }
+              }
+            ]
           }
         },
         {

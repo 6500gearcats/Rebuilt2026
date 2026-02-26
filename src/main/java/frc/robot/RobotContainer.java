@@ -113,7 +113,7 @@ public class RobotContainer {
 
         private LedCANdle m_candle = new LedCANdle();
 
-        private final Hopper hopper = new Hopper();
+        private final Hopper m_hopper = new Hopper();
 
         private final SendableChooser<Command> autoChooser;
 
@@ -235,8 +235,8 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                // hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6,
-                // 1.7), hopper));
+                // m_hopper.setDefaultCommand(new RunCommand(() -> m_hopper.startAllMotors(1.6,
+                // 1.7), m_hopper));
 
                 // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
                 // joystick.b().whileTrue(drivetrain.applyRequest(
@@ -294,11 +294,11 @@ public class RobotContainer {
                 joystick.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 joystick.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
-                // joystick.rightBumper().onTrue(new RunHopper(hopper));
+                // joystick.rightBumper().onTrue(new RunHopper(m_hopper));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ShootingSequence(hopper, m_flywheel, rangeFinder));
+                                .whileTrue(new ShootingSequence(m_hopper, m_flywheel, rangeFinder));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
@@ -336,44 +336,22 @@ public class RobotContainer {
                 Optional<Alliance> alliance = DriverStation.getAlliance();
                 if (alliance.isPresent()) {
                         if (alliance.get().equals(Alliance.Blue)) {
-                                drivetrain.resetPose(new Pose2d());
-                                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                drivetrain.getPigeon2().reset();
+                                drivetrain.runOnce(drivetrain::seedFieldCentric);
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 120,
                                                 45);
                         } else {
-                                drivetrain.resetPose(new Pose2d());
-                                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                drivetrain.getPigeon2().reset();
+                                drivetrain.runOnce(drivetrain::seedFieldCentric);
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);
 
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 120,
                                                 45);
-                        }
-                }
-        }
-
-        /**
-         * Resets the gyro and updates Limelight robot orientation based on alliance.
-         */
-        public void resetRobotGyroAndOrientation() {
-                Optional<Alliance> alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                        if (alliance.get().equals(Alliance.Blue)) {
-                                drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", 0.368, 0, 0.1, 0, 18, 0);
-                        } else {
-                                drivetrain.getPigeon().reset();
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                                0);
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.318, 0.177, 0.29, 0, 6,
-                                                180);
                         }
                 }
         }
@@ -429,5 +407,11 @@ public class RobotContainer {
 
         public void nameCommands() {
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -3));
+                NamedCommands.registerCommand("ShootingSequence",
+                                new ShootingSequence(m_hopper, m_flywheel, rangeFinder));
+                NamedCommands.registerCommand("AlignTurretToHub", new AlignTurretToHub(m_turret));
+                NamedCommands.registerCommand("RunHopper", new RunHopper(m_hopper));
+                NamedCommands.registerCommand("ShootFuel", new ShootFuel(m_flywheel, rangeFinder));
+                NamedCommands.registerCommand("Zero", new InstantCommand(() -> this.setRobotOrientation()));
         }
 }
