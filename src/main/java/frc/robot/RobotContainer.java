@@ -180,18 +180,19 @@ public class RobotContainer {
                                 LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
-                                LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
-                                                drivetrain.rotationSupplier(),
-                                                drivetrain.getAngularVel(),
-                                                true);
+                                // LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // true);
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
-                                                m_ll,
-                                                m_ll2);
+                                                m_ll
+                                // m_ll2
+                                );
                                 m_turret.goToZero();
                                 break;
                         case SIM:
@@ -231,8 +232,8 @@ public class RobotContainer {
         // @formatter:off
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * 0.5 * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * 0.5 * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
                                 .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
@@ -354,12 +355,13 @@ public class RobotContainer {
                                                 45);
 
                                 // GCC
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                                0);
+                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                // 0);
 
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15, 0, 150,
-                                                -45);
+                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                // 0, 150,
+                                // -45);
                         } else {
                                 drivetrain.resetPose(new Pose2d());
                                 drivetrain.setOperatorPerspectiveForward(new Rotation2d());
@@ -373,12 +375,13 @@ public class RobotContainer {
                                                 45);
 
                                 // GCC
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                                0);
+                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                // 0);
 
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15, 0, 150,
-                                                -45);
+                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                // 0, 150,
+                                // -45);
                         }
                 }
         }
