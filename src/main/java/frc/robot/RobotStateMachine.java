@@ -32,6 +32,8 @@ public final class RobotStateMachine {
 
     private Pose2d turretPose = new Pose2d();
 
+    private Vision m_vision;
+
     public static Pose3d Tag_POSE2D;
 
     public static Pose2d HubPose;
@@ -39,7 +41,6 @@ public final class RobotStateMachine {
     private Pose2d targetPose = new Pose2d();
 
     private Pose2d pose = new Pose2d();
-    private Supplier<Pose2d> visionPoseSupplier;
     private FieldZone currentZone = FieldZone.ALLIANCE;
 
     private CommandSwerveDrivetrain drivetrain;
@@ -162,6 +163,10 @@ public final class RobotStateMachine {
                 drivetrain.getModule(3).getCurrentState());
     }
 
+    public void resetVisionPose(Pose2d pose) {
+        m_vision.resetVisionPose(pose);
+    }
+
     public void bindDrivetrain(CommandSwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
     }
@@ -181,15 +186,8 @@ public final class RobotStateMachine {
      */
     public void bindVision(Vision vision) {
         if (vision != null) {
-            this.visionPoseSupplier = vision::getEstimatedPose;
+            m_vision = vision;
         }
-    }
-
-    /**
-     * Bind a pose supplier (for tests or alternate vision providers).
-     */
-    public void bindVisionPoseSupplier(Supplier<Pose2d> poseSupplier) {
-        this.visionPoseSupplier = poseSupplier;
     }
 
     /**
@@ -255,8 +253,8 @@ public final class RobotStateMachine {
      * Pull the latest pose from the bound vision supplier and cache it locally.
      */
     private void refreshPoseFromVision() {
-        if (visionPoseSupplier != null) {
-            Pose2d latest = visionPoseSupplier.get();
+        if (m_vision != null) {
+            Pose2d latest = m_vision.getEstimatedPose();
             if (latest != null) {
                 pose = latest;
             }

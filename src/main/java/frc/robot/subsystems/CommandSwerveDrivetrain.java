@@ -32,7 +32,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.robot.RobotStateMachine;
 import frc.robot.generated.TunerConstants2.TunerSwerveDrivetrain;
 
 /**
@@ -216,8 +216,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         try {
             var config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
-                    () -> getState().Pose, // Supplier of current robot pose
-                    this::resetPose, // Consumer for seeding pose against auto
+                    () -> RobotStateMachine.getInstance().getPose(), // Supplier of current robot pose
+                    (pose) -> RobotStateMachine.getInstance().resetVisionPose(pose), // Consumer for seeding pose
+                                                                                     // against auto
                     () -> getState().Speeds, // Supplier of current robot speeds
                     // Consumer of ChassisSpeeds and feedforwards to drive the robot
                     (speeds, feedforwards) -> setControl(
@@ -286,15 +287,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * disabled.
          * This ensures driving behavior doesn't change until an explicit disable event
          * occurs during testing.
-        //  */
-        // if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-        //     DriverStation.getAlliance().ifPresent(allianceColor -> {
-        //         setOperatorPerspectiveForward(
-        //                 allianceColor == Alliance.Red
-        //                         ? kRedAlliancePerspectiveRotation
-        //                         : kBlueAlliancePerspectiveRotation);
-        //         m_hasAppliedOperatorPerspective = true;
-        //     });
+         */
+        // if (!m_hasAppliedOperatorPerspective /* || DriverStation.isDisabled()*/) {
+        // DriverStation.getAlliance().ifPresent(allianceColor -> {
+        // setOperatorPerspectiveForward(
+        // allianceColor == Alliance.Red
+        // ? kRedAlliancePerspectiveRotation
+        // : kBlueAlliancePerspectiveRotation);
+        // m_hasAppliedOperatorPerspective = true;
+        // });
         // }
     }
 

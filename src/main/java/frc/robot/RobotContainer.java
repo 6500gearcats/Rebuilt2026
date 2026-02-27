@@ -122,6 +122,7 @@ public class RobotContainer {
 
         private final Intake m_intake = new Intake();
 
+        private final RangeFinder rangeFinder = new RangeFinder();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
@@ -145,6 +146,8 @@ public class RobotContainer {
          */
         public RobotContainer() {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -3));
+                NamedCommands.registerCommand("ShootFuel3s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
                 logDir = new File("log");
@@ -363,8 +366,9 @@ public class RobotContainer {
                                 // 0, 150,
                                 // -45);
                         } else {
-                                drivetrain.resetPose(new Pose2d());
-                                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                // drivetrain.resetPose(new Pose2d());
+                                drivetrain.seedFieldCentric();
+                                // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
 
                                 // GCD
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
