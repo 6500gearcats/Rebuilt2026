@@ -40,7 +40,26 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "DeployIntake",
+      "waypointRelativePos": 0.09969873366013071,
+      "endWaypointRelativePos": 0.2994536356209151,
+      "command": null
+    },
+    {
+      "name": "AlignToHub",
+      "waypointRelativePos": 0.23302185457516342,
+      "endWaypointRelativePos": 0.7551828022875822,
+      "command": null
+    },
+    {
+      "name": "ShootFuel",
+      "waypointRelativePos": 0.2886029411764705,
+      "endWaypointRelativePos": 0.7524637459150335,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

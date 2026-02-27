@@ -3,55 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.0,
-        "y": 7.0
+        "x": 3.4,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.340563480741797,
-        "y": 7.866422253922967
+        "x": 2.7179711371527784,
+        "y": 4.613750506365741
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.7663559751157414,
-        "y": 4.028898220486111
+        "x": 2.3403825231481488,
+        "y": 5.738118200231481
       },
       "prevControl": {
-        "x": 1.753496310763889,
-        "y": 5.451334563078705
+        "x": 2.184098234953704,
+        "y": 5.46156980613426
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.35,
-      "rotationDegrees": -179.50060009212982
-    },
-    {
-      "waypointRelativePos": 0.55,
-      "rotationDegrees": 176.94370152925742
-    },
-    {
-      "waypointRelativePos": 0.8,
-      "rotationDegrees": 158.40078212032424
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "ShootFuel",
-      "waypointRelativePos": 0.55,
-      "endWaypointRelativePos": 0.825303819444444,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -62,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 147.53922479409968
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 117.27770518533349
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

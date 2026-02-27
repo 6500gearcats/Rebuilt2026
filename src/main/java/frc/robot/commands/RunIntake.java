@@ -11,8 +11,8 @@ import frc.robot.subsystems.intake.Intake;
 public class RunIntake extends Command {
   /** Creates a new RunIntake. */
   private Intake m_intake;
-  private double speed;
-;
+  private double speed;;
+
   public RunIntake(Intake intake, double speed) {
     m_intake = intake;
     this.speed = speed;
@@ -22,7 +22,8 @@ public class RunIntake extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -35,6 +36,7 @@ public class RunIntake extends Command {
   @Override
   public void end(boolean interrupted) {
     m_intake.setIntakeSpeed(0);
+    m_intake.deployIntake(0);
   }
 
   // Returns true when the command should end.

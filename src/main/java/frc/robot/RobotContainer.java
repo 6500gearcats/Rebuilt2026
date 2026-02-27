@@ -148,6 +148,12 @@ public class RobotContainer {
          */
         public RobotContainer() {
 
+                NamedCommands.registerCommand("DeployIntake", new RunIntake(m_intake, 0.1));
+                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, 0.1));
+                NamedCommands.registerCommand("AlignToHub", new AlignTurretToHub(m_turret));
+                NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, rangeFinder));
+                NamedCommands.registerCommand("ShootFuel3s", new ShootingSequence(hopper, m_flywheel, rangeFinder).withTimeOut(3));
+
                 logDir = new File("log");
                 logDir.mkdirs();
                 logFile = new File(logDir, "shootFile.json");
@@ -424,9 +430,5 @@ public class RobotContainer {
                         System.err.println("Could not close JSON log file.");
                         e.printStackTrace();
                 }
-        }
-
-        public void nameCommands() {
-                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -3));
         }
 }
