@@ -29,6 +29,9 @@ public class AlignTurretToHub extends Command {
   private Turret m_turret;
   private RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
 
+  private Pose2d prevPose = new Pose2d();
+  private double prevTurretRot = 0;
+
   public AlignTurretToHub(Turret turret) {
     m_turret = turret;
     addRequirements(m_turret);
@@ -43,6 +46,13 @@ public class AlignTurretToHub extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    Pose2d currPose = m_StateMachine.getTurretPose();
+    Translation2d errorFromPrev = prevPose.minus(currPose).getTranslation();
+    double errorFromPrevRot = prevTurretRot - m_turret.getConvertedTurretPosition();
+    if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
+        && prevPose.minus(currPose).getRotation().getDegrees() < 2 && errorFromPrevRot > 1) {
+      return;
+    }
     Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
     Translation2d robotToTarget = m_targetPose.getTranslation()
@@ -71,7 +81,7 @@ public class AlignTurretToHub extends Command {
       }
     }
     if (Math.abs(newError) > 0.005) {
-      
+
       m_turret.setPosition(newError);
     }
 
