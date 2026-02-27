@@ -7,6 +7,7 @@ package frc.robot.subsystems.turret;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,11 +27,15 @@ import frc.robot.generated.TunerConstants2;
 public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
+  private PositionVoltage m_request;
+  private final DigitalInput m_switch = new DigitalInput(3);
   private final PositionVoltage m_request;
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
   private boolean overridden = false;
+  private boolean toZeroPos = false;
+  TalonFXConfiguration talonFXConfigs;
   // BOUNDS: 0.0 to 55
 
   public Turret() {
@@ -39,6 +44,9 @@ public class Turret extends SubsystemBase {
 
     var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 5; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 3; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = 3; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kV = 5; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 3; // An acceleration of 1 rps/s requires 0.01 V output
     slot0Configs.kP = 3; // A position error of 2.5 rotations results in 12 V output
@@ -96,7 +104,6 @@ public class Turret extends SubsystemBase {
    */
   public double getConvertedTurretPosition() {
     return -((getMotorPosition() * 4) - 110);
-
   }
 
   public double unconvertPosition(double pos) {
@@ -111,5 +118,19 @@ public class Turret extends SubsystemBase {
   public void setPosition(double deg) {
     SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
+  }
+
+  public void goToZero() {
+    toZeroPos = true;
+  }
+
+  public void updateSlotConfigs() {
+    var slot = talonFXConfigs.Slot1;
+    slot.kV = SmartDashboard.getNumber("kV", 0);
+    slot.kA = SmartDashboard.getNumber("kA", 0);
+    slot.kP = SmartDashboard.getNumber("kP", 0);
+    slot.kI = SmartDashboard.getNumber("kI", 0);
+    slot.kD = SmartDashboard.getNumber("kD", 0);
+    m_request = new PositionVoltage(0).withSlot(1);
   }
 }

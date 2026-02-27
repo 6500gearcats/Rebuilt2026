@@ -23,8 +23,9 @@ public class ShootFuel extends Command {
   /** Creates a new ShootFuel. */
   Flywheel m_Flywheel;
   DoubleSupplier supplier;
-  RangeFinder rangeFinder;
+
   RobotStateMachine stateMachine = RobotStateMachine.getInstance();
+  int counter; // Delays time between spin-up and first ball
 
   /**
    * Creates a new ShootFuel command.
@@ -43,13 +44,15 @@ public class ShootFuel extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_Flywheel.setSpeed(rangeFinder.getShooterSpeed(stateMachine.getTurretPose().getTranslation().getDistance(Constants.TurretConstants.HubPose.getTranslation())));
-    //m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+    m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+        stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+    // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
 
 
@@ -57,6 +60,7 @@ public class ShootFuel extends Command {
   @Override
   public void end(boolean interrupted) {
     m_Flywheel.setSpeed(0.7);
+    counter = 0;
   }
 
   // Returns true when the command should end.

@@ -183,6 +183,13 @@ public class RobotContainer {
                                 PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", false,
                                                 new Translation3d(0.254, 0.254, 0.2032),
                                                 new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
+                                LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
+                                                drivetrain.getAngularVel(),
+                                                true);
+                                // LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // true);
                                 LimelightIO m_ll = new LimelightIO("limelight-gcc", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
@@ -192,6 +199,10 @@ public class RobotContainer {
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
+                                                m_ll
+                                // m_ll2
+                                );
+                                m_turret.goToZero();
                                                 m_ll);
                                 break;
                         case SIM:
@@ -218,6 +229,8 @@ public class RobotContainer {
                                 break;
                 }
                 RobotStateMachine.getInstance().bindVision(m_vision);
+                robotStateMachine.bindVision(m_vision);
+                robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();
         }
 
@@ -346,6 +359,17 @@ public class RobotContainer {
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
+                                                45);
+
+                                // GCC
+                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                // 0);
+
+                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                // 0, 150,
+                                // -45);
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 120,
                                                 45);
                         } else {
@@ -357,6 +381,16 @@ public class RobotContainer {
 
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 120,
                                                 45);
+
+                                // GCC
+                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                // 0);
+
+                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                // 0, 150,
+                                // -45);
+                        }
                         }
                 }
         }

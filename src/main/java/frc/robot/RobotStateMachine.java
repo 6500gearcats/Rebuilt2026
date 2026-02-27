@@ -1,11 +1,19 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meter;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,9 +43,13 @@ public final class RobotStateMachine {
             .publish();
 
     private RobotStateMachine() {
+        checkAlliance();
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
+
+    // 1.926m, Y: 1.524m Blue Allience Target Right
+    // 14.7 m , 2.29 m Red alliance right
 
     /**
      * Returns the shared state machine instance.
@@ -59,6 +71,7 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        checkAlliance();
         refreshPoseFromVision();
         currentZone = checkZone();
         posePublisher.set(pose);
@@ -178,16 +191,18 @@ public final class RobotStateMachine {
     /**
      * Determines the field zone based on the current pose and alliance.
      *
-     * @return field zone classification
+     * @return The {@link FieldZone} you are in, e.g, Allience or neutral
      */
     public FieldZone checkZone() {
         // < 4.52 m is the blue alliance's trench, > 11.63 m is the red alliance's
         // trench, and in between is the neutral zone
         Alliance alliance = DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
         if (pose.getX() < 4.52) {
-            return alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            currentZone = alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            return currentZone;
         } else if (pose.getX() > 11.63) {
-            return alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            currentZone = alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            return currentZone;
         } else {
             return FieldZone.NEUTRAL;
         }

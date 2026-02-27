@@ -11,6 +11,8 @@ import frc.robot.subsystems.hopper.Hopper;
 public class RunHopper extends Command {
   /** Creates a new RunHopper. */
   private Hopper m_hopper;
+  private int counter;
+
   public RunHopper(Hopper hopper) {
     m_hopper = hopper;
     addRequirements(m_hopper);
