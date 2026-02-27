@@ -293,8 +293,6 @@ public class RobotContainer {
                 // joystick.leftBumper().onTrue(drivetrain.runOnce(() ->
                 // drivetrain.seedFieldCentric()));
 
-                drivetrain.registerTelemetry(logger::telemeterize);
-
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
@@ -315,11 +313,6 @@ public class RobotContainer {
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
-                closeLogSendable.onChange(closeLog -> {
-                        if (closeLog) {
-                                this.closeLogFile();
-                        }
-                });
                 // joystick.a().onTrue(new InstantCommand(() -> {
                 // ShooterValuesSenable data = (ShooterValuesSenable)
                 // SmartDashboard.getData("Shooter Values");
@@ -387,41 +380,6 @@ public class RobotContainer {
                                 // 0, 150,
                                 // -45);
                         }
-                }
-        }
-
-        /**
-         * Logs shooter speed and distance values to the JSON log file.
-         *
-         * @param shooterSpeed shooter wheel speed
-         * @param dist         measured distance to target
-         */
-        public void LogValues(double shooterSpeed, double dist) {
-                JSONObject entry = new JSONObject();
-                entry.put("shooterSpeed", shooterSpeed);
-                entry.put("distance", dist);
-                try {
-                        if (writer != null) {
-                                writer.write(entry.toJSONString());
-                        }
-                } catch (IOException e) {
-                        System.err.println("Could not write to JSON log file.");
-                        e.printStackTrace();
-                }
-        }
-
-        /**
-         * Closes the JSON log file and releases the writer.
-         */
-        public void closeLogFile() {
-                try {
-                        if (writer != null) {
-                                writer.close();
-                                writer = null;
-                        }
-                } catch (IOException e) {
-                        System.err.println("Could not close JSON log file.");
-                        e.printStackTrace();
                 }
         }
 }
