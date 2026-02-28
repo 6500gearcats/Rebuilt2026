@@ -100,6 +100,7 @@ public final class RobotStateMachine {
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+        SmartDashboard.putBoolean("IsActive", isActive());
         updateTargetPose();
     }
 
@@ -253,7 +254,7 @@ public final class RobotStateMachine {
                     setState(RobotState.ACTIVE);
                 }
             }
-        }else if (gameData.contains("B")) {
+        } else if (gameData.contains("B")) {
             if (alliance.equals(DriverStation.Alliance.Blue)) {
                 if (DriverStation.getMatchTime() > 130) {
                     setState(RobotState.INACTIVE);

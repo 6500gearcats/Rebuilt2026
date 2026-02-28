@@ -47,6 +47,7 @@ public final class Constants {
   public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout
       .loadField(AprilTagFields.k2026RebuiltAndymark);
 
+
   public static class RobotConstants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
   }
@@ -242,5 +243,10 @@ public final class Constants {
   public static class TurretConstants {
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
+  }
+
+  public static class  ClimberConstants {
+    public static final int kClimberMotorID = 24;
+    public static final int kClimberLimitSwitchID = 4;
   }
 }
