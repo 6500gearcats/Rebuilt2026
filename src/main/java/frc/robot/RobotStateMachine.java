@@ -346,18 +346,18 @@ public final class RobotStateMachine {
             if (getAlliance() == Alliance.Blue) {
                 if (checkZone() == FieldZone.NEUTRAL_TOP) {
                     // top blue pose
-                    return Optional.of(new Pose2d(2.26, 1.681, new Rotation2d(0)));
+                    return Optional.of(new Pose2d(2.26, 1.681, new Rotation2d()));
                 } else if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
                     // bottom blue pose
-                    return Optional.of(new Pose2d(2.26, 5.835, new Rotation2d(0)));
+                    return Optional.of(new Pose2d(2.26, 5.835, new Rotation2d()));
                 }
             } else {
                 if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
                     // bottom red pose
-                    return Optional.of(new Pose2d(14.71, 5.835, new Rotation2d(0)));
+                    return Optional.of(new Pose2d(14.71, 5.835, new Rotation2d()));
                 } else if (checkZone() == FieldZone.NEUTRAL_TOP) {
                     // top red pose
-                    return Optional.of(new Pose2d(14.71, 1.681, new Rotation2d(0)));
+                    return Optional.of(new Pose2d(14.71, 1.681, new Rotation2d()));
                 }
             }
         }

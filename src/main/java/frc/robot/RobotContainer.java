@@ -126,17 +126,6 @@ public class RobotContainer {
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
-        private final File logDir;
-        private final File logFile;
-        private BufferedWriter writer = null;
-        private final SendableChooser<Boolean> closeLogSendable = new SendableChooser<Boolean>();
-        private final SendableChooser<Boolean> shooterSendableChooser = new SendableChooser<Boolean>();
-        private final Sendable shooterSendable = new ShooterValuesSenable();
-
-        // private final Feeder m_feeder = new Feeder();
-        // private final Intake m_intake = new Intake();
-        // private final Shooter m_shooter = new Shooter();
-
         // Vision
         PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
@@ -150,23 +139,6 @@ public class RobotContainer {
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
-                logDir = new File("log");
-                logDir.mkdirs();
-                logFile = new File(logDir, "shootFile.json");
-                logFile.setWritable(true);
-                closeLogSendable.setDefaultOption("false", false);
-                closeLogSendable.addOption("true", true);
-                SmartDashboard.putData("Close Buffer", closeLogSendable);
-
-                SmartDashboard.putData("Shooter Values", shooterSendable);
-
-                try {
-                        writer = Files.newBufferedWriter(logFile.toPath(), StandardOpenOption.CREATE,
-                                        StandardOpenOption.WRITE);
-                } catch (IOException e) {
-                        System.err.println("Could not open the JSON log file.");
-                        e.printStackTrace();
-                }
 
                 autoChooser = AutoBuilder.buildAutoChooser("testAuto");
                 SmartDashboard.putData("Auto Chooser", autoChooser);
