@@ -4,7 +4,10 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.hal.simulation.RoboRioDataJNI;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotStateMachine;
+import frc.robot.RobotStateMachine.FieldZone;
 import frc.robot.subsystems.hopper.Hopper;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -12,6 +15,7 @@ public class RunHopper extends Command {
   /** Creates a new RunHopper. */
   private Hopper m_hopper;
   private int counter;
+  private RobotStateMachine stateMachine = RobotStateMachine.getInstance();
 
   public RunHopper(Hopper hopper) {
     m_hopper = hopper;
@@ -28,6 +32,7 @@ public class RunHopper extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) { return; }
     if (counter > 3) {
       m_hopper.startAllMotors(-0.9, 1);
     }

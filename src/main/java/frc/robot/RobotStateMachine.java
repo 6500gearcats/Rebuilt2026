@@ -227,6 +227,60 @@ public final class RobotStateMachine {
      * @return current state enum
      */
     public RobotState getState() {
+        if (gameData.contains("R")) {
+            if (alliance.equals(DriverStation.Alliance.Red)) {
+                if (DriverStation.getMatchTime() > 130) {
+                    setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 105) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 80) {
+                    setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.INACTIVE);
+                }
+            } else {
+                if (DriverStation.getMatchTime() > 130) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 105) {
+                    setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 80) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.ACTIVE);
+                }
+            }
+        }else if (gameData.contains("B")) {
+            if (alliance.equals(DriverStation.Alliance.Blue)) {
+                if (DriverStation.getMatchTime() > 130) {
+                    setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 105) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 80) {
+                    setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.INACTIVE);
+                }
+            } else {
+                if (DriverStation.getMatchTime() > 130) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 105) {
+                    setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 80) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.ACTIVE);
+                }
+            }
+        }
+
         return state;
     }
 
@@ -326,11 +380,11 @@ public final class RobotStateMachine {
         return DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
     }
 
-    enum RobotState {
+    public enum RobotState {
         ACTIVE, INACTIVE
     }
 
-    enum FieldZone {
+    public enum FieldZone {
         ALLIANCE, NEUTRAL_TOP, NEUTRAL_CENTER, NEUTRAL_BOTTOM, OPPONENT
     }
 

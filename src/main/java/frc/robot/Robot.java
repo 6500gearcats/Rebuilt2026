@@ -58,6 +58,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
+    m_RobotStateMachine.setState(RobotState.ACTIVE);
   }
 
   @Override
@@ -96,18 +97,6 @@ public class Robot extends TimedRobot {
             }
             break;
         }
-      }
-    } else {
-      if (DriverStation.getMatchTime() > 130) {
-        m_RobotStateMachine.switchState();
-      } else if (DriverStation.getMatchTime() > 105) {
-        m_RobotStateMachine.switchState();
-      } else if (DriverStation.getMatchTime() > 80) {
-        m_RobotStateMachine.switchState();
-      } else if (DriverStation.getMatchTime() > 55) {
-        m_RobotStateMachine.switchState();
-      } else if (DriverStation.getMatchTime() > 30) {
-        m_RobotStateMachine.switchState();
       }
     }
   }
