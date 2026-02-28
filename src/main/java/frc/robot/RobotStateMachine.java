@@ -1,20 +1,24 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meter;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.networktables.StructSubscriber;
-import edu.wpi.first.util.struct.StructFetcher;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.utility.RangeFinder;
 
@@ -28,14 +32,20 @@ public final class RobotStateMachine {
 
     private Pose2d turretPose = new Pose2d();
 
-    private Pose2d hubPose = TurretConstants.HubPose;
+    private Vision m_vision;
+
+    public static Pose3d Tag_POSE2D;
+
+    public static Pose2d HubPose;
+
     private Pose2d targetPose = new Pose2d();
 
     private Pose2d pose = new Pose2d();
-    private Supplier<Pose2d> visionPoseSupplier;
     private FieldZone currentZone = FieldZone.ALLIANCE;
 
-    private Supplier<ChassisSpeeds> chassisSpeedsSupplier;
+    private CommandSwerveDrivetrain drivetrain;
+
+    private Alliance alliance = Alliance.Blue; // Default
 
     private final StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
             .getTable("StateMachine")
@@ -53,9 +63,13 @@ public final class RobotStateMachine {
             .publish();
 
     private RobotStateMachine() {
+        checkAlliance();
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
+
+    // 1.926m, Y: 1.524m Blue Allience Target Right
+    // 14.7 m , 2.29 m Red alliance right
 
     /**
      * Returns the shared state machine instance.
@@ -73,6 +87,7 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        checkAlliance();
         refreshPoseFromVision();
         currentZone = checkZone();
         posePublisher.set(pose);
@@ -84,11 +99,20 @@ public final class RobotStateMachine {
         updateTargetPose();
     }
 
+    private void checkAlliance() {
+        if (getAlliance() == Alliance.Red) {
+            Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
+        } else {
+            Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
+        }
+        HubPose = Tag_POSE2D.toPose2d().transformBy(
+                new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter),
+                        new Rotation2d()));
+    }
+
     public Pose2d getTurretPose() {
         return turretPose;
     }
-
-    // Not in periodic
 
     public Pose2d getTargetPose() {
         updateTargetPose();
@@ -104,12 +128,19 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
-        // ! TODO: Make a new methods for this TOF calculation
-        double distance = pose.getTranslation().getDistance(hubPose.getTranslation());
-        double shotVelocity = RangeFinder.getShotVelocity(distance);
-        double timeOfFlight = 9 * 2 * Math.sin(shotVelocity) / 9.8;
+        Pose2d nextPose = pose.plus(
+                new Transform2d(speeds.vxMetersPerSecond * 5, speeds.vyMetersPerSecond * 5, new Rotation2d()));
 
-        targetPose = hubPose
+        double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+        double shotVelocity = RangeFinder.getShotVelocity(distance);
+
+        // Apx launch angle is 65 deg
+        double shootAng = Units.degreesToRadians(65);
+        double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
+        double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
+                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2)) - 2 * 9.8 * dh) / 9.8;
+
+        targetPose = HubPose
                 .transformBy(new Transform2d(
                         new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
                                 speeds.vyMetersPerSecond * timeOfFlight),
@@ -119,23 +150,25 @@ public final class RobotStateMachine {
     }
 
     public ChassisSpeeds getFieldSpeeds() {
-        if (chassisSpeedsSupplier == null) {
+        if (drivetrain == null) {
             return null;
         }
-        return ChassisSpeeds.fromRobotRelativeSpeeds(chassisSpeedsSupplier.get(), pose.getRotation());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), pose.getRotation());
     }
 
-    public void bindChassisSpeedsSupplier(Supplier<ChassisSpeeds> chassisSpeedsSupplier) {
-        this.chassisSpeedsSupplier = chassisSpeedsSupplier;
+    public ChassisSpeeds getChassisSpeeds() {
+        return drivetrain.getKinematics().toChassisSpeeds(
+                drivetrain.getModule(0).getCurrentState(), drivetrain.getModule(1).getCurrentState(),
+                drivetrain.getModule(2).getCurrentState(),
+                drivetrain.getModule(3).getCurrentState());
     }
 
-    /**
-     * Returns the currently computed field zone.
-     *
-     * @return field zone classification
-     */
-    public FieldZone getCurrentZone() {
-        return currentZone;
+    public void resetVisionPose(Pose2d pose) {
+        m_vision.resetVisionPose(pose);
+    }
+
+    public void bindDrivetrain(CommandSwerveDrivetrain drivetrain) {
+        this.drivetrain = drivetrain;
     }
 
     /**
@@ -153,15 +186,8 @@ public final class RobotStateMachine {
      */
     public void bindVision(Vision vision) {
         if (vision != null) {
-            this.visionPoseSupplier = vision::getEstimatedPose;
+            m_vision = vision;
         }
-    }
-
-    /**
-     * Bind a pose supplier (for tests or alternate vision providers).
-     */
-    public void bindVisionPoseSupplier(Supplier<Pose2d> poseSupplier) {
-        this.visionPoseSupplier = poseSupplier;
     }
 
     /**
@@ -227,8 +253,8 @@ public final class RobotStateMachine {
      * Pull the latest pose from the bound vision supplier and cache it locally.
      */
     private void refreshPoseFromVision() {
-        if (visionPoseSupplier != null) {
-            Pose2d latest = visionPoseSupplier.get();
+        if (m_vision != null) {
+            Pose2d latest = m_vision.getEstimatedPose();
             if (latest != null) {
                 pose = latest;
             }
@@ -238,16 +264,18 @@ public final class RobotStateMachine {
     /**
      * Determines the field zone based on the current pose and alliance.
      *
-     * @return field zone classification
+     * @return The {@link FieldZone} you are in, e.g, Allience or neutral
      */
     public FieldZone checkZone() {
         // < 4.52 m is the blue alliance's trench, > 11.63 m is the red alliance's
         // trench, and in between is the neutral zone
         Alliance alliance = getAlliance();
         if (pose.getX() < 4.52) {
-            return alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            currentZone = alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            return currentZone;
         } else if (pose.getX() > 11.63) {
-            return alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            currentZone = alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
+            return currentZone;
         } else {
             return FieldZone.NEUTRAL;
         }

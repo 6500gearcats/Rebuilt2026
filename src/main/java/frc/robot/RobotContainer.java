@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
@@ -121,6 +122,7 @@ public class RobotContainer {
 
         private final Intake m_intake = new Intake();
 
+        private final RangeFinder rangeFinder = new RangeFinder();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
@@ -143,6 +145,11 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
+                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -3));
+                NamedCommands.registerCommand("ShootFuel3s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
+
+                SmartDashboard.putNumber("Shoot Speed", 0);
                 logDir = new File("log");
                 logDir.mkdirs();
                 logFile = new File(logDir, "shootFile.json");
@@ -161,7 +168,8 @@ public class RobotContainer {
                         e.printStackTrace();
                 }
 
-                autoChooser = AutoBuilder.buildAutoChooser("Tests");
+                autoChooser = AutoBuilder.buildAutoChooser("testAuto");
+                SmartDashboard.putData("Auto Chooser", autoChooser);
                 configureBindings();
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
@@ -175,13 +183,20 @@ public class RobotContainer {
                                 LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
+                                // LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // true);
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
-                                                m_ll);
+                                                m_ll
+                                // m_ll2
+                                );
+                                m_turret.goToZero();
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -207,10 +222,7 @@ public class RobotContainer {
                                 break;
                 }
                 robotStateMachine.bindVision(m_vision);
-                robotStateMachine.bindChassisSpeedsSupplier(() -> drivetrain.getKinematics().toChassisSpeeds(
-                                drivetrain.getModule(0).getCurrentState(), drivetrain.getModule(1).getCurrentState(),
-                                drivetrain.getModule(2).getCurrentState(),
-                                drivetrain.getModule(3).getCurrentState()));
+                robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();
         }
 
@@ -281,8 +293,6 @@ public class RobotContainer {
                 // joystick.leftBumper().onTrue(drivetrain.runOnce(() ->
                 // drivetrain.seedFieldCentric()));
 
-                drivetrain.registerTelemetry(logger::telemeterize);
-
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
@@ -293,6 +303,7 @@ public class RobotContainer {
                 joystick.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
+                joystick.rightBumper().whileTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)
@@ -302,11 +313,6 @@ public class RobotContainer {
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
-                closeLogSendable.onChange(closeLog -> {
-                        if (closeLog) {
-                                this.closeLogFile();
-                        }
-                });
                 // joystick.a().onTrue(new InstantCommand(() -> {
                 // ShooterValuesSenable data = (ShooterValuesSenable)
                 // SmartDashboard.getData("Shooter Values");
@@ -336,56 +342,44 @@ public class RobotContainer {
                         if (alliance.get().equals(Alliance.Blue)) {
                                 drivetrain.resetPose(new Pose2d());
                                 drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+
+                                // GCD
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
                                                 45);
+
+                                // GCC
+                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                // 0);
+
+                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                // 0, 150,
+                                // -45);
                         } else {
-                                drivetrain.resetPose(new Pose2d());
-                                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                // drivetrain.resetPose(new Pose2d());
+                                drivetrain.seedFieldCentric();
+                                // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+
+                                // GCD
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);
 
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
                                                 45);
-                        }
-                }
-        }
 
-        /**
-         * Logs shooter speed and distance values to the JSON log file.
-         *
-         * @param shooterSpeed shooter wheel speed
-         * @param dist         measured distance to target
-         */
-        public void LogValues(double shooterSpeed, double dist) {
-                JSONObject entry = new JSONObject();
-                entry.put("shooterSpeed", shooterSpeed);
-                entry.put("distance", dist);
-                try {
-                        if (writer != null) {
-                                writer.write(entry.toJSONString());
-                        }
-                } catch (IOException e) {
-                        System.err.println("Could not write to JSON log file.");
-                        e.printStackTrace();
-                }
-        }
+                                // GCC
+                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                // 0);
 
-        /**
-         * Closes the JSON log file and releases the writer.
-         */
-        public void closeLogFile() {
-                try {
-                        if (writer != null) {
-                                writer.close();
-                                writer = null;
+                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                // 0, 150,
+                                // -45);
                         }
-                } catch (IOException e) {
-                        System.err.println("Could not close JSON log file.");
-                        e.printStackTrace();
                 }
         }
 }

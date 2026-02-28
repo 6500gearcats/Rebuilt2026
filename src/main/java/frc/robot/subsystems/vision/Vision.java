@@ -178,4 +178,8 @@ public class Vision extends SubsystemBase {
   public Pose2d getEstimatedPose() {
     return estimator.getEstimatedPosition();
   }
+
+  public void resetVisionPose(Pose2d pose) {
+    estimator.resetPose(pose);
+  }
 }

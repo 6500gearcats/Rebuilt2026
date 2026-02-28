@@ -11,6 +11,7 @@ import frc.robot.subsystems.hopper.Hopper;
 public class RunHopper extends Command {
   /** Creates a new RunHopper. */
   private Hopper m_hopper;
+  private int counter;
 
   public RunHopper(Hopper hopper) {
     m_hopper = hopper;
@@ -21,12 +22,16 @@ public class RunHopper extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    counter = 0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_hopper.startAllMotors(-0.8, 1);
+    if (counter > 3) {
+      m_hopper.startAllMotors(-0.9, 1);
+    }
+    counter++;
   }
 
   // Called once the command ends or is interrupted.
