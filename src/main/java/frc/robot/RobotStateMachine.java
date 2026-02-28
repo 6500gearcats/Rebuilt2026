@@ -121,12 +121,18 @@ public final class RobotStateMachine {
 
     public void updateTargetPose() {
         ChassisSpeeds speeds = getFieldSpeeds();
-        if (speeds == null) {
+        ChassisSpeeds robotRelSpeeds = getChassisSpeeds();
+        if (speeds == null && robotRelSpeeds == null) {
             return;
         }
 
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
+
+        if (robotRelSpeeds.vxMetersPerSecond < 0 && robotRelSpeeds.vyMetersPerSecond < 0) {
+            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.omegaRadiansPerSecond * 1.3,
+                    speeds.omegaRadiansPerSecond);
+        }
 
         Pose2d nextPose = pose.plus(
                 new Transform2d(speeds.vxMetersPerSecond * 5, speeds.vyMetersPerSecond * 5, new Rotation2d()));
