@@ -183,19 +183,18 @@ public class RobotContainer {
                                 LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
-                                // LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
-                                // drivetrain.rotationSupplier(),
-                                // drivetrain.getAngularVel(),
-                                // true);
+                                LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
+                                                drivetrain.rotationSupplier(),
+                                                drivetrain.getAngularVel(),
+                                                true);
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
-                                                m_ll
-                                // m_ll2
-                                );
+                                                m_ll,
+                                                m_ll2);
                                 m_turret.goToZero();
                                 break;
                         case SIM:
@@ -340,8 +339,9 @@ public class RobotContainer {
                 Optional<Alliance> alliance = DriverStation.getAlliance();
                 if (alliance.isPresent()) {
                         if (alliance.get().equals(Alliance.Blue)) {
-                                drivetrain.resetPose(new Pose2d());
-                                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                // drivetrain.resetPose(new Pose2d());
+                                // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                drivetrain.seedFieldCentric();
 
                                 // GCD
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
@@ -351,13 +351,13 @@ public class RobotContainer {
                                                 45);
 
                                 // GCC
-                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                // 0);
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
 
-                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
-                                // 0, 150,
-                                // -45);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                                0, 150,
+                                                -45);
                         } else {
                                 // drivetrain.resetPose(new Pose2d());
                                 drivetrain.seedFieldCentric();
@@ -372,13 +372,13 @@ public class RobotContainer {
                                                 45);
 
                                 // GCC
-                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                // 0);
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
 
-                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
-                                // 0, 150,
-                                // -45);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                                0, 150,
+                                                -45);
                         }
                 }
         }

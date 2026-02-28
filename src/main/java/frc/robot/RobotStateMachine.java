@@ -2,6 +2,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meter;
 
+import java.lang.StackWalker.Option;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -29,6 +31,8 @@ public final class RobotStateMachine {
     private static RobotStateMachine instance;
 
     private RobotState state = RobotState.INACTIVE;
+    private String gameData = "";
+    private boolean gotData = false;
 
     private Pose2d turretPose = new Pose2d();
 
@@ -146,11 +150,15 @@ public final class RobotStateMachine {
         double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
                 + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2)) - 2 * 9.8 * dh) / 9.8;
 
-        targetPose = HubPose
-                .transformBy(new Transform2d(
-                        new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
-                                speeds.vyMetersPerSecond * timeOfFlight),
-                        new Rotation2d()));
+        Optional<Pose2d> bestPose = getBestPoseTarget();
+        if (bestPose.isEmpty()) {
+            return;
+        }
+
+        targetPose = bestPose.get().transformBy(new Transform2d(
+                new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
+                        speeds.vyMetersPerSecond * timeOfFlight),
+                new Rotation2d()));
 
         targetPosePublisher.set(targetPose);
     }
@@ -237,6 +245,14 @@ public final class RobotStateMachine {
         update(next);
     }
 
+    public void switchState() {
+        if (getState() == RobotState.ACTIVE) {
+            setState(RobotState.INACTIVE);
+        } else {
+            setState(RobotState.ACTIVE);
+        }
+    }
+
     /**
      * Applies the requested state transition.
      *
@@ -283,8 +299,27 @@ public final class RobotStateMachine {
             currentZone = alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
             return currentZone;
         } else {
-            return FieldZone.NEUTRAL;
+            if (pose.getY() > 4.2) {
+                return FieldZone.NEUTRAL_BOTTOM;
+            } else if (pose.getY() < 3.8) {
+                return FieldZone.NEUTRAL_TOP;
+            } else {
+                return FieldZone.NEUTRAL_CENTER;
+            }
         }
+    }
+
+    public String getGameData() {
+        return gameData;
+    }
+
+    public void setGameData(String data) {
+        gameData = data;
+        gotData = true;
+    }
+
+    public boolean hasData() {
+        return gotData;
     }
 
     public Alliance getAlliance() {
@@ -296,6 +331,36 @@ public final class RobotStateMachine {
     }
 
     enum FieldZone {
-        ALLIANCE, NEUTRAL, OPPONENT
+        ALLIANCE, NEUTRAL_TOP, NEUTRAL_CENTER, NEUTRAL_BOTTOM, OPPONENT
+    }
+
+    public boolean isActive() {
+        return getState() == RobotState.ACTIVE;
+    }
+
+    private Optional<Pose2d> getBestPoseTarget() {
+        if (checkZone() == FieldZone.ALLIANCE) {
+            return Optional.of(HubPose);
+        } else {
+            // return feed position
+            if (getAlliance() == Alliance.Blue) {
+                if (checkZone() == FieldZone.NEUTRAL_TOP) {
+                    // top blue pose
+                    return Optional.of(new Pose2d(2.26, 1.681, new Rotation2d(0)));
+                } else if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
+                    // bottom blue pose
+                    return Optional.of(new Pose2d(2.26, 5.835, new Rotation2d(0)));
+                }
+            } else {
+                if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
+                    // bottom red pose
+                    return Optional.of(new Pose2d(14.71, 5.835, new Rotation2d(0)));
+                } else if (checkZone() == FieldZone.NEUTRAL_TOP) {
+                    // top red pose
+                    return Optional.of(new Pose2d(14.71, 1.681, new Rotation2d(0)));
+                }
+            }
+        }
+        return Optional.empty();
     }
 }
