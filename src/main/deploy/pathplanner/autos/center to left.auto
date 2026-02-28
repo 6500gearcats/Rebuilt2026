@@ -11,15 +11,27 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "ShootFuel3s"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "left to neutral zone"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "neutral zone to left (climb)"
+            "name": "ShootFuel3s"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFuel3s"
           }
         }
       ]

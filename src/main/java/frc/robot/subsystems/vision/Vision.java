@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 
 public class Vision extends SubsystemBase {
@@ -181,5 +182,21 @@ public class Vision extends SubsystemBase {
 
   public void resetVisionPose(Pose2d pose) {
     estimator.resetPose(pose);
+  }
+  
+  public void throttleLimelight() {
+    for(VisionIO vision : m_visionOdometryCams) {
+      if(vision instanceof LimelightIO) {
+        ((LimelightIO)vision).throttleTemp();
+      }
+    }
+  }
+
+  public void resetLimelightThrottle() {
+    for(VisionIO vision : m_visionOdometryCams) {
+      if(vision instanceof LimelightIO) {
+        ((LimelightIO)vision).resetThrottle();
+      }
+    }
   }
 }

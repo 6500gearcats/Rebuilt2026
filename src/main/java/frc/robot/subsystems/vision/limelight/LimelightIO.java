@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers.LimelightResults;
@@ -231,4 +232,23 @@ public class LimelightIO implements VisionIO {
         return Optional.empty();
     }
 
+    public void throttleTemp() {
+        SmartDashboard.putNumber("Throttle", LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").getDouble(0));
+        boolean done = LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").setNumber(150);
+        if (done) {
+            System.out.println("Limelight has been throttled");
+        } else {
+            System.out.println("Limelight couldn't be thorttled");
+        }
+    }
+
+    public void resetThrottle() {
+        SmartDashboard.putNumber("Throttle", LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").getDouble(0));
+        boolean done = LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").setNumber(150);
+        if (done) {
+            System.out.println("Limelight's throttle has been reset");
+        } else {
+            System.out.println("Limelight's throttle couldn't be reset");
+        }
+    }
 }

@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 3.4,
-        "y": 7.3
+        "x": 2.732,
+        "y": 5.672
       },
       "prevControl": {
-        "x": 2.7388352864583343,
-        "y": 6.050489945023148
+        "x": 3.2627389443651924,
+        "y": 4.934236804564907
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,28 +30,23 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.19394985465116268,
-      "rotationDegrees": 107.8706744832809
-    },
-    {
-      "waypointRelativePos": 0.5803324854651158,
-      "rotationDegrees": 111.23939760408129
+      "waypointRelativePos": 1.0,
+      "rotationDegrees": 127.00000000000001
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "DeployIntake",
+      "name": "Intake",
       "waypointRelativePos": 0.06510416666666662,
       "endWaypointRelativePos": 0.16780279820261443,
-      "command": null
-    },
-    {
-      "name": "ShootFuel",
-      "waypointRelativePos": 0.13730596405228762,
-      "endWaypointRelativePos": 0.6058900122549021,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake"
+        }
+      }
     }
   ],
   "globalConstraints": {
@@ -64,13 +59,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.4039324805607989
+    "rotation": 125.53357834812067
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 2.187433986741095
+    "rotation": 0.2200669595600684
   },
   "useDefaultConstraints": true
 }

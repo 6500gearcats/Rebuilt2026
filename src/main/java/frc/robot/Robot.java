@@ -40,6 +40,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    m_robotContainer.disableInitCode();
   }
 
   @Override
@@ -48,6 +49,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledExit() {
+    m_robotContainer.disableExitCode();
   }
 
   @Override

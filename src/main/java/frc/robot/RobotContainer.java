@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -135,6 +136,9 @@ public class RobotContainer {
          */
         public RobotContainer() {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -3));
+                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1));
+                NamedCommands.registerCommand("AlignToHub", new AlignTurretToHub(m_turret));
+                NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
 
@@ -353,5 +357,13 @@ public class RobotContainer {
                                                 -45);
                         }
                 }
+        }
+
+        public void disableInitCode() {
+                m_vision.throttleLimelight();
+        }
+
+        public void disableExitCode() {
+                m_vision.resetLimelightThrottle();
         }
 }
