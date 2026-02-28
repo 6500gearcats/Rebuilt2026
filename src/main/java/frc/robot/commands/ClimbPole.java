@@ -14,9 +14,9 @@ public class ClimbPole extends Command {
   private Climber m_climber;
   private double m_speed;
 
-  public ClimbPole(Climber climber) {
+  public ClimbPole(Climber climber, double m_speed) {
     m_climber = climber;
-    m_speed = 0.5; // Put speed to change climber by
+    this.m_speed = m_speed; // Put speed to change climber by
 
     addRequirements(m_climber);
     // Use addRequirements() here to declare subsystem dependencies.

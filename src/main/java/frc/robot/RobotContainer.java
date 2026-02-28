@@ -60,12 +60,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
+import frc.robot.commands.ClimbPole;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.generated.TunerConstants2;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
@@ -121,6 +123,7 @@ public class RobotContainer {
 
         private final Intake m_intake = new Intake();
 
+        private final Climber m_climber = new Climber();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
@@ -281,7 +284,7 @@ public class RobotContainer {
                 // joystick.leftBumper().onTrue(drivetrain.runOnce(() ->
                 // drivetrain.seedFieldCentric()));
 
-                drivetrain.registerTelemetry(logger::telemeterize);
+                // drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
@@ -297,8 +300,9 @@ public class RobotContainer {
 
                 new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ShootingSequence(hopper, m_flywheel, m_turret));
-
-                joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+                joystick.x().whileTrue(new ClimbPole(m_climber, 0.2));
+                joystick.y().whileTrue(new ClimbPole(m_climber, -0.2));
+                // joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
