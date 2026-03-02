@@ -63,12 +63,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
+import frc.robot.commands.ClimbPole;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.generated.TunerConstants2;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
@@ -124,6 +126,8 @@ public class RobotContainer {
 
         private final Intake m_intake = new Intake();
 
+        private final Climber m_climber = new Climber();
+
         private final RangeFinder rangeFinder = new RangeFinder();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
@@ -147,6 +151,7 @@ public class RobotContainer {
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
                  NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
+                NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
