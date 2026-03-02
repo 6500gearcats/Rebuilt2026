@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "center to right"
+            "pathName": "center start to shooting pos"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "shooting pos to right"
           }
         },
         {

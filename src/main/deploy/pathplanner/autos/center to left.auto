@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "center to left"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "center to left"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AlignTurret1s"
+                }
+              }
+            ]
           }
         },
         {

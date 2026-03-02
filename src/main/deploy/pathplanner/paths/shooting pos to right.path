@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4,
-        "y": 4.0
+        "x": 2.0,
+        "y": 3.2
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8959972371287557,
-        "y": 3.1270416075519156
+        "x": 2.957117481995526,
+        "y": 2.9102999384560926
       },
       "isLocked": false,
       "linkedName": null
@@ -17,11 +17,11 @@
     {
       "anchor": {
         "x": 3.4,
-        "y": 0.6515406562054205
+        "y": 0.652
       },
       "prevControl": {
-        "x": 0.4938659058487871,
-        "y": 2.60527817403709
+        "x": 1.4,
+        "y": 0.6520000000000002
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,38 +30,43 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.23020530523255778,
-      "rotationDegrees": 179.03096866676094
-    },
-    {
-      "waypointRelativePos": 0.7257994186046502,
-      "rotationDegrees": -135.23516694236955
+      "waypointRelativePos": 0.5040485829959614,
+      "rotationDegrees": 180.0
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.17,
+      "maxWaypointRelativePos": 0.38,
+      "constraints": {
+        "maxVelocity": 0.2,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "DeployIntake",
-      "waypointRelativePos": 0.09969873366013071,
-      "endWaypointRelativePos": 0.6654016445287578,
+      "name": "ShootFuel",
+      "waypointRelativePos": 0.2,
+      "endWaypointRelativePos": 0.35,
       "command": {
         "type": "named",
         "data": {
-          "name": "Intake"
+          "name": "ShootFuel"
         }
       }
     },
     {
-      "name": "ShootFuel",
-      "waypointRelativePos": 0.2886029411764705,
-      "endWaypointRelativePos": 0.9487666034155575,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "ShootFuel3s"
-        }
-      }
+      "name": "Intake",
+      "waypointRelativePos": 0.5,
+      "endWaypointRelativePos": 0.8,
+      "command": null
     }
   ],
   "globalConstraints": {
@@ -80,7 +85,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

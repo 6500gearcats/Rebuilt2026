@@ -12,6 +12,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -131,16 +132,21 @@ public class RobotContainer {
         PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
 
+        SlewRateLimiter filterXLimiter = new SlewRateLimiter(20);
+        SlewRateLimiter filterYLimiter = new SlewRateLimiter(20);
+        SlewRateLimiter filterRotLimiter = new SlewRateLimiter(20);
+
         /**
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -3));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1));
-                NamedCommands.registerCommand("AlignToHub", new AlignTurretToHub(m_turret));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
+                NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
+                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
@@ -210,9 +216,9 @@ public class RobotContainer {
         // @formatter:off
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
+                        () -> drive.withVelocityX(filterXLimiter.calculate(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier)) // Drive forward with negative Y (forward)
+                                .withVelocityY(filterYLimiter.calculate(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier)) // Drive left with negative X (left)
+                                .withRotationalRate(filterRotLimiter.calculate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate)))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
