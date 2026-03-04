@@ -56,6 +56,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -288,7 +289,9 @@ public class RobotContainer {
 
                 // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
-
+                new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
+                                .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
+                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
