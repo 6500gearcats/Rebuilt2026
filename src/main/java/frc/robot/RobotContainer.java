@@ -150,7 +150,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
-                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
+                NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
                 NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
@@ -221,9 +221,9 @@ public class RobotContainer {
         // @formatter:off
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(filterXLimiter.calculate(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier)) // Drive forward with negative Y (forward)
-                                .withVelocityY(filterYLimiter.calculate(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier)) // Drive left with negative X (left)
-                                .withRotationalRate(filterRotLimiter.calculate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate)))); // Drive counterclockwise with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
@@ -283,11 +283,10 @@ public class RobotContainer {
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
                 // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
-                //                 .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
+                // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
                 joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
-
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
                 joystick.rightBumper().whileTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)));
