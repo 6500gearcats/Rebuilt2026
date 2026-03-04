@@ -146,7 +146,8 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
-                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -3));
+                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
+                NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(3));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
@@ -154,6 +155,9 @@ public class RobotContainer {
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
                 NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
+                NamedCommands.registerCommand("BopBop",
+                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
+                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 

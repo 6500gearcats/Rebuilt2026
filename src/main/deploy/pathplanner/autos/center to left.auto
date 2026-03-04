@@ -24,9 +24,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "ShootFuel3s"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "BopBop"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ShootFuel3s"
+                }
+              }
+            ]
           }
         },
         {
@@ -48,7 +61,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "IntakeFuel"
+                  "name": "IntakeFuelJason"
                 }
               }
             ]
