@@ -111,6 +111,7 @@ public class RobotContainer {
         private final CommandPS4Controller pranav = new CommandPS4Controller(0);
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
+        private final XboxController m_gunner = new XboxController(1);
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
 
@@ -285,18 +286,21 @@ public class RobotContainer {
                 // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
                 // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
-                joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
+
+                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
                 joystick.rightBumper().whileTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
-                new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1)
+                new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ShootingSequence(hopper, m_flywheel, m_turret));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-                joystick2.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
+                joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 // joystick.a().onTrue(new InstantCommand(() -> {
