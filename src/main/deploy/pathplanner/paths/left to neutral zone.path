@@ -148,19 +148,7 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "IntakeFuel",
-      "waypointRelativePos": 1.8848829854522573,
-      "endWaypointRelativePos": 4.1872232764073,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "IntakeFuel"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

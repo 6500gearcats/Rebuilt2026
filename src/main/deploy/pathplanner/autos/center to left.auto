@@ -30,9 +30,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "left to neutral zone"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "left to neutral zone"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeFuel"
+                }
+              }
+            ]
           }
         },
         {
