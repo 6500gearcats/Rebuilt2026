@@ -282,21 +282,22 @@ public class RobotContainer {
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
-                new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
-                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
+                // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
+                //                 .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
-                joystick.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                joystick.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
+
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
                 joystick.rightBumper().whileTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
-                new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)
+                new Trigger(() -> Math.abs(joystick2.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ShootingSequence(hopper, m_flywheel, m_turret));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-                joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
+                joystick2.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 // joystick.a().onTrue(new InstantCommand(() -> {

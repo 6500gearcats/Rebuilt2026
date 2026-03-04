@@ -30,13 +30,19 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "1stLTN"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "left to neutral zone"
+                  "pathName": "2ndLTN"
                 }
               },
               {
@@ -46,6 +52,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3rdLTN"
           }
         },
         {
