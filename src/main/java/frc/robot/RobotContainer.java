@@ -53,6 +53,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -65,6 +66,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.ClimbPole;
+
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
@@ -304,7 +309,7 @@ public class RobotContainer {
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ShootingSequence(hopper, m_flywheel, m_turret));
+                                .whileTrue(new ParallelCommandGroup(new RunCommand(()->joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)), new ShootingSequence(hopper, m_flywheel, m_turret))).onFalse(new InstantCommand(()->joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0)).andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
