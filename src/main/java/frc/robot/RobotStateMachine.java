@@ -140,7 +140,8 @@ public final class RobotStateMachine {
         }
 
         Pose2d nextPose = pose.plus(
-                new Transform2d(speeds.vxMetersPerSecond * 5, speeds.vyMetersPerSecond * 5, new Rotation2d()));
+                new Transform2d(speeds.vxMetersPerSecond * 2, speeds.vyMetersPerSecond * 2
+                , new Rotation2d()));
 
         double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
