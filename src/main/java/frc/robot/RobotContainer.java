@@ -76,6 +76,7 @@ import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.generated.TunerConstants2;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
@@ -97,7 +98,7 @@ import frc.robot.utility.ShooterValuesSenable;
 public class RobotContainer {
         @SuppressWarnings("unused")
         private double speedModify = 1;
-        private double MaxSpeed = TunerConstants2.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                        // speed
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
@@ -119,7 +120,7 @@ public class RobotContainer {
         private final CommandXboxController joystick2 = new CommandXboxController(1);
         private final XboxController m_gunner = new XboxController(1);
 
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
         private LedCANdle m_candle = new LedCANdle();
 
@@ -232,8 +233,8 @@ public class RobotContainer {
         // @formatter:off
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
                                 .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
@@ -309,7 +310,12 @@ public class RobotContainer {
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ParallelCommandGroup(new RunCommand(()->joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)), new ShootingSequence(hopper, m_flywheel, m_turret))).onFalse(new InstantCommand(()->joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0)).andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
+                                .whileTrue(new ParallelCommandGroup(new RunCommand(
+                                                () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
+                                                new ShootingSequence(hopper, m_flywheel, m_turret)))
+                                .onFalse(new InstantCommand(
+                                                () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
+                                                .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
