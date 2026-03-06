@@ -250,15 +250,46 @@ public final class RobotStateMachine {
             if (alliance.equals(DriverStation.Alliance.Red)) {
                 if (DriverStation.getMatchTime() > 130) {
                     setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 135) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 105) {
                     setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 110) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 85) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 60) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 30) {
+                    if (DriverStation.getMatchTime() < 35) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                     setState(RobotState.ACTIVE);
                 } else {
+                    switching = false;
                     setState(RobotState.ACTIVE);
                 }
             } else {
@@ -266,13 +297,38 @@ public final class RobotStateMachine {
                     setState(RobotState.ACTIVE);
                 } else if (DriverStation.getMatchTime() > 105) {
                     setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 110) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 85) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 60) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 30) {
                     setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 35) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else {
+                    switching = false;
                     setState(RobotState.ACTIVE);
                 }
             }
@@ -280,13 +336,38 @@ public final class RobotStateMachine {
             if (alliance.equals(DriverStation.Alliance.Blue)) {
                 if (DriverStation.getMatchTime() > 130) {
                     setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 135) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 105) {
                     setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 110) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 85) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 60) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 30) {
+                    switching = false;
                     setState(RobotState.ACTIVE);
                 } else {
                     setState(RobotState.ACTIVE);
@@ -296,13 +377,38 @@ public final class RobotStateMachine {
                     setState(RobotState.ACTIVE);
                 } else if (DriverStation.getMatchTime() > 105) {
                     setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 110) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 85) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 60) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else if (DriverStation.getMatchTime() > 30) {
                     setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 35) {
+                        switching = true;
+                    }
+                    else {
+                        switching = false;
+                    }
                 } else {
+                    switching = false;
                     setState(RobotState.ACTIVE);
                 }
             }
