@@ -31,8 +31,11 @@ public final class RobotStateMachine {
     private static RobotStateMachine instance;
 
     private RobotState state = RobotState.INACTIVE;
-    private String gameData = "";
+    private String gameData = "B";
     private boolean gotData = false;
+
+    private boolean switching = false;
+    private boolean postedValue = false;
 
     private Pose2d turretPose = new Pose2d();
 
@@ -91,6 +94,7 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        alliance = getAlliance();
         checkAlliance();
         refreshPoseFromVision();
         currentZone = checkZone();
@@ -98,10 +102,23 @@ public final class RobotStateMachine {
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
         turretPosePublisher.set(turretPose);
+        SmartDashboard.putBoolean("change fast", newPostedValue());
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
         SmartDashboard.putBoolean("IsActive", isActive());
+        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         updateTargetPose();
+    }
+
+    private boolean newPostedValue() {
+        if (switching) {
+            postedValue = !postedValue;
+            return postedValue;
+        }
+        else {
+            return false;
+        }
+
     }
 
     private void checkAlliance() {
@@ -232,52 +249,60 @@ public final class RobotStateMachine {
         if (gameData.contains("R")) {
             if (alliance.equals(DriverStation.Alliance.Red)) {
                 if (DriverStation.getMatchTime() > 130) {
-                    setState(RobotState.INACTIVE);
+                    setState(RobotState.ACTIVE);
                 } else if (DriverStation.getMatchTime() > 105) {
-                    setState(RobotState.ACTIVE);
+                    setState(RobotState.INACTIVE);
                 } else if (DriverStation.getMatchTime() > 80) {
-                    setState(RobotState.INACTIVE);
-                } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.ACTIVE);
-                } else if (DriverStation.getMatchTime() > 30) {
+                } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.ACTIVE);
+                } else {
+                    setState(RobotState.ACTIVE);
                 }
             } else {
                 if (DriverStation.getMatchTime() > 130) {
                     setState(RobotState.ACTIVE);
                 } else if (DriverStation.getMatchTime() > 105) {
-                    setState(RobotState.INACTIVE);
-                } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.ACTIVE);
-                } else if (DriverStation.getMatchTime() > 55) {
+                } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.ACTIVE);
                 } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.INACTIVE);
+                } else {
                     setState(RobotState.ACTIVE);
                 }
             }
         } else if (gameData.contains("B")) {
             if (alliance.equals(DriverStation.Alliance.Blue)) {
                 if (DriverStation.getMatchTime() > 130) {
-                    setState(RobotState.INACTIVE);
+                    setState(RobotState.ACTIVE);
                 } else if (DriverStation.getMatchTime() > 105) {
-                    setState(RobotState.ACTIVE);
+                    setState(RobotState.INACTIVE);
                 } else if (DriverStation.getMatchTime() > 80) {
-                    setState(RobotState.INACTIVE);
-                } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.ACTIVE);
-                } else if (DriverStation.getMatchTime() > 30) {
+                } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.ACTIVE);
+                } else {
+                    setState(RobotState.ACTIVE);
                 }
             } else {
                 if (DriverStation.getMatchTime() > 130) {
                     setState(RobotState.ACTIVE);
                 } else if (DriverStation.getMatchTime() > 105) {
-                    setState(RobotState.INACTIVE);
-                } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.ACTIVE);
-                } else if (DriverStation.getMatchTime() > 55) {
+                } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.INACTIVE);
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.ACTIVE);
                 } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.INACTIVE);
+                } else {
                     setState(RobotState.ACTIVE);
                 }
             }
