@@ -31,7 +31,7 @@ public final class RobotStateMachine {
     private static RobotStateMachine instance;
 
     private RobotState state = RobotState.INACTIVE;
-    private String gameData = "B";
+    private String gameData = "";
     private boolean gotData = false;
 
     private boolean switching = false;
@@ -71,6 +71,7 @@ public final class RobotStateMachine {
 
     private RobotStateMachine() {
         checkAlliance();
+
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
@@ -94,6 +95,7 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        gameData = DriverStation.getGameSpecificMessage();
         alliance = getAlliance();
         checkAlliance();
         refreshPoseFromVision();
@@ -102,7 +104,7 @@ public final class RobotStateMachine {
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
         turretPosePublisher.set(turretPose);
-        SmartDashboard.putBoolean("change fast", newPostedValue());
+        SmartDashboard.putBoolean("Hey guys we're switching", newPostedValue());
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
         SmartDashboard.putBoolean("IsActive", isActive());
