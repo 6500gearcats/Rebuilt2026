@@ -32,6 +32,7 @@ public class Flywheel extends SubsystemBase {
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
+  private double speedMultiplier = 0;
   TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
 
   TalonFXConfiguration talonFXConfigs;
@@ -43,7 +44,7 @@ public class Flywheel extends SubsystemBase {
     talonFXConfigs = new TalonFXConfiguration();
 
     // set slot 0 gains
-   var slot0Configs = talonFXConfigs.Slot0;
+    var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
     slot0Configs.kV = 9; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
@@ -63,7 +64,7 @@ public class Flywheel extends SubsystemBase {
       speedModifier = 1;
     }
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
-
+    SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
     // This method will be called once per scheduler run
   }
 
@@ -72,14 +73,24 @@ public class Flywheel extends SubsystemBase {
     // m_motor.set(speed);
 
     // set velocity to rps, add 0.5 V to overcome gravity
-    double speedValue = speed;
-    m_motor.setControl(m_request.withVelocity(speedValue).withFeedForward(0.5));
-    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
+    double speedValue = speed + (0.01 * speedMultiplier);
+    if (speedValue > 0) {
+      m_motor.setControl(m_request.withVelocity(speedValue).withFeedForward(0.5));
+      m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
+    }
   }
 
   public void stopMotor() {
     m_motor.set(0);
     m_motor2.set(0);
+  }
+
+  public void incrementMultiplierUp() {
+    speedMultiplier++;
+  }
+
+  public void incrementMultiplierDown() {
+    speedMultiplier--;
   }
 
   public void updateMotorConfigs() {

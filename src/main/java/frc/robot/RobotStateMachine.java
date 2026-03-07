@@ -116,8 +116,7 @@ public final class RobotStateMachine {
         if (switching) {
             postedValue = !postedValue;
             return postedValue;
-        }
-        else {
+        } else {
             return false;
         }
 
@@ -159,8 +158,7 @@ public final class RobotStateMachine {
         }
 
         Pose2d nextPose = pose.plus(
-                new Transform2d(speeds.vxMetersPerSecond * 2, speeds.vyMetersPerSecond * 2
-                , new Rotation2d()));
+                new Transform2d(speeds.vxMetersPerSecond * 2, speeds.vyMetersPerSecond * 2, new Rotation2d()));
 
         double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
@@ -254,39 +252,34 @@ public final class RobotStateMachine {
                     setState(RobotState.ACTIVE);
                     if (DriverStation.getMatchTime() < 140) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 105) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 115) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.ACTIVE);
                     if (DriverStation.getMatchTime() < 90) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 65) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 30) {
                     if (DriverStation.getMatchTime() < 40) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                     setState(RobotState.ACTIVE);
@@ -301,32 +294,28 @@ public final class RobotStateMachine {
                     setState(RobotState.ACTIVE);
                     if (DriverStation.getMatchTime() < 115) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 90) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.ACTIVE);
                     if (DriverStation.getMatchTime() < 65) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 30) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 40) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else {
@@ -340,32 +329,28 @@ public final class RobotStateMachine {
                     setState(RobotState.ACTIVE);
                     if (DriverStation.getMatchTime() < 140) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 105) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 115) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.ACTIVE);
                     if (DriverStation.getMatchTime() < 90) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 65) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 30) {
@@ -381,32 +366,28 @@ public final class RobotStateMachine {
                     setState(RobotState.ACTIVE);
                     if (DriverStation.getMatchTime() < 115) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 80) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 90) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 55) {
                     setState(RobotState.ACTIVE);
                     if (DriverStation.getMatchTime() < 65) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else if (DriverStation.getMatchTime() > 30) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 40) {
                         switching = true;
-                    }
-                    else {
+                    } else {
                         switching = false;
                     }
                 } else {
@@ -535,18 +516,18 @@ public final class RobotStateMachine {
             if (getAlliance() == Alliance.Blue) {
                 if (checkZone() == FieldZone.NEUTRAL_TOP) {
                     // top blue pose
-                    return Optional.of(new Pose2d(2.26, 1.681, new Rotation2d()));
+                    return Optional.of(new Pose2d(1.0, 1.681, new Rotation2d()));
                 } else if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
                     // bottom blue pose
-                    return Optional.of(new Pose2d(2.26, 5.835, new Rotation2d()));
+                    return Optional.of(new Pose2d(1.0, 5.835, new Rotation2d()));
                 }
             } else {
                 if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
                     // bottom red pose
-                    return Optional.of(new Pose2d(14.71, 5.835, new Rotation2d()));
+                    return Optional.of(new Pose2d(15.7, 5.835, new Rotation2d()));
                 } else if (checkZone() == FieldZone.NEUTRAL_TOP) {
                     // top red pose
-                    return Optional.of(new Pose2d(14.71, 1.681, new Rotation2d()));
+                    return Optional.of(new Pose2d(15.7, 1.681, new Rotation2d()));
                 }
             }
         }
