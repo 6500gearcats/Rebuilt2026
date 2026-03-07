@@ -103,7 +103,7 @@
   "folder": "LeftProjectHailMary",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 135.7
   },
   "useDefaultConstraints": true
 }

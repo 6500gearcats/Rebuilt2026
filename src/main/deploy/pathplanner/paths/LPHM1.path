@@ -31,7 +31,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.42914979757084765,
-      "rotationDegrees": -149.10654768664037
+      "rotationDegrees": 138.69240588846918
     }
   ],
   "constraintZones": [],
@@ -47,7 +47,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 135.76389846092997
   },
   "reversed": false,
   "folder": "LeftProjectHailMary",
