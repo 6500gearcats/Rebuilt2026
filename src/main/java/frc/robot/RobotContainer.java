@@ -256,7 +256,7 @@ public class RobotContainer {
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
                 joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
-                joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
+                joystick.leftBumper().whileTrue(new RunIntake(m_intake, -1));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(

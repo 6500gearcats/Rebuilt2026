@@ -29,7 +29,7 @@ public class RunIntake extends Command {
   @Override
   public void execute() {
     m_intake.setIntakeSpeed(speed);
-    m_intake.deployIntake(0.1);
+    m_intake.deployIntake(0.15);
   }
 
   // Called once the command ends or is interrupted.
