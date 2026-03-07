@@ -15,18 +15,6 @@
           "data": {
             "name": "ShootFuel3s"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "simple center to climb"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Climb"
-          }
         }
       ]
     }

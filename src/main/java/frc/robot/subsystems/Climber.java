@@ -22,18 +22,24 @@ public class Climber extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
   }
 
   public void setMotorSpeed(double speed) {
-    if (m_limitSwitch.get()) {
-      m_motor.set(0);
-    } else {
-      m_motor.set(speed);
-    }
+    // if ((getMotorPosition() < 1.2)) {
+    // if (speed < 0) {
+    // speed = 0;
+    // }
+    // }
+    m_motor.set(speed);
   }
 
   public boolean getLimitSwitchStatus() {
     return m_limitSwitch.get();
+  }
+
+  public double getMotorPosition() {
+    return m_motor.getPosition().getValueAsDouble();
   }
 
 }

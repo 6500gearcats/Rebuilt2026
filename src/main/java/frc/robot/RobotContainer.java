@@ -111,8 +111,6 @@ public class RobotContainer {
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-        private final Telemetry logger = new Telemetry(MaxSpeed);
-
         private final CommandXboxController joystick = new CommandXboxController(0);
         private final CommandPS4Controller pranav = new CommandPS4Controller(0);
 
@@ -153,7 +151,7 @@ public class RobotContainer {
         public RobotContainer() {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(3));
-                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1));
+                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
@@ -242,54 +240,6 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                // hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6,
-                // 1.7), hopper));
-
-                // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-                // joystick.b().whileTrue(drivetrain.applyRequest(
-                // () -> point.withModuleDirection(
-                // new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
-
-                // LED test controls
-                // joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40)));
-                // // gearcat teal!
-                // joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
-                // joystick.y().onTrue(new IntakeFuel(m_intake, 1));
-                // joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
-                // joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
-                // joystick.pov(90).whileTrue(new IntakeFuel(m_intake, 1));
-                // joystick.rightBumper().whileTrue(new RunCommand(() ->
-                // m_candle.colorWithBrightness(
-                // Math.sqrt(Math.pow(joystick.getLeftX(), 2) + Math.pow(joystick.getLeftY(),
-                // 2))
-                // )));
-
-                // joystick.leftTrigger().whileTrue(new RunCommand(() ->
-                // m_candle.colorWithBrightness(
-                // joystick.getLeftTriggerAxis()
-                // )));
-
-                // new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
-                // .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-                // () -> joystick2.getLeftTriggerAxis())));
-
-                // Change input str to
-                // joystick.rightBumper().onTrue(Commands.runOnce(() -> m_candle.cycleFlag()));
-
-                // Run SysId routines when holding back/start and X/Y.
-                // Note that each routine should be run exactly once in a single log.
-                // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-                // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-                // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-                // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-                // joystick.a().whileTrue(drivetrain.applyRequest(() ->
-                // drive.withRotationalRate(getAlignRate() * 0.1)));
-
-                // reset the field-centric heading on left bumper press
-                // joystick.leftBumper().onTrue(drivetrain.runOnce(() ->
-                // drivetrain.seedFieldCentric()));
-
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
@@ -305,25 +255,28 @@ public class RobotContainer {
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
-                joystick.rightBumper().whileTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)));
+                joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ParallelCommandGroup(new RunCommand(()->joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)), new ShootingSequence(hopper, m_flywheel, m_turret))).onFalse(new InstantCommand(()->joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0)).andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
+                                .whileTrue(new ParallelCommandGroup(new RunCommand(
+                                                () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
+                                                new ShootingSequence(hopper, m_flywheel, m_turret)))
+                                .onFalse(new InstantCommand(
+                                                () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
+                                                .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
-                // joystick.a().onTrue(new InstantCommand(() -> {
-                // ShooterValuesSenable data = (ShooterValuesSenable)
-                // SmartDashboard.getData("Shooter Values");
-                // if (data != null) {
-                // LogValues(data.getDist(), data.getShooterSpeed());
-                // }
-
-                // }));
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
+                new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
+                new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5                                                                    ));
+                new JoystickButton(m_gunner, XboxController.Button.kX.value)
+                                .onTrue(new InstantCommand(() -> m_turret.goToZero()));
+                new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
+                                .whileTrue(new ShootingSequence(hopper, m_flywheel));
         }
 
         /**

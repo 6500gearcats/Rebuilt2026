@@ -42,6 +42,6 @@ public class ClimbPole extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_climber.getLimitSwitchStatus();
+    return false; // m_climber.getLimitSwitchStatus();
   }
 }

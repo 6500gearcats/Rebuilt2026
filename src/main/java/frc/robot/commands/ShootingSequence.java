@@ -20,4 +20,10 @@ public class ShootingSequence extends ParallelCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(new RunHopper(hopper), new ShootFuel(flywheel), new AlignTurretToHub(turret), new CoolSnurbo(flywheel));
   }
+
+  public ShootingSequence(Hopper hopper, Flywheel flywheel) {
+    // Add your commands in the addCommands() call, e.g.
+    // addCommands(new FooCommand(), new BarCommand());
+    addCommands(new RunHopper(hopper), new ShootFuel(flywheel), new CoolSnurbo(flywheel));
+  }
 }
