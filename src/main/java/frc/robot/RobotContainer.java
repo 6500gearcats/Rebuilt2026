@@ -111,11 +111,11 @@ public class RobotContainer {
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-        private final CommandXboxController joystick = new CommandXboxController(0);
+        private final CommandXboxController joystick;
         private final CommandPS4Controller pranav = new CommandPS4Controller(0);
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
-        private final XboxController m_gunner = new XboxController(1);
+        private final XboxController m_gunner;
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
 
@@ -149,6 +149,8 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
+                joystick = robotStateMachine.getDriver();
+                m_gunner = robotStateMachine.getGunner();
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));

@@ -17,8 +17,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
@@ -69,11 +71,22 @@ public final class RobotStateMachine {
             .getStructTopic("TargetPose", Pose2d.struct)
             .publish();
 
+    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final XboxController m_gunner = new XboxController(1);
+
     private RobotStateMachine() {
         checkAlliance();
 
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+    }
+
+    public CommandXboxController getDriver() {
+        return joystick;
+    }
+
+    public XboxController getGunner() {
+        return m_gunner;
     }
 
     // 1.926m, Y: 1.524m Blue Allience Target Right
@@ -95,6 +108,8 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
+        SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
         gameData = DriverStation.getGameSpecificMessage();
         alliance = getAlliance();
         checkAlliance();
