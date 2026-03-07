@@ -272,7 +272,7 @@ public class RobotContainer {
 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
                 new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
-                new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5                                                                    ));
+                new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5));
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)

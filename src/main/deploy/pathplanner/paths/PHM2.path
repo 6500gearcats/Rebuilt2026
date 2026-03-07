@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.534450784593438,
-        "y": 2.8769900142653353
+        "x": 3.52151212553495,
+        "y": 2.5
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.7841047778899646,
-        "y": 2.8638414922534183
+        "x": 3.7711661188314767,
+        "y": 2.486851477988083
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.3958487874465044,
-        "y": 3.2004564907275324
+        "x": 6.265,
+        "y": 2.5
       },
       "prevControl": {
-        "x": 2.1465635546580932,
-        "y": 3.219347565700327
+        "x": 6.0157147672115885,
+        "y": 2.5188910749727946
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,8 +30,8 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.4372469635627513,
-      "rotationDegrees": -149.10654768664037
+      "waypointRelativePos": 0.0,
+      "rotationDegrees": 45.0
     }
   ],
   "constraintZones": [],
@@ -43,11 +43,11 @@
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": false
+    "unlimited": true
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 43.59808643524114
   },
   "reversed": false,
   "folder": "RightProjectHailMary",

@@ -3,7 +3,8 @@
   "robotLength": 0.86,
   "holonomicMode": true,
   "pathFolders": [
-    "New Folder"
+    "LeftProjectHailMary",
+    "RightProjectHailMary"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,
