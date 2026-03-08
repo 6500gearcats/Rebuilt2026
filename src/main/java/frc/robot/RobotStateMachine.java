@@ -32,7 +32,7 @@ import frc.robot.utility.RangeFinder;
 public final class RobotStateMachine {
     private static RobotStateMachine instance;
 
-    private RobotState state = RobotState.INACTIVE;
+    private RobotState state = RobotState.ACTIVE;
     private String gameData = "";
     private boolean gotData = false;
 

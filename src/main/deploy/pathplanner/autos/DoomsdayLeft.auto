@@ -9,43 +9,18 @@
           "data": {
             "commands": [
               {
+                "type": "path",
+                "data": {
+                  "pathName": "DDay1"
+                }
+              },
+              {
                 "type": "named",
                 "data": {
                   "name": "Intake"
                 }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "LPHM1"
-                }
               }
             ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "ShootFuel3s"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "BopBop"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LPHM2"
           }
         },
         {
@@ -55,13 +30,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LPHM3"
+                  "pathName": "DDay2"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "IntakeFuelJason"
+                  "name": "IntakeFuel"
                 }
               }
             ]
@@ -70,7 +45,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LPHM4"
+            "pathName": "DDay3"
           }
         },
         {
@@ -80,16 +55,47 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "BopBop"
+                  "name": "ShootFuel7s"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "DDay4"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "DDay5"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "ShootFuel10s"
+                  "name": "IntakeFuel"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "DDay6"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFuel7s"
           }
         }
       ]

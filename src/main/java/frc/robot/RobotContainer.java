@@ -156,7 +156,11 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
+                NamedCommands.registerCommand("ShootFuel10s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7));
+                NamedCommands.registerCommand("ShootFuel7s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(10.0));
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
                 NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
@@ -258,7 +262,7 @@ public class RobotContainer {
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
                 joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
-                joystick.leftBumper().whileTrue(new RunIntake(m_intake, -1));
+                joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(
