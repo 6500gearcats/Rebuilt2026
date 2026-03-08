@@ -17,26 +17,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "1.5PHM1"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "PHM4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeFuelJason"
+                  "pathName": "FinalHope1"
                 }
               }
             ]
@@ -45,7 +26,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "PHM5"
+            "pathName": "FinalHope2"
           }
         },
         {
@@ -92,10 +73,34 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "ShootFuel10s"
+                  "name": "ShootFuel7s"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "FinalHope3"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "FinalHope4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFuel10s"
           }
         }
       ]

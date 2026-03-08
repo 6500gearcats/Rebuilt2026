@@ -3,10 +3,10 @@
   "robotLength": 0.86,
   "holonomicMode": true,
   "pathFolders": [
-    "Artemis1",
+    "FinalHope",
+    "Artemis2",
     "Doomsday",
     "LeftProjectHailMary",
-    "Artemis2",
     "RightProjectHailMary"
   ],
   "autoFolders": [],
