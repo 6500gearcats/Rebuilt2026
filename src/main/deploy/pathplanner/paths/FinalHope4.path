@@ -4,24 +4,24 @@
     {
       "anchor": {
         "x": 0.597,
-        "y": 0.664
+        "y": 0.63
       },
       "prevControl": null,
       "nextControl": {
         "x": 0.43166028599522166,
-        "y": 0.39581587810924307
+        "y": 0.36181587810924304
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.732253922967189,
-        "y": 2.644094151212554
+        "x": 2.4605420827389435,
+        "y": 2.320627674750357
       },
       "prevControl": {
-        "x": 3.02431077651594,
-        "y": 2.947138970353527
+        "x": 2.7525989362876944,
+        "y": 2.62367249389133
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -144.09027692082236
+    "rotation": -144.0902769208224
   },
   "reversed": false,
   "folder": "FinalHope",

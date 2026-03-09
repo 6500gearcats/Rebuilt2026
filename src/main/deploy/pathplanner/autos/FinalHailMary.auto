@@ -75,19 +75,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "FinalHope3"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "FinalHope4"
+            "pathName": "FinalHailMary1"
           }
         }
       ]
