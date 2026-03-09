@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.61,
+        "y": 0.677
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.0072823121862635,
+        "y": 1.0833135084746006
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.4346647646219686,
+        "y": 2.462952924393724
+      },
+      "prevControl": {
+        "x": 0.49994819652359235,
+        "y": 1.677134529118749
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -144.09027692082236
+  },
+  "reversed": false,
+  "folder": "Artemis2",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 179.94855145913158
+  },
+  "useDefaultConstraints": true
+}

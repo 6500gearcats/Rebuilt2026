@@ -73,8 +73,11 @@ public class Flywheel extends SubsystemBase {
     // m_motor.set(speed);
 
     // set velocity to rps, add 0.5 V to overcome gravity
-    double speedValue = speed + (0.01 * speedMultiplier);
+    SmartDashboard.putNumber("flywheel initial speed", speed);
+    double speedValue = speed + (0.05 * speedMultiplier);
     if (speedValue > 0) {
+      SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
+
       m_motor.setControl(m_request.withVelocity(speedValue).withFeedForward(0.5));
       m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
     }

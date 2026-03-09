@@ -154,19 +154,23 @@ public class RobotContainer {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
+                NamedCommands.registerCommand("IntakeLong", new RunIntake(m_intake, -0.1).withTimeout(0.5));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
                 NamedCommands.registerCommand("ShootFuel10s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7));
-                NamedCommands.registerCommand("ShootFuel7s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(10.0));
+                NamedCommands.registerCommand("ShootFuel7s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7.0));
+                NamedCommands.registerCommand("ShootFuel5s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
                 NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
                 NamedCommands.registerCommand("BopBop",
                                 new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
+                NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
