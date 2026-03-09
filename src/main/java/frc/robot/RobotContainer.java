@@ -5,12 +5,14 @@
 package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -51,9 +53,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -61,12 +65,18 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
+import frc.robot.commands.ClimbPole;
+
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.generated.TunerConstants2;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
@@ -101,12 +111,11 @@ public class RobotContainer {
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-        private final Telemetry logger = new Telemetry(MaxSpeed);
-
-        private final CommandXboxController joystick = new CommandXboxController(0);
+        private final CommandXboxController joystick;
         private final CommandPS4Controller pranav = new CommandPS4Controller(0);
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
+        private final XboxController m_gunner;
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
 
@@ -122,51 +131,48 @@ public class RobotContainer {
 
         private final Intake m_intake = new Intake();
 
+        private final Climber m_climber = new Climber();
+
         private final RangeFinder rangeFinder = new RangeFinder();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
-
-        private final File logDir;
-        private final File logFile;
-        private BufferedWriter writer = null;
-        private final SendableChooser<Boolean> closeLogSendable = new SendableChooser<Boolean>();
-        private final SendableChooser<Boolean> shooterSendableChooser = new SendableChooser<Boolean>();
-        private final Sendable shooterSendable = new ShooterValuesSenable();
-
-        // private final Feeder m_feeder = new Feeder();
-        // private final Intake m_intake = new Intake();
-        // private final Shooter m_shooter = new Shooter();
 
         // Vision
         PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
 
+        SlewRateLimiter filterXLimiter = new SlewRateLimiter(20);
+        SlewRateLimiter filterYLimiter = new SlewRateLimiter(20);
+        SlewRateLimiter filterRotLimiter = new SlewRateLimiter(20);
+
         /**
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
-                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -3));
+                joystick = robotStateMachine.getDriver();
+                m_gunner = robotStateMachine.getGunner();
+                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
+                NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
+                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
+                NamedCommands.registerCommand("IntakeLong", new RunIntake(m_intake, -0.1).withTimeout(0.5));
+                NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.0));
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
+                NamedCommands.registerCommand("ShootFuel10s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(10.0));
+                NamedCommands.registerCommand("ShootFuel7s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7.0));
+                NamedCommands.registerCommand("ShootFuel5s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
+                NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
+                NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
+                NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
+                NamedCommands.registerCommand("BopBop",
+                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
+                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
+                NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
-                logDir = new File("log");
-                logDir.mkdirs();
-                logFile = new File(logDir, "shootFile.json");
-                logFile.setWritable(true);
-                closeLogSendable.setDefaultOption("false", false);
-                closeLogSendable.addOption("true", true);
-                SmartDashboard.putData("Close Buffer", closeLogSendable);
-
-                SmartDashboard.putData("Shooter Values", shooterSendable);
-
-                try {
-                        writer = Files.newBufferedWriter(logFile.toPath(), StandardOpenOption.CREATE,
-                                        StandardOpenOption.WRITE);
-                } catch (IOException e) {
-                        System.err.println("Could not open the JSON log file.");
-                        e.printStackTrace();
-                }
 
                 autoChooser = AutoBuilder.buildAutoChooser("testAuto");
                 SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -183,19 +189,18 @@ public class RobotContainer {
                                 LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 true);
-                                // LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
-                                // drivetrain.rotationSupplier(),
-                                // drivetrain.getAngularVel(),
-                                // true);
+                                LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
+                                                drivetrain.rotationSupplier(),
+                                                drivetrain.getAngularVel(),
+                                                true);
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
-                                                m_ll
-                                // m_ll2
-                                );
+                                                m_ll,
+                                                m_ll2);
                                 m_turret.goToZero();
                                 break;
                         case SIM:
@@ -245,83 +250,46 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                // hopper.setDefaultCommand(new RunCommand(() -> hopper.startAllMotors(1.6,
-                // 1.7), hopper));
-
-                // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-                // joystick.b().whileTrue(drivetrain.applyRequest(
-                // () -> point.withModuleDirection(
-                // new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
-
-                // LED test controls
-                // joystick.x().onTrue(Commands.runOnce(() -> m_candle.setLedColor(2, 92, 40)));
-                // // gearcat teal!
-                // joystick.y().onTrue(Commands.runOnce(() -> m_candle.setRainbowAnimation()));
-                // joystick.y().onTrue(new IntakeFuel(m_intake, 1));
-                // joystick.pov(0).whileTrue(new FeedFuel(m_feeder));
-                // joystick.pov(90).whileTrue(new ShootFuel(m_shooter, 1));
-                // joystick.pov(90).whileTrue(new IntakeFuel(m_intake, 1));
-                // joystick.rightBumper().whileTrue(new RunCommand(() ->
-                // m_candle.colorWithBrightness(
-                // Math.sqrt(Math.pow(joystick.getLeftX(), 2) + Math.pow(joystick.getLeftY(),
-                // 2))
-                // )));
-
-                // joystick.leftTrigger().whileTrue(new RunCommand(() ->
-                // m_candle.colorWithBrightness(
-                // joystick.getLeftTriggerAxis()
-                // )));
-
-                // new Trigger(() -> joystick2.getLeftTriggerAxis() > 0.01)
-                // .whileTrue(new RunCommand(() -> m_candle.colorWithBrightness(
-                // () -> joystick2.getLeftTriggerAxis())));
-
-                // Change input str to
-                // joystick.rightBumper().onTrue(Commands.runOnce(() -> m_candle.cycleFlag()));
-
-                // Run SysId routines when holding back/start and X/Y.
-                // Note that each routine should be run exactly once in a single log.
-                // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-                // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-                // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-                // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-                // joystick.a().whileTrue(drivetrain.applyRequest(() ->
-                // drive.withRotationalRate(getAlignRate() * 0.1)));
-
-                // reset the field-centric heading on left bumper press
-                // joystick.leftBumper().onTrue(drivetrain.runOnce(() ->
-                // drivetrain.seedFieldCentric()));
-
                 // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
-                new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
-                                .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
+                // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
+                // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
-                joystick.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                joystick.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
+                                .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
+                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
+                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
-                joystick.rightBumper().whileTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)));
+                joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
-                new Trigger(() -> Math.abs(joystick.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ShootingSequence(hopper, m_flywheel, m_turret));
+                new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
+                                .whileTrue(new ParallelCommandGroup(new RunCommand(
+                                                () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
+                                                new ShootingSequence(hopper, m_flywheel, m_turret)))
+                                .onFalse(new InstantCommand(
+                                                () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
+                                                .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
                 joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
-                // joystick.a().onTrue(new InstantCommand(() -> {
-                // ShooterValuesSenable data = (ShooterValuesSenable)
-                // SmartDashboard.getData("Shooter Values");
-                // if (data != null) {
-                // LogValues(data.getDist(), data.getShooterSpeed());
-                // }
-
-                // }));
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
+                new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
+                new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5));
+                new JoystickButton(m_gunner, XboxController.Button.kX.value)
+                                .onTrue(new InstantCommand(() -> m_turret.goToZero()));
+                new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
+                                .whileTrue(new ShootingSequence(hopper, m_flywheel));
+                new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
+
+                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
         }
 
         /**
@@ -340,8 +308,9 @@ public class RobotContainer {
                 Optional<Alliance> alliance = DriverStation.getAlliance();
                 if (alliance.isPresent()) {
                         if (alliance.get().equals(Alliance.Blue)) {
-                                drivetrain.resetPose(new Pose2d());
-                                drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                // drivetrain.resetPose(new Pose2d());
+                                // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
+                                drivetrain.seedFieldCentric();
 
                                 // GCD
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
@@ -351,13 +320,13 @@ public class RobotContainer {
                                                 45);
 
                                 // GCC
-                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                // 0);
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
 
-                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
-                                // 0, 150,
-                                // -45);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                                0, 150,
+                                                -45);
                         } else {
                                 // drivetrain.resetPose(new Pose2d());
                                 drivetrain.seedFieldCentric();
@@ -372,14 +341,22 @@ public class RobotContainer {
                                                 45);
 
                                 // GCC
-                                // LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                // drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                // 0);
+                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                0);
 
-                                // LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
-                                // 0, 150,
-                                // -45);
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                                0, 150,
+                                                -45);
                         }
                 }
+        }
+
+        public void disableInitCode() {
+                m_vision.throttleLimelight();
+        }
+
+        public void disableExitCode() {
+                m_vision.resetLimelightThrottle();
         }
 }

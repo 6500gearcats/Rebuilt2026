@@ -3,41 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 15.7,
-        "y": 1.68
+        "x": 3.81910128388017,
+        "y": 7.366704707560627
       },
       "prevControl": null,
       "nextControl": {
-        "x": 16.483652199074072,
-        "y": 1.6719299045138891
+        "x": 6.186875891583452,
+        "y": 7.366704707560627
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 9.05424269386574,
-        "y": 3.954495876736111
+        "x": 6.937,
+        "y": 6.797
       },
       "prevControl": {
-        "x": 8.564607693142362,
-        "y": 3.9387124430338543
-      },
-      "nextControl": {
-        "x": 9.543877694589119,
-        "y": 3.9702793104383676
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 6.096305278174036,
-        "y": 5.063623395149786
-      },
-      "prevControl": {
-        "x": 4.811388611507368,
-        "y": 5.134351549084972
+        "x": 6.92437945791726,
+        "y": 7.754864479315264
       },
       "nextControl": null,
       "isLocked": false,
@@ -57,11 +41,11 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 0.0
+    "velocity": 3.0,
+    "rotation": -50.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Doomsday",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

@@ -5,18 +5,24 @@
 package frc.robot;
 
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.RobotStateMachine.RobotState;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-  Timer m_gcTimer = new Timer();
+  private Timer m_gcTimer = new Timer();
+  private Timer stateTimer = new Timer();
   private final RobotContainer m_robotContainer;
+  private final RobotStateMachine m_RobotStateMachine;
 
   public Robot() {
     m_robotContainer = new RobotContainer();
+    m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);
     if (m_gcTimer.advanceIfElapsed(5)) {
       System.gc();
@@ -26,7 +32,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    RobotStateMachine.getInstance().periodic();
+    m_RobotStateMachine.periodic();
     if (m_gcTimer.advanceIfElapsed(0.1)) {
       System.gc();
     }
@@ -34,6 +40,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    m_robotContainer.disableInitCode();
   }
 
   @Override
@@ -42,6 +49,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledExit() {
+    m_robotContainer.disableExitCode();
   }
 
   @Override
@@ -52,6 +60,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
+    m_RobotStateMachine.setState(RobotState.ACTIVE);
   }
 
   @Override
@@ -71,6 +80,27 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    if (!m_RobotStateMachine.hasData()) {
+      m_RobotStateMachine.setGameData(DriverStation.getGameSpecificMessage());
+      if (!m_RobotStateMachine.getGameData().isEmpty()) {
+        switch (m_RobotStateMachine.getGameData().charAt(0)) {
+          case 'B':
+            if (m_RobotStateMachine.getAlliance().equals(Alliance.Blue)) {
+              m_RobotStateMachine.setState(RobotState.INACTIVE);
+            } else {
+              m_RobotStateMachine.setState(RobotState.ACTIVE);
+            }
+            break;
+          case 'R':
+            if (m_RobotStateMachine.getAlliance().equals(Alliance.Red)) {
+              m_RobotStateMachine.setState(RobotState.INACTIVE);
+            } else {
+              m_RobotStateMachine.setState(RobotState.ACTIVE);
+            }
+            break;
+        }
+      }
+    }
   }
 
   @Override

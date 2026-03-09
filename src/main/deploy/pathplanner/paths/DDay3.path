@@ -1,0 +1,95 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.701,
+        "y": 4.65
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.497576598093875,
+        "y": 4.915374284551889
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.539942938659058,
+        "y": 5.64586305278174
+      },
+      "prevControl": {
+        "x": 5.915927852635764,
+        "y": 5.434274424078532
+      },
+      "nextControl": {
+        "x": 5.322073104622174,
+        "y": 5.768471108865916
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.702653352353779,
+        "y": 5.64586305278174
+      },
+      "prevControl": {
+        "x": 3.9453638280912684,
+        "y": 5.705793220204178
+      },
+      "nextControl": {
+        "x": 3.1189709977439666,
+        "y": 5.501739973104193
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.654621968616262,
+        "y": 4.753095577746078
+      },
+      "prevControl": {
+        "x": 2.696436223080663,
+        "y": 4.506617245790536
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.789473684210525,
+      "rotationDegrees": 130.04392100161775
+    },
+    {
+      "waypointRelativePos": 2.15,
+      "rotationDegrees": 136.46076222452317
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 149.41271038744782
+  },
+  "reversed": false,
+  "folder": "Doomsday",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -84.4
+  },
+  "useDefaultConstraints": true
+}

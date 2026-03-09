@@ -49,10 +49,14 @@ public class AlignTurretToHub extends Command {
     Pose2d currPose = m_StateMachine.getTurretPose();
     Translation2d errorFromPrev = prevPose.minus(currPose).getTranslation();
     double errorFromPrevRot = prevTurretRot - m_turret.getConvertedTurretPosition();
-    if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
-        && prevPose.minus(currPose).getRotation().getDegrees() < 2 && errorFromPrevRot > 1) {
+    SmartDashboard.putNumber("errorFromPrev.getX", errorFromPrev.getX());
+    SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
+    SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
+    SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
+    /* if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
+        && prevPose.minus(currPose).getRotation().getDegrees() < 2 && errorFromPrevRot < 1) {
       return;
-    }
+    } */
     Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
     Translation2d robotToTarget = m_targetPose.getTranslation()

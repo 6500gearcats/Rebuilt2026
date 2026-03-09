@@ -3,52 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.534450784593438,
-        "y": 5.2059486447931524
+        "x": 0.61,
+        "y": 0.677
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.3200775531653024,
-        "y": 5.334572583650035
+        "x": 1.0072823121862635,
+        "y": 1.0833135084746006
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.9004564907275316,
-        "y": 5.671740370898717
+        "x": 2.4346647646219686,
+        "y": 2.462952924393724
       },
       "prevControl": {
-        "x": 3.0815977175463622,
-        "y": 5.3353352353780314
+        "x": 0.49994819652359235,
+        "y": 1.677134529118749
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": 127.00000000000001
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Intake",
-      "waypointRelativePos": 0.06510416666666662,
-      "endWaypointRelativePos": 0.16780279820261443,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Intake"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -59,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 125.53357834812067
+    "rotation": -144.09027692082236
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Artemis2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.2200669595600684
+    "rotation": 179.94855145913158
   },
   "useDefaultConstraints": true
 }

@@ -1,0 +1,109 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.383,
+        "y": 4.688
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.603759918389931,
+        "y": 4.805324585797142
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.3274322396576315,
+        "y": 5.529415121255349
+      },
+      "prevControl": {
+        "x": 3.068659058487874,
+        "y": 5.542353780313837
+      },
+      "nextControl": {
+        "x": 3.5771203243770935,
+        "y": 5.516930717019376
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.9927960057061345,
+        "y": 5.529415121255349
+      },
+      "prevControl": {
+        "x": 5.85412095664983,
+        "y": 5.737427694839812
+      },
+      "nextControl": {
+        "x": 6.131471054762439,
+        "y": 5.321402547670886
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.937318116975749,
+        "y": 6.7974037089871615
+      },
+      "prevControl": {
+        "x": 6.846747503566333,
+        "y": 7.056176890156919
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.910931174089058,
+      "rotationDegrees": -52.8848043068148
+    },
+    {
+      "waypointRelativePos": 1.8825910931173877,
+      "rotationDegrees": -58.53346444010113
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 2.2390891840607186,
+      "maxWaypointRelativePos": 3.0,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -50.07213287251456
+  },
+  "reversed": false,
+  "folder": "LeftProjectHailMary",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 135.7
+  },
+  "useDefaultConstraints": true
+}

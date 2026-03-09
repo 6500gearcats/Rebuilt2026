@@ -3,48 +3,54 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.534450784593438,
-        "y": 5.2059486447931524
+        "x": 3.4,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.3200775531653024,
-        "y": 5.334572583650035
+        "x": 4.220510065562471,
+        "y": 4.0649710190076895
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.9004564907275316,
-        "y": 5.671740370898717
+        "x": 2.0,
+        "y": 3.2
       },
       "prevControl": {
-        "x": 3.0815977175463622,
-        "y": 5.3353352353780314
+        "x": 1.6696023680650367,
+        "y": 3.3000040179195897
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": 127.00000000000001
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Intake",
-      "waypointRelativePos": 0.06510416666666662,
-      "endWaypointRelativePos": 0.16780279820261443,
+      "name": "DeployIntake",
+      "waypointRelativePos": 0.4503478810879213,
+      "endWaypointRelativePos": 0.8,
       "command": {
         "type": "named",
         "data": {
           "name": "Intake"
+        }
+      }
+    },
+    {
+      "name": "AlignTurret",
+      "waypointRelativePos": 0.7514231499051213,
+      "endWaypointRelativePos": 1.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "AlignTurret"
         }
       }
     }
@@ -59,13 +65,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 125.53357834812067
+    "rotation": -179.27477570094072
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.2200669595600684
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

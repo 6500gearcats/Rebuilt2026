@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 1.7663559751157414,
-        "y": 4.028898220486111
+        "x": 2.0982596291012836,
+        "y": 4.00265335235378
       },
       "prevControl": {
-        "x": 1.753496310763889,
-        "y": 5.451334563078705
+        "x": 2.0853999647494312,
+        "y": 5.425089694946374
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.35,
+      "waypointRelativePos": 0.3036437246963574,
       "rotationDegrees": -179.50060009212982
     },
     {
@@ -47,9 +47,14 @@
   "eventMarkers": [
     {
       "name": "ShootFuel",
-      "waypointRelativePos": 0.55,
+      "waypointRelativePos": 0.3870967741935533,
       "endWaypointRelativePos": 0.825303819444444,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "ShootFuel"
+        }
+      }
     }
   ],
   "globalConstraints": {

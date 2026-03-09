@@ -243,4 +243,9 @@ public final class Constants {
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
   }
+
+  public static class ClimberConstants {
+    public static final int kClimberMotorID = 25;
+    public static final int kClimberLimitSwitchID = 4;
+  }
 }

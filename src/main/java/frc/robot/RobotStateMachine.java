@@ -2,6 +2,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meter;
 
+import java.lang.StackWalker.Option;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,8 +17,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Vision;
@@ -28,7 +32,12 @@ import frc.robot.utility.RangeFinder;
 public final class RobotStateMachine {
     private static RobotStateMachine instance;
 
-    private RobotState state = RobotState.INACTIVE;
+    private RobotState state = RobotState.ACTIVE;
+    private String gameData = "";
+    private boolean gotData = false;
+
+    private boolean switching = false;
+    private boolean postedValue = false;
 
     private Pose2d turretPose = new Pose2d();
 
@@ -62,10 +71,22 @@ public final class RobotStateMachine {
             .getStructTopic("TargetPose", Pose2d.struct)
             .publish();
 
+    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final XboxController m_gunner = new XboxController(1);
+
     private RobotStateMachine() {
         checkAlliance();
+
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+    }
+
+    public CommandXboxController getDriver() {
+        return joystick;
+    }
+
+    public XboxController getGunner() {
+        return m_gunner;
     }
 
     // 1.926m, Y: 1.524m Blue Allience Target Right
@@ -87,6 +108,10 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
+        SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
+        gameData = DriverStation.getGameSpecificMessage();
+        alliance = getAlliance();
         checkAlliance();
         refreshPoseFromVision();
         currentZone = checkZone();
@@ -94,9 +119,22 @@ public final class RobotStateMachine {
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
         turretPosePublisher.set(turretPose);
+        SmartDashboard.putBoolean("Hey guys we're switching", newPostedValue());
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+        SmartDashboard.putBoolean("IsActive", isActive());
+        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         updateTargetPose();
+    }
+
+    private boolean newPostedValue() {
+        if (switching) {
+            postedValue = !postedValue;
+            return postedValue;
+        } else {
+            return false;
+        }
+
     }
 
     private void checkAlliance() {
@@ -121,15 +159,21 @@ public final class RobotStateMachine {
 
     public void updateTargetPose() {
         ChassisSpeeds speeds = getFieldSpeeds();
-        if (speeds == null) {
+        ChassisSpeeds robotRelSpeeds = getChassisSpeeds();
+        if (speeds == null && robotRelSpeeds == null) {
             return;
         }
 
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
+        if (robotRelSpeeds.vxMetersPerSecond < 0 && robotRelSpeeds.vyMetersPerSecond < 0) {
+            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.omegaRadiansPerSecond * 1.3,
+                    speeds.omegaRadiansPerSecond);
+        }
+
         Pose2d nextPose = pose.plus(
-                new Transform2d(speeds.vxMetersPerSecond * 5, speeds.vyMetersPerSecond * 5, new Rotation2d()));
+                new Transform2d(speeds.vxMetersPerSecond * 2, speeds.vyMetersPerSecond * 2, new Rotation2d()));
 
         double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
@@ -140,11 +184,15 @@ public final class RobotStateMachine {
         double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
                 + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2)) - 2 * 9.8 * dh) / 9.8;
 
-        targetPose = HubPose
-                .transformBy(new Transform2d(
-                        new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
-                                speeds.vyMetersPerSecond * timeOfFlight),
-                        new Rotation2d()));
+        Optional<Pose2d> bestPose = getBestPoseTarget();
+        if (bestPose.isEmpty()) {
+            return;
+        }
+
+        targetPose = bestPose.get().transformBy(new Transform2d(
+                new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
+                        speeds.vyMetersPerSecond * timeOfFlight),
+                new Rotation2d()));
 
         targetPosePublisher.set(targetPose);
     }
@@ -213,6 +261,157 @@ public final class RobotStateMachine {
      * @return current state enum
      */
     public RobotState getState() {
+        if (gameData.contains("R")) {
+            if (alliance.equals(DriverStation.Alliance.Red)) {
+                if (DriverStation.getMatchTime() > 130) {
+                    setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 140) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 105) {
+                    setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 115) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 80) {
+                    setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 90) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 65) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 30) {
+                    if (DriverStation.getMatchTime() < 40) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                    setState(RobotState.ACTIVE);
+                } else {
+                    switching = false;
+                    setState(RobotState.ACTIVE);
+                }
+            } else {
+                if (DriverStation.getMatchTime() > 130) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 105) {
+                    setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 115) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 80) {
+                    setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 90) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 65) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 40) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else {
+                    switching = false;
+                    setState(RobotState.ACTIVE);
+                }
+            }
+        } else if (gameData.contains("B")) {
+            if (alliance.equals(DriverStation.Alliance.Blue)) {
+                if (DriverStation.getMatchTime() > 130) {
+                    setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 140) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 105) {
+                    setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 115) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 80) {
+                    setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 90) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 65) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 30) {
+                    switching = false;
+                    setState(RobotState.ACTIVE);
+                } else {
+                    setState(RobotState.ACTIVE);
+                }
+            } else {
+                if (DriverStation.getMatchTime() > 130) {
+                    setState(RobotState.ACTIVE);
+                } else if (DriverStation.getMatchTime() > 105) {
+                    setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 115) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 80) {
+                    setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 90) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 55) {
+                    setState(RobotState.ACTIVE);
+                    if (DriverStation.getMatchTime() < 65) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else if (DriverStation.getMatchTime() > 30) {
+                    setState(RobotState.INACTIVE);
+                    if (DriverStation.getMatchTime() < 40) {
+                        switching = true;
+                    } else {
+                        switching = false;
+                    }
+                } else {
+                    switching = false;
+                    setState(RobotState.ACTIVE);
+                }
+            }
+        }
+
         return state;
     }
 
@@ -229,6 +428,14 @@ public final class RobotStateMachine {
             return;
         refreshPoseFromVision();
         update(next);
+    }
+
+    public void switchState() {
+        if (getState() == RobotState.ACTIVE) {
+            setState(RobotState.INACTIVE);
+        } else {
+            setState(RobotState.ACTIVE);
+        }
     }
 
     /**
@@ -277,19 +484,68 @@ public final class RobotStateMachine {
             currentZone = alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
             return currentZone;
         } else {
-            return FieldZone.NEUTRAL;
+            if (pose.getY() > 4.2) {
+                return FieldZone.NEUTRAL_BOTTOM;
+            } else if (pose.getY() < 3.8) {
+                return FieldZone.NEUTRAL_TOP;
+            } else {
+                return FieldZone.NEUTRAL_CENTER;
+            }
         }
+    }
+
+    public String getGameData() {
+        return gameData;
+    }
+
+    public void setGameData(String data) {
+        gameData = data;
+        gotData = true;
+    }
+
+    public boolean hasData() {
+        return gotData;
     }
 
     public Alliance getAlliance() {
         return DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
     }
 
-    enum RobotState {
+    public enum RobotState {
         ACTIVE, INACTIVE
     }
 
-    enum FieldZone {
-        ALLIANCE, NEUTRAL, OPPONENT
+    public enum FieldZone {
+        ALLIANCE, NEUTRAL_TOP, NEUTRAL_CENTER, NEUTRAL_BOTTOM, OPPONENT
+    }
+
+    public boolean isActive() {
+        return getState() == RobotState.ACTIVE;
+    }
+
+    private Optional<Pose2d> getBestPoseTarget() {
+        if (checkZone() == FieldZone.ALLIANCE) {
+            return Optional.of(HubPose);
+        } else {
+            // return feed position
+            if (getAlliance() == Alliance.Blue) {
+                if (checkZone() == FieldZone.NEUTRAL_TOP) {
+                    // top blue pose
+                    return Optional.of(new Pose2d(1.0, 1.681, new Rotation2d()));
+                } else if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
+                    // bottom blue pose
+                    return Optional.of(new Pose2d(1.0, 5.835, new Rotation2d()));
+                }
+            } else {
+                if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
+                    // bottom red pose
+                    return Optional.of(new Pose2d(15.7, 5.835, new Rotation2d()));
+                } else if (checkZone() == FieldZone.NEUTRAL_TOP) {
+                    // top red pose
+                    return Optional.of(new Pose2d(15.7, 1.681, new Rotation2d()));
+                }
+            }
+        }
+        return Optional.empty();
     }
 }

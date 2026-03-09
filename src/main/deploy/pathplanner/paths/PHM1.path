@@ -4,24 +4,24 @@
     {
       "anchor": {
         "x": 3.534450784593438,
-        "y": 5.2059486447931524
+        "y": 2.8769900142653353
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.3200775531653024,
-        "y": 5.334572583650035
+        "x": 3.7841047778899646,
+        "y": 2.8638414922534183
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.9004564907275316,
-        "y": 5.671740370898717
+        "x": 2.3958487874465044,
+        "y": 3.2004564907275324
       },
       "prevControl": {
-        "x": 3.0815977175463622,
-        "y": 5.3353352353780314
+        "x": 2.1465635546580932,
+        "y": 3.219347565700327
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,25 +30,13 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": 127.00000000000001
+      "waypointRelativePos": 0.4372469635627513,
+      "rotationDegrees": -149.10654768664037
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Intake",
-      "waypointRelativePos": 0.06510416666666662,
-      "endWaypointRelativePos": 0.16780279820261443,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Intake"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -59,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 125.53357834812067
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "RightProjectHailMary",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.2200669595600684
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
