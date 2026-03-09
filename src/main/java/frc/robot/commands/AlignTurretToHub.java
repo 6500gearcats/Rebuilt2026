@@ -87,7 +87,7 @@ public class AlignTurretToHub extends Command {
         newError = 110 * (Math.abs(newError) / newError);
       }
     }
-    if ((Math.abs(newError) > 0.005) && (Math.abs(turretToTargetAngle.getDegrees()) < 10)) {
+    if ((Math.abs(newError) > 0.005) && (Math.abs(turretToTargetAngle.getDegrees()) < 0.5)) {
       m_turret.setPosition(newError);
     }
 
