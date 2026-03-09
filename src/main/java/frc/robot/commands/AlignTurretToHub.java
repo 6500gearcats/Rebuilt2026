@@ -53,10 +53,13 @@ public class AlignTurretToHub extends Command {
     SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
     SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
     SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
-    /* if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
-        && prevPose.minus(currPose).getRotation().getDegrees() < 2 && errorFromPrevRot < 1) {
-      return;
-    } */
+    /*
+     * if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
+     * && prevPose.minus(currPose).getRotation().getDegrees() < 2 &&
+     * errorFromPrevRot < 1) {
+     * return;
+     * }
+     */
     Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
     Translation2d robotToTarget = m_targetPose.getTranslation()
@@ -84,17 +87,11 @@ public class AlignTurretToHub extends Command {
         newError = 110 * (Math.abs(newError) / newError);
       }
     }
-    if (Math.abs(newError) > 0.005) {
-
+    if ((Math.abs(newError) > 0.005) && (Math.abs(turretToTargetAngle.getDegrees()) < 10)) {
       m_turret.setPosition(newError);
     }
 
-    // double error = pid.calculate(m_turret.getConvertedTurretPosition(),
-    // newError); // sets turret speed
-    // m_turret.setSpeed(error);
     SmartDashboard.putNumber("tunring_pos_setpoint", newError);
-    // SmartDashboard.putNumber("turretTurnRate", rate);
-    // m_turret.setSpeed(rate);
   }
 
   // Called once the command ends or is interrupted.

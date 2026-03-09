@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.hal.simulation.RoboRioDataJNI;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
 import frc.robot.RobotStateMachine.FieldZone;
@@ -32,9 +33,11 @@ public class RunHopper extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) { return; }
-    if (counter > 3) {
-      
+    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
+      return;
+    }
+    if ((counter > 3) && (Math.abs(SmartDashboard.getNumber("turretError", 0)) < 10)) {
+
       m_hopper.startAllMotors(-0.9, 1);
     }
     counter++;
