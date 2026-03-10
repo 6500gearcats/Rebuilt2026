@@ -84,8 +84,7 @@ public class AlignTurretToHub extends Command {
       }
     } else {
       if (Math.abs(newError) > 103) {
-        newError = 110 * (Math.abs(newError) / newError);
-      }
+        newError = 103 * (Math.abs(newError) / newError); //changed from 110, think this fixes the limit error
     }
     if ((Math.abs(newError) > 0.005) && (Math.abs(turretToTargetAngle.getDegrees()) < 0.5)) {
       m_turret.setPosition(newError);
