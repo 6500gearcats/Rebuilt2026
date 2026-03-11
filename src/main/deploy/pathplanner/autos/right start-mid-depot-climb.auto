@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "right start over bump"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "middle to left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFuel3s"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "left to depot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depot to climb"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

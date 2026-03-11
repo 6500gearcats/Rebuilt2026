@@ -1,0 +1,122 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.8,
+        "y": 4.0
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.790390625000001,
+        "y": 4.455707768458947
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.8,
+        "y": 5.206272930070465
+      },
+      "prevControl": {
+        "x": 7.78942502489277,
+        "y": 4.802778033088235
+      },
+      "nextControl": {
+        "x": 7.815408351616466,
+        "y": 5.794188379999198
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.162982626522289,
+        "y": 5.7213786046645225
+      },
+      "prevControl": {
+        "x": 5.797064014509612,
+        "y": 5.767276096717985
+      },
+      "nextControl": {
+        "x": 2.5289012385349654,
+        "y": 5.6754811126110605
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.0,
+        "y": 4.75
+      },
+      "prevControl": {
+        "x": 2.531122041590074,
+        "y": 5.364667442172182
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 90.39311220674206
+    },
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 89.50571303672508
+    },
+    {
+      "waypointRelativePos": 2.5,
+      "rotationDegrees": 139.26790689162476
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Intake",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 1.286429298885076,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake"
+        }
+      }
+    },
+    {
+      "name": "ShootFuel",
+      "waypointRelativePos": 2.4226254288164775,
+      "endWaypointRelativePos": 3.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "ShootFuel"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "useDefaultConstraints": true
+}

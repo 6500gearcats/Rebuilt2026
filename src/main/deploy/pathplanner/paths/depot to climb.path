@@ -1,0 +1,93 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.5,
+        "y": 6.0
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 0.8974332682291666,
+        "y": 5.923126053155638
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.027159543504902,
+        "y": 5.6418005610447315
+      },
+      "prevControl": {
+        "x": 1.0334507864845934,
+        "y": 5.891721389031857
+      },
+      "nextControl": {
+        "x": 1.0162376982614831,
+        "y": 5.207928174428321
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.0393764839920343,
+        "y": 4.772592534083946
+      },
+      "prevControl": {
+        "x": 1.0432808670343139,
+        "y": 5.053708113128064
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "ShootFuel",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 2.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "ShootFuel"
+        }
+      }
+    },
+    {
+      "name": "Climb",
+      "waypointRelativePos": 1.8953419811320709,
+      "endWaypointRelativePos": 1.9964488636363638,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Climb"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -179.13218614091394
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -179.8471190681841
+  },
+  "useDefaultConstraints": true
+}
