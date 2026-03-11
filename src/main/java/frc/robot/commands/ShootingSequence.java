@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.turret.Turret;
-import frc.robot.utility.RangeFinder;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:

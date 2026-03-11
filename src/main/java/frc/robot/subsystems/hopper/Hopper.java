@@ -4,28 +4,40 @@
 
 package frc.robot.subsystems.hopper;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
+import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.subsystems.hopper.indexer.IndexerIO;
+import frc.robot.subsystems.hopper.indexer.IndexerIOInputsAutoLogged;
+import frc.robot.subsystems.hopper.kicker.KickerIO;
+import frc.robot.subsystems.hopper.kicker.KickerIOInputsAutoLogged;
 
 /**
  * Hopper subsystem that controls the indexer and kicker motors.
  */
 public class Hopper extends SubsystemBase {
   /** Creates a new Hopper. */
-  TalonFX m_hopperMotor = new TalonFX(Constants.MotorConstants.kIndexerMotorID);
-  TalonFX m_kickerMotor = new TalonFX(Constants.MotorConstants.kKickerMotorID);
+
+  IndexerIO m_indexerIO;
+  KickerIO m_kickerIO;
+
+  IndexerIOInputsAutoLogged indexerInputs = new IndexerIOInputsAutoLogged();
+  KickerIOInputsAutoLogged kickerInputs = new KickerIOInputsAutoLogged();
+
+  public Hopper(IndexerIO indexerIO, KickerIO kickerIO) {
+    m_indexerIO = indexerIO;
+    m_kickerIO = kickerIO;
+  }
 
   public Hopper() {
   }
 
   @Override
   public void periodic() {
+    m_indexerIO.updateInputs(indexerInputs);
+    m_kickerIO.updateInputs(kickerInputs);
+    Logger.processInputs("Indexer", indexerInputs);
+    Logger.processInputs("Kicker", kickerInputs);
   }
 
   /**
@@ -35,20 +47,21 @@ public class Hopper extends SubsystemBase {
    * @param kickerSpeed speed for the kicker motor
    */
   public void startAllMotors(double hopperSpeed, double kickerSpeed) {
-    m_hopperMotor.set(hopperSpeed);
-    m_kickerMotor.set(kickerSpeed);
+    m_indexerIO.setSpeed(hopperSpeed);
+    m_kickerIO.setSpeed(kickerSpeed);
   }
 
   public void stopAllMotors() {
-    m_hopperMotor.set(0);
-    m_kickerMotor.set(0);
+    m_indexerIO.setSpeed(0);
+    m_kickerIO.setSpeed(0);
   }
 
+  // Index = hopper sorry for confusion
   public void setHopperSpeed(double speed) {
-    m_hopperMotor.set(speed);
+    m_indexerIO.setSpeed(speed);
   }
 
   public void setKickerMotorSpeed(double speed) {
-    m_kickerMotor.set(speed);
+    m_kickerIO.setSpeed(speed);
   }
 }

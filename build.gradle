@@ -132,7 +132,8 @@ gversion {
     srcDir       = "src/main/java/"
     classPackage = "frc.robot"
     className    = "BuildConstants"
-    dateFormat   = "yyyy-MM-dd HH:mm:ss z"
+    dateFormat   = "MM-dd-yyyy HH:mm:ss z"
     timeZone     = "America/New_York" // Change to your local time zone
     indent       = "  "
 }
+createVersionFile.outputs.upToDateWhen { false }

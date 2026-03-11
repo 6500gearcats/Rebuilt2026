@@ -32,9 +32,11 @@ public class RunHopper extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) { return; }
+    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
+      return;
+    }
     if (counter > 3) {
-      
+
       m_hopper.startAllMotors(-0.9, 1);
     }
     counter++;

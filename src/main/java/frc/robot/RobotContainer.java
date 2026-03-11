@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -13,75 +12,52 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.derive;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.StandardOpenOption;
 import java.util.Optional;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
-import javax.crypto.ShortBufferException;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.photonvision.simulation.SimCameraProperties;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.ClimbPole;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.MoveTurret;
-import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
-import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.generated.TunerConstants2;
-import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
+import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.indexer.SimIndexerIO;
+import frc.robot.subsystems.hopper.indexer.TalonFXIndexerIO;
+import frc.robot.subsystems.hopper.kicker.SimKickerIO;
+import frc.robot.subsystems.hopper.kicker.TalonFXKickerIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
@@ -89,7 +65,6 @@ import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.utility.RangeFinder;
-import frc.robot.utility.ShooterValuesSenable;
 
 /**
  * Central robot wiring for subsystems, commands, and operator bindings.
@@ -121,7 +96,7 @@ public class RobotContainer {
 
         private LedCANdle m_candle = new LedCANdle();
 
-        private final Hopper hopper = new Hopper();
+        private final Hopper hopper;
 
         private final SendableChooser<Command> autoChooser;
 
@@ -151,26 +126,6 @@ public class RobotContainer {
         public RobotContainer() {
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
-                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
-                NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
-                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
-                NamedCommands.registerCommand("IntakeLong", new RunIntake(m_intake, -0.1).withTimeout(0.5));
-                NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
-                NamedCommands.registerCommand("ShootFuel3s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
-                NamedCommands.registerCommand("ShootFuel10s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(10.0));
-                NamedCommands.registerCommand("ShootFuel7s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7.0));
-                NamedCommands.registerCommand("ShootFuel5s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
-                NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
-                NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
-                NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
-                NamedCommands.registerCommand("BopBop",
-                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
-                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
-                NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
@@ -201,6 +156,9 @@ public class RobotContainer {
                                                 m_photonVisionIO2,
                                                 m_ll,
                                                 m_ll2);
+                                TalonFXIndexerIO indexerIO = new TalonFXIndexerIO();
+                                TalonFXKickerIO kickerIO = new TalonFXKickerIO();
+                                hopper = new Hopper(indexerIO, kickerIO);
                                 m_turret.goToZero();
                                 break;
                         case SIM:
@@ -221,11 +179,16 @@ public class RobotContainer {
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 camSim);
+                                SimKickerIO simKickerIO = new SimKickerIO(false);
+                                SimIndexerIO simIndexerIO = new SimIndexerIO(false);
+                                hopper = new Hopper(simIndexerIO, simKickerIO);
                                 break;
                         default:
                                 m_vision = new Vision();
+                                hopper = new Hopper();
                                 break;
                 }
+                namedCommands();
                 robotStateMachine.bindVision(m_vision);
                 robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();
@@ -358,5 +321,29 @@ public class RobotContainer {
 
         public void disableExitCode() {
                 m_vision.resetLimelightThrottle();
+        }
+
+        public void namedCommands() {
+                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
+                NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
+                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
+                NamedCommands.registerCommand("IntakeLong", new RunIntake(m_intake, -0.1).withTimeout(0.5));
+                NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
+                NamedCommands.registerCommand("ShootFuel3s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
+                NamedCommands.registerCommand("ShootFuel10s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(10.0));
+                NamedCommands.registerCommand("ShootFuel7s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7.0));
+                NamedCommands.registerCommand("ShootFuel5s",
+                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
+                NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
+                NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
+                NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
+                NamedCommands.registerCommand("BopBop",
+                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
+                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
+                NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
+
         }
 }
