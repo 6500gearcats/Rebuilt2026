@@ -9,8 +9,10 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.hopper.indexer.IndexerIO;
 import frc.robot.subsystems.hopper.indexer.IndexerIOInputsAutoLogged;
+import frc.robot.subsystems.hopper.indexer.TalonFXIndexerIO;
 import frc.robot.subsystems.hopper.kicker.KickerIO;
 import frc.robot.subsystems.hopper.kicker.KickerIOInputsAutoLogged;
+import frc.robot.subsystems.hopper.kicker.TalonFXKickerIO;
 
 /**
  * Hopper subsystem that controls the indexer and kicker motors.
@@ -30,6 +32,8 @@ public class Hopper extends SubsystemBase {
   }
 
   public Hopper() {
+    m_indexerIO = new TalonFXIndexerIO();
+    m_kickerIO = new TalonFXKickerIO();
   }
 
   @Override

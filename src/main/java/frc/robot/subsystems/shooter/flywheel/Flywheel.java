@@ -40,6 +40,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Flywheel() {
+    io = new TalonFXFlywheelIO();
   }
 
   @Override

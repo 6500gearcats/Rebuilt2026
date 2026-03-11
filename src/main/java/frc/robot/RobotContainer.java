@@ -135,10 +135,7 @@ public class RobotContainer {
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
-                autoChooser = AutoBuilder.buildAutoChooser("testAuto");
-                SmartDashboard.putData("Auto Chooser", autoChooser);
-                configureBindings();
-                CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+                // Initialize hardware-backed subsystems before wiring commands and PathPlanner
                 switch (RobotConstants.currentMode) {
                         case REAL:
                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", false,
@@ -217,7 +214,18 @@ public class RobotContainer {
                                 m_turret = new Turret();
                                 break;
                 }
+                // Register named PathPlanner commands now that subsystems are initialized
                 namedCommands();
+
+                // Build chooser after named commands are registered so PathPlanner can create
+                // any commands referenced by autonomous paths without warnings.
+                autoChooser = AutoBuilder.buildAutoChooser("testAuto");
+                SmartDashboard.putData("Auto Chooser", autoChooser);
+
+                // Configure input bindings and default commands now that subsystems exist
+                configureBindings();
+                CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+
                 robotStateMachine.bindVision(m_vision);
                 robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();

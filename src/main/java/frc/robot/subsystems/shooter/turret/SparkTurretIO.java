@@ -3,16 +3,12 @@ package frc.robot.subsystems.shooter.turret;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.Constants;
 
 public class SparkTurretIO implements TurretIO {
     private final SparkMax motor;
-    private final DigitalInput limitSwitch;
-
     public SparkTurretIO() {
         motor = new SparkMax(Constants.MotorConstants.kTurretYawMotorID, MotorType.kBrushless);
-        limitSwitch = new DigitalInput(3);
     }
 
     @Override
@@ -40,9 +36,7 @@ public class SparkTurretIO implements TurretIO {
     public void updateInputs(TurretIOInputs inputs) {
         inputs.motorPositionRotations = 0.0;
         inputs.motorVelocityRps = 0.0;
-        inputs.motorAppliedOutput = motor.get();
-        inputs.limitSwitch = limitSwitch.get();
-    }
+        inputs.motorAppliedOutput = motor.get();    }
 
     @Override
     public double getMotorPosition() {

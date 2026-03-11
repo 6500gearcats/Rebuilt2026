@@ -25,7 +25,7 @@ import frc.robot.subsystems.shooter.flywheel.FlywheelIO;
  */
 public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
-  private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
+
   private PositionVoltage m_request;
   private final DigitalInput m_switch = new DigitalInput(3);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
@@ -44,6 +44,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Turret() {
+    io = new TalonFXTurretIO();
   }
 
   @Override
@@ -82,7 +83,7 @@ public class Turret extends SubsystemBase {
         }
       }
     }
-    m_motor.set(speed);
+    io.setSpeed(speed);
   }
 
   public void toggleOverride() {

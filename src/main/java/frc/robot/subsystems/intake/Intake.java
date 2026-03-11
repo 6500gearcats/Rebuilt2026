@@ -19,7 +19,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Intake() {
-    io = null;
+    io = new TalonFXIntakeIO();
   }
 
   @Override

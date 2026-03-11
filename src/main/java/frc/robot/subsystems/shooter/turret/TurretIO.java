@@ -8,7 +8,6 @@ public interface TurretIO {
         double motorPositionRotations;
         double motorVelocityRps;
         double motorAppliedOutput;
-        boolean limitSwitch;
     }
 
     void setSpeed(double speed);

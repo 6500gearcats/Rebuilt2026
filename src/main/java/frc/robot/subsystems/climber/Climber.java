@@ -26,11 +26,6 @@ public class Climber extends SubsystemBase {
   }
 
   public void setMotorSpeed(double speed) {
-    // if ((getMotorPosition() < 1.2)) {
-    // if (speed < 0) {
-    // speed = 0;
-    // }
-    // }
     m_motor.set(speed);
   }
 

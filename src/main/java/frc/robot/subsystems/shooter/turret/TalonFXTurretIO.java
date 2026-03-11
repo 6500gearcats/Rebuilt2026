@@ -5,19 +5,16 @@ import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
 public class TalonFXTurretIO implements TurretIO {
     private final TalonFX motor;
-    private final DigitalInput limitSwitch;
     private final TalonFXConfiguration talonFXConfigs;
     private PositionVoltage request;
 
     public TalonFXTurretIO() {
         motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
-        limitSwitch = new DigitalInput(3);
         request = new PositionVoltage(0).withSlot(2);
 
         talonFXConfigs = new TalonFXConfiguration();
@@ -92,6 +89,5 @@ public class TalonFXTurretIO implements TurretIO {
         inputs.motorPositionRotations = motor.getPosition().getValueAsDouble();
         inputs.motorVelocityRps = motor.getVelocity().getValueAsDouble();
         inputs.motorAppliedOutput = motor.get();
-        inputs.limitSwitch = limitSwitch.get();
     }
 }
