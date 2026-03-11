@@ -5,7 +5,8 @@
 package frc.robot.subsystems.shooter.flywheel;
 
 import java.util.function.DoubleSupplier;
-import java.util.logging.Logger;
+
+import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -26,6 +27,8 @@ import frc.robot.Constants.MotorConstants;
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
   FlywheelIO io;
+
+  FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
   public boolean snurboEnable = false;
   public double speedModifier = 1;
@@ -48,6 +51,9 @@ public class Flywheel extends SubsystemBase {
     }
     SmartDashboard.putNumber("Left Motor Speed", io.getSpeed());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
+
+    io.updateInputs(inputs);
+    Logger.processInputs("Intake", inputs);
     // This method will be called once per scheduler run
   }
 

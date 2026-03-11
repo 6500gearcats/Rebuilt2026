@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.shooter.turret;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -35,6 +37,7 @@ public class Turret extends SubsystemBase {
   // BOUNDS: 0.0 to 55
 
   private TurretIO io;
+  TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
 
   public Turret(TurretIO io) {
     this.io = io;
@@ -57,8 +60,9 @@ public class Turret extends SubsystemBase {
         zeroMotorPosition();
         toZeroPos = false;
       }
-
     }
+    io.updateInputs(inputs);
+    Logger.processInputs("Intake", inputs);
   }
 
   public void setSpeed(double speed) {
