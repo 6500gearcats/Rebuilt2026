@@ -11,6 +11,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants.MotorConstants;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.hopper.indexer.IndexerIO.IndexerIOInputs;
 
 public class SimKickerIO implements KickerIO {
     boolean isSparkMax = false;
@@ -36,7 +37,7 @@ public class SimKickerIO implements KickerIO {
     }
 
     /*
-     * Sets the speed in either -1 to 1 if using SparkMax
+     * Set the speed in either -1 to 1 if using SparkMax
      * otherwise in terms of RadiansPerSec if using TalonFX
      */
     @Override
@@ -57,6 +58,19 @@ public class SimKickerIO implements KickerIO {
             return maxSim.getVelocity();
         }
         return m_motor.getAngularVelocityRadPerSec();
+    }
+
+    /*
+     * logs the speed in either -1 to 1 if using SparkMaxSim otherwise in terms of
+     * RadiansPerSec if using TalonFXSim
+     */
+    @Override
+    public void updateInputs(KickerIOInputs inputs) {
+        if (isSparkMax) {
+            inputs.speed = maxSim.getVelocity();
+            return;
+        }
+        inputs.speed = m_motor.getAngularVelocityRadPerSec();
     }
 
 }

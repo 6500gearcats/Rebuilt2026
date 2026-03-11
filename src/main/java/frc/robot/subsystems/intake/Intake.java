@@ -11,9 +11,15 @@ import frc.robot.Constants.MotorConstants;
 
 public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
-  private final TalonFX m_intakeMotor = new TalonFX(MotorConstants.kIntakeMotorID);
-  private final TalonFX m_intakeDeployMotor = new TalonFX(MotorConstants.kIntakeDeployMotorID);
-  public Intake() {}
+  private final IntakeIO io;
+
+  public Intake(IntakeIO io) {
+    this.io = io;
+  }
+
+  public Intake() {
+    io = null;
+  }
 
   @Override
   public void periodic() {
@@ -21,9 +27,16 @@ public class Intake extends SubsystemBase {
   }
 
   public void setIntakeSpeed(double speed) {
-    m_intakeMotor.set(speed);
+    if (io == null) {
+      return;
+    }
+    io.setIntakeSpeed(speed);
   }
-  public void deployIntake(double speed){
-    m_intakeDeployMotor.set(speed);
+
+  public void deployIntake(double speed) {
+    if (io == null) {
+      return;
+    }
+    io.setDeploySpeed(speed);
   }
 }

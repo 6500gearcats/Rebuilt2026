@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
 import frc.robot.Constants.TurretConstants;
-import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.shooter.turret.Turret;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignTurretToHub extends Command {
@@ -53,10 +53,13 @@ public class AlignTurretToHub extends Command {
     SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
     SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
     SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
-    /* if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
-        && prevPose.minus(currPose).getRotation().getDegrees() < 2 && errorFromPrevRot < 1) {
-      return;
-    } */
+    /*
+     * if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
+     * && prevPose.minus(currPose).getRotation().getDegrees() < 2 &&
+     * errorFromPrevRot < 1) {
+     * return;
+     * }
+     */
     Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
     Translation2d robotToTarget = m_targetPose.getTranslation()

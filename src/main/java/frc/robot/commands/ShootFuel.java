@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
 import frc.robot.RobotStateMachine.FieldZone;
-import frc.robot.subsystems.turret.Flywheel;
+import frc.robot.subsystems.shooter.flywheel.Flywheel;
 import frc.robot.utility.RangeFinder;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -50,13 +50,13 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-   if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
+    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
       return;
-   }
-   m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
-   stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+    }
+    m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+        stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
 
-     //m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+    // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
 
   // Called once the command ends or is interrupted.

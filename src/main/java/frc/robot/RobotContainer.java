@@ -51,14 +51,20 @@ import frc.robot.generated.TunerConstants2;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.turret.Flywheel;
-import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.indexer.SimIndexerIO;
 import frc.robot.subsystems.hopper.indexer.TalonFXIndexerIO;
 import frc.robot.subsystems.hopper.kicker.SimKickerIO;
 import frc.robot.subsystems.hopper.kicker.TalonFXKickerIO;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.SimIntakeIO;
+import frc.robot.subsystems.intake.TalonFXIntakeIO;
+import frc.robot.subsystems.shooter.flywheel.Flywheel;
+import frc.robot.subsystems.shooter.flywheel.SimFlywheelIO;
+import frc.robot.subsystems.shooter.flywheel.TalonFXFlywheelIO;
+import frc.robot.subsystems.shooter.turret.SimTurretIO;
+import frc.robot.subsystems.shooter.turret.TalonFXTurretIO;
+import frc.robot.subsystems.shooter.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
@@ -100,11 +106,11 @@ public class RobotContainer {
 
         private final SendableChooser<Command> autoChooser;
 
-        private final Flywheel m_flywheel = new Flywheel();
+        private final Flywheel m_flywheel;
 
-        private final Turret m_turret = new Turret();
+        private final Turret m_turret;
 
-        private final Intake m_intake = new Intake();
+        private final Intake m_intake;
 
         private final Climber m_climber = new Climber();
 
@@ -156,9 +162,20 @@ public class RobotContainer {
                                                 m_photonVisionIO2,
                                                 m_ll,
                                                 m_ll2);
+
                                 TalonFXIndexerIO indexerIO = new TalonFXIndexerIO();
                                 TalonFXKickerIO kickerIO = new TalonFXKickerIO();
                                 hopper = new Hopper(indexerIO, kickerIO);
+
+                                TalonFXIntakeIO intakeIO = new TalonFXIntakeIO();
+                                m_intake = new Intake(intakeIO);
+
+                                TalonFXFlywheelIO flywheelIO = new TalonFXFlywheelIO();
+                                m_flywheel = new Flywheel(flywheelIO);
+
+                                TalonFXTurretIO turretIO = new TalonFXTurretIO();
+                                m_turret = new Turret(turretIO);
+
                                 m_turret.goToZero();
                                 break;
                         case SIM:
@@ -182,10 +199,22 @@ public class RobotContainer {
                                 SimKickerIO simKickerIO = new SimKickerIO(false);
                                 SimIndexerIO simIndexerIO = new SimIndexerIO(false);
                                 hopper = new Hopper(simIndexerIO, simKickerIO);
+
+                                SimIntakeIO simIntakeIO = new SimIntakeIO(false, false);
+                                m_intake = new Intake(simIntakeIO);
+
+                                SimFlywheelIO simFlywheelIO = new SimFlywheelIO();
+                                m_flywheel = new Flywheel(simFlywheelIO);
+
+                                SimTurretIO simTurretIO = new SimTurretIO();
+                                m_turret = new Turret(simTurretIO);
                                 break;
                         default:
                                 m_vision = new Vision();
                                 hopper = new Hopper();
+                                m_flywheel = new Flywheel();
+                                m_intake = new Intake();
+                                m_turret = new Turret();
                                 break;
                 }
                 namedCommands();
