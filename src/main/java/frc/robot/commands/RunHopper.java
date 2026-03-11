@@ -9,15 +9,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
 import frc.robot.RobotStateMachine.FieldZone;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.turret.Flywheel;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class RunHopper extends Command {
   /** Creates a new RunHopper. */
   private Hopper m_hopper;
   private int counter;
+  private Flywheel m_Flywheel;
   private RobotStateMachine stateMachine = RobotStateMachine.getInstance();
 
-  public RunHopper(Hopper hopper) {
+  public RunHopper(Hopper hopper, Flywheel flywheel) {
+    m_Flywheel = flywheel;
     m_hopper = hopper;
     addRequirements(m_hopper);
     // Use addRequirements() here to declare subsystem dependencies.
@@ -32,10 +35,13 @@ public class RunHopper extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) { return; }
+    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
+      return;
+    }
     if (counter > 3) {
-      
-      m_hopper.startAllMotors(-0.9, 1);
+      //if (m_Flywheel.isUpToSpeed()) {
+        m_hopper.startAllMotors(-0.9, 1);
+      //}
     }
     counter++;
   }
