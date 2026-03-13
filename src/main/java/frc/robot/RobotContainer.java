@@ -180,7 +180,6 @@ public class RobotContainer {
 
                 autoChooser = AutoBuilder.buildAutoChooser("testAuto");
                 SmartDashboard.putData("Auto Chooser", autoChooser);
-                configureBindings();
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
@@ -206,7 +205,7 @@ public class RobotContainer {
                                                 m_ll,
                                                 m_ll2);
                                 m_turret.goToZero();
-                                m_turretSysID = new SysIDUtil(m_turret);
+                                // m_turretSysID = new SysIDUtil(m_turret);
                                 m_flywheelSysID = new SysIDUtil(m_flywheel);
                                 break;
                         case SIM:
@@ -227,11 +226,14 @@ public class RobotContainer {
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 camSim);
+                                m_flywheelSysID = new SysIDUtil(m_flywheel);
+
                                 break;
                         default:
                                 m_vision = new Vision();
                                 break;
                 }
+                configureBindings();
                 robotStateMachine.bindVision(m_vision);
                 robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();

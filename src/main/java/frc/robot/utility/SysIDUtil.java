@@ -3,6 +3,7 @@ package frc.robot.utility;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import java.lang.StackWalker.Option;
 import java.util.Optional;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -21,10 +22,10 @@ import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.turret.Turret;
 
 public class SysIDUtil {
-        private Optional<SysIdRoutine> routine;
+        private Optional<SysIdRoutine> routine = Optional.empty();
         private final VoltageOut m_voltReq = new VoltageOut(0.0);
-        private Optional<Flywheel> m_flywheel;
-        private Optional<Turret> m_turret;
+        private Optional<Flywheel> m_flywheel = Optional.empty();
+        private Optional<Turret> m_turret = Optional.empty();
 
         /*
          * Uses Singal Logger from CTRE
