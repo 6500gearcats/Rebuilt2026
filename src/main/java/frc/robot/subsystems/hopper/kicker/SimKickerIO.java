@@ -28,11 +28,11 @@ public class SimKickerIO implements KickerIO {
         this.isSparkMax = isSparkMax;
         if (isSparkMax) {
             max = new SparkMax(MotorConstants.kKickerMotorID, MotorType.kBrushless);
-            maxSim = new SparkMaxSim(max, DCMotor.getNeo550(0));
+            maxSim = new SparkMaxSim(max, DCMotor.getNeo550(1));
         } else {
             simState = new TalonFXSimState(new CoreTalonFX(MotorConstants.kKickerMotorID, TunerConstants.kCANBus));
             // Find Constants (kV and kA) using Sys ID
-            m_motor = new DCMotorSim(LinearSystemId.createDCMotorSystem(0, 0), DCMotor.getKrakenX60(0));
+            m_motor = new DCMotorSim(LinearSystemId.createDCMotorSystem(0.02, 0.003), DCMotor.getKrakenX60(1));
         }
     }
 
@@ -44,6 +44,7 @@ public class SimKickerIO implements KickerIO {
     public void setSpeed(double speed) {
         if (isSparkMax) {
             maxSim.setVelocity(speed);
+            return;
         }
         m_motor.setAngularVelocity(speed);
     }

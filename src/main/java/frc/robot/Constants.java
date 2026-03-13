@@ -47,6 +47,14 @@ public final class Constants {
   public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout
       .loadField(AprilTagFields.k2026RebuiltAndymark);
 
+  public static final class LoggingConstants {
+    /**
+     * When true, run the robot in log replay mode on desktop.
+     * When false, run live simulation logging (NT4 + local WPILOG).
+     */
+    public static final boolean REPLAY = false;
+  }
+
   public static class RobotConstants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
   }

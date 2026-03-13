@@ -42,11 +42,14 @@ public class Robot extends LoggedRobot {
     if (isReal()) {
       Logger.addDataReceiver(new WPILOGWriter()); // Log to a USB stick ("/U/logs")
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-    } else {
+    } else if (Constants.LoggingConstants.REPLAY) {
       setUseTiming(false); // Run as fast as possible
       String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
       Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
       Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
+    } else {
+      Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+      Logger.addDataReceiver(new WPILOGWriter("logs")); // Log to local folder
     }
     Logger.start();
 

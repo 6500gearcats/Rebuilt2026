@@ -7,18 +7,11 @@ package frc.robot.subsystems.shooter.turret;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
-import frc.robot.subsystems.shooter.flywheel.FlywheelIO;
 
 /**
  * Turret subsystem that controls the yaw motor and tracks its position.
@@ -26,9 +19,7 @@ import frc.robot.subsystems.shooter.flywheel.FlywheelIO;
 public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
 
-  private PositionVoltage m_request;
   private final DigitalInput m_switch = new DigitalInput(3);
-  private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
   private boolean overridden = false;
@@ -52,6 +43,8 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
+    SmartDashboard.putBoolean("Turret Zeroing", toZeroPos);
+    SmartDashboard.putBoolean("Turret Limit Switch", m_switch.get());
 
     if (toZeroPos) {
       if (!m_switch.get()) {
@@ -63,7 +56,7 @@ public class Turret extends SubsystemBase {
       }
     }
     io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
+    Logger.processInputs("Turret", inputs);
   }
 
   public void setSpeed(double speed) {

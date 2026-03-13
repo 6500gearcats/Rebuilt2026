@@ -27,11 +27,11 @@ public class SimIndexerIO implements IndexerIO {
         this.isSparkMax = isSparkMax;
         if (isSparkMax) {
             max = new SparkMax(MotorConstants.kIndexerMotorID, MotorType.kBrushless);
-            maxSim = new SparkMaxSim(max, DCMotor.getNeo550(0));
+            maxSim = new SparkMaxSim(max, DCMotor.getNeo550(1));
         } else {
             simState = new TalonFXSimState(new CoreTalonFX(MotorConstants.kIndexerMotorID, TunerConstants.kCANBus));
             // Find Constants (kV and kA) using Sys ID
-            m_motor = new DCMotorSim(LinearSystemId.createDCMotorSystem(0, 0), DCMotor.getKrakenX60(0));
+            m_motor = new DCMotorSim(LinearSystemId.createDCMotorSystem(1, 1), DCMotor.getKrakenX60(1));
         }
     }
 
@@ -43,6 +43,7 @@ public class SimIndexerIO implements IndexerIO {
     public void setSpeed(double speed) {
         if (isSparkMax) {
             maxSim.setVelocity(speed);
+            return;
         }
         m_motor.setAngularVelocity(speed);
     }
