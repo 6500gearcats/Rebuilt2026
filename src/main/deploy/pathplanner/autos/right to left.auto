@@ -27,12 +27,6 @@
           "data": {
             "name": "ShootFuel3s"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "climb"
-          }
         }
       ]
     }
