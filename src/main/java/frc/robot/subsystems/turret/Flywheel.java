@@ -8,6 +8,7 @@ import java.util.function.DoubleSupplier;
 import java.util.logging.Logger;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
@@ -18,6 +19,7 @@ import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -44,19 +46,22 @@ public class Flywheel extends SubsystemBase {
 
   public Flywheel() {
 
-    talonFXConfigs = new TalonFXConfiguration();
+    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6));
 
     // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 6.5; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 0.035; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kS = 22; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 0.15; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 0; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0Configs.kP = 10; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kP = 5; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0;
 
+    slot0Configs.StaticFeedforwardSign = StaticFeedforwardSignValue.UseVelocitySign;
+
     m_motor.getConfigurator().apply(talonFXConfigs);
     m_motor2.getConfigurator().apply(talonFXConfigs);
+
   }
 
   @Override
@@ -79,11 +84,10 @@ public class Flywheel extends SubsystemBase {
 
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);
-    double speedValue = speed + (0.05 * speedMultiplier);
-    if (speedValue > 0) {
-      SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
+    if (speed > 0) {
+      SmartDashboard.putNumber("flywheel sped-up speed", speed);
 
-      m_motor.setControl(m_request.withVelocity(speedValue));
+      m_motor.setControl(m_request.withVelocity(speed));
       m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
     }
   }

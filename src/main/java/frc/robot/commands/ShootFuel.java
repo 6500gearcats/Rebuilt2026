@@ -63,7 +63,7 @@ public class ShootFuel extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_Flywheel.setSpeed(0.7);
+    m_Flywheel.setSpeed(0);
     counter = 0;
   }
 
