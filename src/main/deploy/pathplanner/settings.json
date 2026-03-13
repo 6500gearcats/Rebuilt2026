@@ -7,10 +7,13 @@
     "Doomsday",
     "FinalHope",
     "LeftProjectHailMary",
-    "C test auto",
-    "RightProjectHailMary"
+    "RightProjectHailMary",
+    "simple left",
+    "simple right"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "simple autos"
+  ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,

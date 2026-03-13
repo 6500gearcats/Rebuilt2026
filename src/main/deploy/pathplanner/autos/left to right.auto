@@ -13,13 +13,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "S right to mid "
+            "pathName": "S left start to mid"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "S middle to left"
+            "pathName": "S mid to right"
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "S left to depot"
+            "pathName": "S right to climb"
           }
         },
         {

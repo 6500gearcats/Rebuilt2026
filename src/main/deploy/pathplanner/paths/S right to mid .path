@@ -20,12 +20,12 @@
         "y": 2.6462991153492648
       },
       "prevControl": {
-        "x": 5.429601473470355,
-        "y": 2.7229802324520436
+        "x": 5.412452593601058,
+        "y": 2.625010735627475
       },
       "nextControl": {
-        "x": 7.470483111213236,
-        "y": 2.4756817746629904
+        "x": 7.847990770526961,
+        "y": 2.7047808957567407
       },
       "isLocked": false,
       "linkedName": null
@@ -48,22 +48,15 @@
     {
       "waypointRelativePos": 1,
       "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.2,
+      "rotationDegrees": 22.30713173895983
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
-    {
-      "name": "DeployIntake",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": 0.5,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "DeployIntake"
-        }
-      }
-    },
     {
       "name": "Intake",
       "waypointRelativePos": 1.0622453902229845,
@@ -89,7 +82,7 @@
     "rotation": 89.01214059638333
   },
   "reversed": false,
-  "folder": "C test auto",
+  "folder": "simple right",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
