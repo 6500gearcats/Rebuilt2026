@@ -90,6 +90,7 @@ import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.utility.RangeFinder;
 import frc.robot.utility.ShooterValuesSenable;
+import frc.robot.utility.SysIDUtil;
 
 /**
  * Central robot wiring for subsystems, commands, and operator bindings.
@@ -136,6 +137,9 @@ public class RobotContainer {
         private final RangeFinder rangeFinder = new RangeFinder();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
+
+        SysIDUtil m_turretSysID = new SysIDUtil();
+        SysIDUtil m_flywheelSysID = new SysIDUtil();
 
         // Vision
         PhotonVisionIO photonVisionIO;
@@ -202,6 +206,8 @@ public class RobotContainer {
                                                 m_ll,
                                                 m_ll2);
                                 m_turret.goToZero();
+                                m_turretSysID = new SysIDUtil(m_turret);
+                                m_flywheelSysID = new SysIDUtil(m_flywheel);
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -290,6 +296,22 @@ public class RobotContainer {
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+
+                if (m_turretSysID.isPresent()) {
+                        // Driver Back + A
+                        joystick.back().and(joystick.a())
+                                        .onTrue(m_flywheelSysID.sysIdAll().get()
+                                                        .andThen(new InstantCommand(() -> System.out
+                                                                        .println("Get Hoot Logs from TunerX"))));
+                }
+                if (m_flywheelSysID.isPresent()) {
+                        // Driver Back + B
+                        joystick.back().and(joystick.b())
+                                        .onTrue(m_flywheelSysID.sysIdAll().get().andThen(new InstantCommand(
+                                                        () -> System.out.println("Get Hoot Logs from TunerX"))));
+                }
+        }
+
         }
 
         /**

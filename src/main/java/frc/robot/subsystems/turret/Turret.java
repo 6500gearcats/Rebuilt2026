@@ -9,6 +9,7 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.config.LimitSwitchConfig;
@@ -150,6 +151,13 @@ public class Turret extends SubsystemBase {
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }
 
+  /*
+   * Gets Speed in RPS
+   */
+  public double getSpeed() {
+    return m_motor.getVelocity().getValueAsDouble();
+  }
+
   public void goToZero() {
     toZeroPos = true;
   }
@@ -162,5 +170,9 @@ public class Turret extends SubsystemBase {
     slot.kI = SmartDashboard.getNumber("kI", 0);
     slot.kD = SmartDashboard.getNumber("kD", 0);
     m_request = new PositionVoltage(0).withSlot(1);
+  }
+
+  public void setControl(ControlRequest req) {
+    m_motor.setControl(req);
   }
 }

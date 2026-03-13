@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
@@ -54,6 +55,7 @@ public class Flywheel extends SubsystemBase {
 
     m_motor.getConfigurator().apply(talonFXConfigs);
     m_motor2.getConfigurator().apply(talonFXConfigs);
+    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
   }
 
   @Override
@@ -79,8 +81,14 @@ public class Flywheel extends SubsystemBase {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
       m_motor.setControl(m_request.withVelocity(speedValue).withFeedForward(0.5));
-      m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
     }
+  }
+
+  /*
+   * Gets Speed in RPS
+   */
+  public double getSpeed() {
+    return m_motor.getVelocity().getValueAsDouble();
   }
 
   public void stopMotor() {
@@ -94,6 +102,11 @@ public class Flywheel extends SubsystemBase {
 
   public void incrementMultiplierDown() {
     speedMultiplier--;
+  }
+
+  public void setControl(ControlRequest req) {
+    m_motor.setControl(req);
+    m_motor2.setControl(req);
   }
 
   public void updateMotorConfigs() {
