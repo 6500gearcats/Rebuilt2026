@@ -1,0 +1,123 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.0,
+        "y": 3.5
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.970580001531863,
+        "y": 4.213761967677696
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.574054218367035,
+        "y": 5.363623764935662
+      },
+      "prevControl": {
+        "x": 7.99012557842803,
+        "y": 5.360879937728017
+      },
+      "nextControl": {
+        "x": 6.498165785845589,
+        "y": 5.370718826593138
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.16217893114277,
+        "y": 5.377142166436888
+      },
+      "prevControl": {
+        "x": 6.776735278514303,
+        "y": 5.379359373204849
+      },
+      "nextControl": {
+        "x": 5.547622583771237,
+        "y": 5.3749249596689275
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.543387475107231,
+        "y": 5.363623764935662
+      },
+      "prevControl": {
+        "x": 3.8468285592697207,
+        "y": 5.363623764935662
+      },
+      "nextControl": {
+        "x": 3.231789626534739,
+        "y": 5.363623764935662
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.0,
+        "y": 5.5
+      },
+      "prevControl": {
+        "x": 2.5108121744791667,
+        "y": 5.3762605315563725
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": -179.3026410862713
+    },
+    {
+      "waypointRelativePos": 3.0,
+      "rotationDegrees": -179.23069451177062
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Intake",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 1.263092302744425,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 178.73855206397494
+  },
+  "reversed": false,
+  "folder": "C test auto",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 91.85705637873555
+  },
+  "useDefaultConstraints": true
+}

@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "christian test1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "middle to left"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "left to depot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFuel3s"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "climb"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
