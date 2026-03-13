@@ -312,8 +312,6 @@ public class RobotContainer {
                 }
         }
 
-        }
-
         /**
          * Returns the currently selected autonomous command.
          *
