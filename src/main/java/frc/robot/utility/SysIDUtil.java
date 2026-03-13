@@ -33,7 +33,12 @@ public class SysIDUtil {
                 m_flywheel = Optional.of(flywheel);
                 if (m_flywheel.isPresent()) {
                         routine = Optional.of(
-                                        new SysIdRoutine(new Config(null, Volts.of(4), null),
+                                        new SysIdRoutine(new Config(null, // Use default ramp rate (1 V/s)
+                                                        Volts.of(4), // Reduce dynamic step voltage to 4 to prevent
+                                                                     // brownout
+                                                        null,
+                                                        (state) -> SignalLogger.writeString("flywheel state", state
+                                                                        .toString())), // Use default timeout (10 s)
                                                         new Mechanism((volts) -> m_flywheel.get().setControl(
                                                                         m_voltReq.withOutput(volts.in(Volts))),
                                                                         null,
@@ -48,7 +53,11 @@ public class SysIDUtil {
                 m_turret = Optional.of(turret);
                 if (m_turret.isPresent()) {
                         routine = Optional.of(
-                                        new SysIdRoutine(new Config(null, Volts.of(1), Time.ofBaseUnits(4, Seconds)),
+                                        new SysIdRoutine(new Config(null,
+                                                        Volts.of(1),
+                                                        Time.ofBaseUnits(4, Seconds),
+                                                        (state) -> SignalLogger.writeString("turret state", state
+                                                                        .toString())),
                                                         new Mechanism((volts) -> m_turret.get().setControl(
                                                                         m_voltReq.withOutput(volts.in(Volts))),
                                                                         null,
