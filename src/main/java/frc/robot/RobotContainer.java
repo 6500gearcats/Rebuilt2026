@@ -176,6 +176,8 @@ public class RobotContainer {
                                 new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
                 NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
+                NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));
+                NamedCommands.registerCommand("ClimbDown2s", new ClimbPole(m_climber, -0.5).withTimeout(2));
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
