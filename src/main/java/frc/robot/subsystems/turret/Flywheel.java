@@ -8,6 +8,7 @@ import java.util.function.DoubleSupplier;
 import java.util.logging.Logger;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
@@ -42,14 +43,14 @@ public class Flywheel extends SubsystemBase {
 
   public Flywheel() {
 
-    talonFXConfigs = new TalonFXConfiguration();
+    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6));
 
     // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 9; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0Configs.kP = 0.45; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kS = 0.31134; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 0.075575; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 0.0064695; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = 0.030814; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0;
 
@@ -106,7 +107,7 @@ public class Flywheel extends SubsystemBase {
 
   public void setControl(ControlRequest req) {
     m_motor.setControl(req);
-    m_motor2.setControl(req);
+    // m_motor2.setControl(req);
   }
 
   public void updateMotorConfigs() {

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
+
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -21,6 +23,7 @@ public class Robot extends TimedRobot {
   private final RobotStateMachine m_RobotStateMachine;
 
   public Robot() {
+    SignalLogger.setPath("media/sda1/ctre-logs/");
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);

@@ -55,7 +55,7 @@ public class SysIDUtil {
                 if (m_turret.isPresent()) {
                         routine = Optional.of(
                                         new SysIdRoutine(new Config(null,
-                                                        Volts.of(1),
+                                                        Volts.of(0.5),
                                                         Time.ofBaseUnits(4, Seconds),
                                                         (state) -> SignalLogger.writeString("turret state", state
                                                                         .toString())),

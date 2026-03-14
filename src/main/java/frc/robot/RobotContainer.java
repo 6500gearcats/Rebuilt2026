@@ -308,7 +308,7 @@ public class RobotContainer {
                 }
                 if (m_flywheelSysID.isPresent()) {
                         // Driver Back + B
-                        joystick.back().and(joystick.b())
+                        joystick.b()
                                         .onTrue(m_flywheelSysID.sysIdAll().get().andThen(new InstantCommand(
                                                         () -> System.out.println("Get Hoot Logs from TunerX"))));
                 }
