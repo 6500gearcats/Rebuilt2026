@@ -159,7 +159,9 @@ public class RobotContainer {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
-                NamedCommands.registerCommand("IntakeLong", new RunIntake(m_intake, -0.1).withTimeout(0.5));
+                NamedCommands.registerCommand("IntakeLong",
+                                new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.5),
+                                                new ShootingSequence(hopper, m_flywheel).withTimeout(0.2)));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
@@ -249,6 +251,8 @@ public class RobotContainer {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
+        m_flywheel.setDefaultCommand(new RunCommand(()-> m_flywheel.setSpeed(RangeFinder.getShotVelocity(
+        robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)

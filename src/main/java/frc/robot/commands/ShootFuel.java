@@ -50,12 +50,11 @@ public class ShootFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if ((!stateMachine.isActive()) && (stateMachine.checkZone() ==
-    FieldZone.ALLIANCE)) {
-    return;
+    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
+      return;
     }
     m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
-    stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+        stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
 
     // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
@@ -63,7 +62,7 @@ public class ShootFuel extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_Flywheel.setSpeed(0.7);
+    m_Flywheel.setSpeed(60);
     counter = 0;
   }
 

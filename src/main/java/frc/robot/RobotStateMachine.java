@@ -150,6 +150,10 @@ public final class RobotStateMachine {
                         new Rotation2d()));
     }
 
+    public Pose2d getHubPose() {
+        return HubPose;
+    }
+
     public Pose2d getTurretPose() {
         return turretPose;
     }
