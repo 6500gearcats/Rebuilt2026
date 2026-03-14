@@ -13,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "S right to mid "
+            "pathName": "S right bump to mid "
           }
         },
         {
@@ -23,9 +23,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "ShootFuel3s"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ShootFuel3s"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "BopBop"
+                }
+              }
+            ]
           }
         },
         {
@@ -35,9 +48,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "ShootFuel3s"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "BopBop"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ShootFuel3s"
+                }
+              }
+            ]
           }
         }
       ]
