@@ -13,23 +13,19 @@ public class RangeFinder {
   private static InterpolatingDoubleTreeMap m_map = new InterpolatingDoubleTreeMap();
 
   static {
-    m_map.put(1.4, 2.5);
-    m_map.put(1.75, 2.7);
-    m_map.put(1.95, 2.8);
-    m_map.put(2.25, 2.9);
-    m_map.put(2.43, 3.0);
-    m_map.put(2.62, 3.1);
-    m_map.put(2.86, 3.2);
-    m_map.put(2.93, 3.3);
-    m_map.put(3.05, 3.4);
-    m_map.put(3.23, 3.45);
-    m_map.put(3.46, 3.6);
-    m_map.put(3.66, 3.8);
-    m_map.put(3.84, 3.9);
-    m_map.put(4.04, 4.2);
-    m_map.put(4.13, 4.5);
-    m_map.put(4.26, 5.2);
-    m_map.put(5.0, 8.0);
+    m_map.put(2.23, 55.0);
+    m_map.put(1.8, 50.0);
+    m_map.put(2.0, 53.0);
+    m_map.put(2.5, 60.0);
+    m_map.put(2.8, 62.0);
+    m_map.put(3.0, 63.0);
+    m_map.put(3.4, 68.0);
+    m_map.put(3.2, 64.0);
+    m_map.put(3.6, 78.0);
+    m_map.put(3.5, 74.0);
+    m_map.put(4.0, 80.0);
+    m_map.put(4.2, 86.0);
+    m_map.put(5.2, 105.0);
   }
 
   public static double getShotVelocity(double distance) {
