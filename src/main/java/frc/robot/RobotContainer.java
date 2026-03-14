@@ -65,6 +65,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
+import frc.robot.commands.BurstFire;
 import frc.robot.commands.ClimbPole;
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -279,7 +280,7 @@ public class RobotContainer {
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
-                                                new ShootingSequence(hopper, m_flywheel, m_turret)))
+                                                new BurstFire(hopper, m_flywheel, m_turret, robotStateMachine)))
                                 .onFalse(new InstantCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
@@ -294,7 +295,7 @@ public class RobotContainer {
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
-                                .whileTrue(new ShootingSequence(hopper, m_flywheel));
+                                .whileTrue(new BurstFire(hopper, m_flywheel, robotStateMachine));
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));

@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Meter;
 
 import java.lang.StackWalker.Option;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -124,6 +125,7 @@ public final class RobotStateMachine {
         SmartDashboard.putString("FieldZone", currentZone.toString());
         SmartDashboard.putBoolean("IsActive", isActive());
         SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+        SmartDashboard.putNumber("distToTag2", distToTag());
         updateTargetPose();
     }
 
@@ -217,6 +219,14 @@ public final class RobotStateMachine {
 
     public void bindDrivetrain(CommandSwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
+    }
+
+    public double distToTag() {
+        return pose.getTranslation().getDistance(HubPose.getTranslation());
+    }
+
+    public BooleanSupplier isFarEnough() {
+        return () -> distToTag() > 4.2;
     }
 
     /**

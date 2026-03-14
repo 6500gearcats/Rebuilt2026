@@ -34,7 +34,9 @@ public class Flywheel extends SubsystemBase {
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
+  public boolean waitForSpeed = false;
   private double speedMultiplier = 0;
+  private double reqSpeed;
   TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
 
   TalonFXConfiguration talonFXConfigs;
@@ -56,7 +58,6 @@ public class Flywheel extends SubsystemBase {
 
     m_motor.getConfigurator().apply(talonFXConfigs);
     m_motor2.getConfigurator().apply(talonFXConfigs);
-    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
   }
 
   @Override
@@ -68,12 +69,15 @@ public class Flywheel extends SubsystemBase {
     }
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
+    SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
+    SmartDashboard.putNumber("reqSpeed", reqSpeed);
+    SmartDashboard.putNumber("actSpeed", getSpeed());
+
     // This method will be called once per scheduler run
   }
 
   public void setSpeed(double speed) {
-    // create a velocity closed-loop request, voltage output, slot 0 configs
-    // m_motor.set(speed);
+
 
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);
@@ -81,7 +85,8 @@ public class Flywheel extends SubsystemBase {
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
-      m_motor.setControl(m_request.withVelocity(speedValue).withFeedForward(0.5));
+      m_motor.setControl(m_request.withVelocity(speedValue));
+      m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
     }
   }
 
@@ -90,6 +95,10 @@ public class Flywheel extends SubsystemBase {
    */
   public double getSpeed() {
     return m_motor.getVelocity().getValueAsDouble();
+  }
+
+  public boolean isUpToSpeed() {
+    return Math.abs(reqSpeed - getSpeed()) < 2;
   }
 
   public void stopMotor() {
