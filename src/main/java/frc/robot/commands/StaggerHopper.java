@@ -16,7 +16,7 @@ public class StaggerHopper extends SequentialCommandGroup {
   public StaggerHopper(Hopper hopper) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new RunHopper(hopper).withTimeout(0.4), new WaitCommand(0.3));
+    addCommands(new RunHopper(hopper).withTimeout(0.35), new WaitCommand(0.2));
 
   }
 }
