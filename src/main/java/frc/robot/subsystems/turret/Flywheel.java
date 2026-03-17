@@ -38,6 +38,7 @@ public class Flywheel extends SubsystemBase {
   public double speedModifier = 1;
   public boolean waitForSpeed = false;
   private double speedMultiplier = 0;
+  public double rotationMultiplier = 1;
   private double reqSpeed;
   TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
   private RobotStateMachine robotStateMachine;
@@ -86,7 +87,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void setSpeed(double speed) {
-    reqSpeed = speed;
+    reqSpeed = speed + (2 * speedMultiplier);
 
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);

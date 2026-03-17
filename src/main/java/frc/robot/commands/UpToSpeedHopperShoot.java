@@ -21,8 +21,6 @@ public class UpToSpeedHopperShoot extends Command {
   public UpToSpeedHopperShoot(Hopper m_Hopper, Flywheel m_Flywheel) {
     this.m_Hopper = m_Hopper;
     this.m_Flywheel = m_Flywheel;
-
-    addRequirements(m_Hopper, m_Flywheel);
   }
 
   // Called when the command is initially scheduled.

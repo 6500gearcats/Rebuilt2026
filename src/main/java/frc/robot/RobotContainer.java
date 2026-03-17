@@ -276,7 +276,7 @@ public class RobotContainer {
                 // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
                 new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
-                                .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.15)
+                                .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.25)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.1)));
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
@@ -311,16 +311,12 @@ public class RobotContainer {
 
                 if (m_turretSysID.isPresent()) {
                         // Driver Back + A
-                        joystick.back().and(joystick.a())
+                        joystick.b(
+
+                        )
                                         .onTrue(m_flywheelSysID.sysIdAll().get()
                                                         .andThen(new InstantCommand(() -> System.out
                                                                         .println("Get Hoot Logs from TunerX"))));
-                }
-                if (m_flywheelSysID.isPresent()) {
-                        // Driver Back + B
-                        joystick.b()
-                                        .onTrue(m_flywheelSysID.sysIdAll().get().andThen(new InstantCommand(
-                                                        () -> System.out.println("Get Hoot Logs from TunerX"))));
                 }
         }
 

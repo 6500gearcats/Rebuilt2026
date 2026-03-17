@@ -248,6 +248,10 @@ public final class RobotStateMachine {
         return Math.abs(reqShooterSpeed - shooterSpeed) < 2;
     }
 
+    // public boolean isFacingHub() {
+    // (pose.getRotation()).minus(targetPose.getRotation());
+    // }
+
     /**
      * Sets the current field zone override.
      *
