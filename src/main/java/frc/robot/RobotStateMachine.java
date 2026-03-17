@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.utility.RangeFinder;
 
@@ -37,12 +38,16 @@ public final class RobotStateMachine {
     private String gameData = "";
     private boolean gotData = false;
 
+    public double shooterSpeed;
+    public double reqShooterSpeed;
+
     private boolean switching = false;
     private boolean postedValue = false;
 
     private Pose2d turretPose = new Pose2d();
 
     private Vision m_vision;
+    private Flywheel m_Flywheel = new Flywheel();
 
     public static Pose3d Tag_POSE2D;
 
@@ -82,6 +87,10 @@ public final class RobotStateMachine {
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
 
+    public Flywheel getFlywheel() {
+        return m_Flywheel;
+    }
+
     public CommandXboxController getDriver() {
         return joystick;
     }
@@ -109,6 +118,8 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        reqShooterSpeed = m_Flywheel.getReqSpeed();
+        shooterSpeed = m_Flywheel.getSpeed();
         SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
         SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
         gameData = DriverStation.getGameSpecificMessage();
@@ -232,6 +243,10 @@ public final class RobotStateMachine {
     public BooleanSupplier isFarEnough() {
         return () -> distToTag() > 4.2;
     }
+
+    public boolean isUpToSpeed() {
+    return Math.abs(reqShooterSpeed - shooterSpeed) < 2;
+  }
 
     /**
      * Sets the current field zone override.

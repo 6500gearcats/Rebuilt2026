@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.RobotStateMachine;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.turret.Turret;
@@ -18,7 +19,7 @@ import frc.robot.utility.RangeFinder;
 public class ShootingSequenceUTS extends ParallelCommandGroup {
   
   /** Creates a new ShootingSequence. */
-  public ShootingSequenceUTS(Hopper hopper, Flywheel flywheel, Turret turret) {
+  public ShootingSequenceUTS(Hopper hopper, Flywheel flywheel, Turret turret, RobotStateMachine robotStateMachine) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(new ConditionalCommand(new RunHopper(hopper), new WaitCommand(0.02), () -> flywheel.isUpToSpeed()), new ShootFuel(flywheel), new AlignTurretToHub(turret), new CoolSnurbo(flywheel));
@@ -27,6 +28,6 @@ public class ShootingSequenceUTS extends ParallelCommandGroup {
   public ShootingSequenceUTS(Hopper hopper, Flywheel flywheel) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new RunHopper(hopper), new ShootFuel(flywheel), new CoolSnurbo(flywheel));
+    addCommands(new ConditionalCommand(new RunHopper(hopper), new WaitCommand(0.02), () -> flywheel.isUpToSpeed()), new ShootFuel(flywheel), new CoolSnurbo(flywheel));
   }
 }

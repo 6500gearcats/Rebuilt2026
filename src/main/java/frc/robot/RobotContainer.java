@@ -76,6 +76,7 @@ import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
+import frc.robot.commands.ShootingSequenceUTS;
 import frc.robot.generated.TunerConstants2;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -127,7 +128,7 @@ public class RobotContainer {
 
         private final SendableChooser<Command> autoChooser;
 
-        private final Flywheel m_flywheel = new Flywheel();
+        private final Flywheel m_flywheel;
 
         private final Turret m_turret = new Turret();
 
@@ -154,6 +155,7 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
+                m_flywheel = robotStateMachine.getFlywheel();
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
@@ -286,7 +288,7 @@ public class RobotContainer {
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
-                                                new BurstFire(hopper, m_flywheel, m_turret, robotStateMachine)))
+                                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)))
                                 .onFalse(new InstantCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));

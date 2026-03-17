@@ -67,6 +67,7 @@ public class Flywheel extends SubsystemBase {
     } else {
       speedModifier = 1;
     }
+
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
     SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
@@ -95,6 +96,10 @@ public class Flywheel extends SubsystemBase {
    */
   public double getSpeed() {
     return m_motor.getVelocity().getValueAsDouble();
+  }
+
+  public double getReqSpeed() {
+    return reqSpeed;
   }
 
   public boolean isUpToSpeed() {
