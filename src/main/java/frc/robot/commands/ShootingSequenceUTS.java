@@ -17,17 +17,18 @@ import frc.robot.utility.RangeFinder;
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ShootingSequenceUTS extends ParallelCommandGroup {
-  
+
   /** Creates a new ShootingSequence. */
   public ShootingSequenceUTS(Hopper hopper, Flywheel flywheel, Turret turret, RobotStateMachine robotStateMachine) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new ConditionalCommand(new RunHopper(hopper), new WaitCommand(0.02), () -> flywheel.isUpToSpeed()), new ShootFuel(flywheel), new AlignTurretToHub(turret), new CoolSnurbo(flywheel));
+    addCommands(new UpToSpeedHopperShoot(hopper, flywheel), new AlignTurretToHub(turret), new CoolSnurbo(flywheel));
   }
 
   public ShootingSequenceUTS(Hopper hopper, Flywheel flywheel) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new ConditionalCommand(new RunHopper(hopper), new WaitCommand(0.02), () -> flywheel.isUpToSpeed()), new ShootFuel(flywheel), new CoolSnurbo(flywheel));
+    addCommands(new UpToSpeedHopperShoot(hopper, flywheel),
+        new ShootFuel(flywheel), new CoolSnurbo(flywheel));
   }
 }

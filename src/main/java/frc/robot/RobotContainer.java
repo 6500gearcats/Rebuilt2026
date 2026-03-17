@@ -253,8 +253,8 @@ public class RobotContainer {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
-        m_flywheel.setDefaultCommand(new RunCommand(()-> m_flywheel.setSpeed(RangeFinder.getShotVelocity(
-        robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
+        //m_flywheel.setDefaultCommand(new RunCommand(()-> m_flywheel.setSpeed(RangeFinder.getShotVelocity(
+        //robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
@@ -288,7 +288,8 @@ public class RobotContainer {
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
-                                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)))
+                                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret,
+                                                                robotStateMachine)))
                                 .onFalse(new InstantCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
@@ -303,7 +304,7 @@ public class RobotContainer {
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
-                                .whileTrue(new BurstFire(hopper, m_flywheel, robotStateMachine));
+                                .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));

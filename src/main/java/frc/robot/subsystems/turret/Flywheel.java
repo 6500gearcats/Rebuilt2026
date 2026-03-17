@@ -23,6 +23,8 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotStateMachine;
+import frc.robot.utility.RangeFinder;
 import frc.robot.Constants.MotorConstants;
 
 /**
@@ -38,13 +40,14 @@ public class Flywheel extends SubsystemBase {
   private double speedMultiplier = 0;
   private double reqSpeed;
   TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
+  private RobotStateMachine robotStateMachine;
 
   TalonFXConfiguration talonFXConfigs;
 
   // TODO: Add a constant Spin to the motors to not have to fight static friction
 
-  public Flywheel() {
-
+  public Flywheel(RobotStateMachine robotStateMachine) {
+    this.robotStateMachine = robotStateMachine;
     talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6));
 
     // set slot 0 gains
@@ -66,6 +69,11 @@ public class Flywheel extends SubsystemBase {
       speedModifier = 0.15;
     } else {
       speedModifier = 1;
+    }
+    if (robotStateMachine.isActive()) {
+      setSpeed(RangeFinder.getShotVelocity(
+          robotStateMachine.getTurretPose().getTranslation()
+              .getDistance(robotStateMachine.getHubPose().getTranslation())));
     }
 
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());

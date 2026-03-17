@@ -47,7 +47,7 @@ public final class RobotStateMachine {
     private Pose2d turretPose = new Pose2d();
 
     private Vision m_vision;
-    private Flywheel m_Flywheel = new Flywheel();
+    private Flywheel m_Flywheel = new Flywheel(this);
 
     public static Pose3d Tag_POSE2D;
 
@@ -245,8 +245,8 @@ public final class RobotStateMachine {
     }
 
     public boolean isUpToSpeed() {
-    return Math.abs(reqShooterSpeed - shooterSpeed) < 2;
-  }
+        return Math.abs(reqShooterSpeed - shooterSpeed) < 2;
+    }
 
     /**
      * Sets the current field zone override.
@@ -550,6 +550,10 @@ public final class RobotStateMachine {
 
     public boolean isActive() {
         return getState() == RobotState.ACTIVE;
+    }
+
+    public boolean isInAlliance() {
+        return checkZone() == FieldZone.ALLIANCE;
     }
 
     private Optional<Pose2d> getBestPoseTarget() {
