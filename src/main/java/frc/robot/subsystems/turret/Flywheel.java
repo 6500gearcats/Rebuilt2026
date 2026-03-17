@@ -77,7 +77,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void setSpeed(double speed) {
-
+    reqSpeed = speed;
 
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);
