@@ -207,8 +207,8 @@ public final class RobotStateMachine {
         }
 
         targetPose = bestPose.get().transformBy(new Transform2d(
-                new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
-                        speeds.vyMetersPerSecond * timeOfFlight),
+                new Translation2d(-speeds.vxMetersPerSecond * timeOfFlight,
+                        -speeds.vyMetersPerSecond * timeOfFlight),
                 new Rotation2d()));
 
         targetPosePublisher.set(targetPose);
