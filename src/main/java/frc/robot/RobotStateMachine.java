@@ -143,6 +143,7 @@ public final class RobotStateMachine {
         SmartDashboard.putBoolean("IsActive", isActive());
         SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         SmartDashboard.putNumber("distToTag2", distToTag());
+        SmartDashboard.putBoolean("isFacing", isFacingHub());
         updateTargetPose();
     }
 
@@ -262,9 +263,16 @@ public final class RobotStateMachine {
         return Math.abs(reqShooterSpeed - shooterSpeed) < 2;
     }
 
-    // public boolean isFacingHub() {
-    // (pose.getRotation()).minus(targetPose.getRotation());
-    // }
+    public boolean isFacingHub() {
+        double dx = targetPose.getX() - pose.getX();
+        double dy = targetPose.getY() - pose.getY();
+        double targetAngle = Math.atan2(dy, dx);
+        double delta = targetAngle - pose.getRotation().getRadians();
+        delta = Math.atan2(Math.sin(delta), Math.cos(delta));
+        double tolerance = Math.toRadians(20);
+
+        return Math.abs(delta) < tolerance;
+    }
 
     /**
      * Sets the current field zone override.

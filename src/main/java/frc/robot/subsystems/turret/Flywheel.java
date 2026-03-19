@@ -38,7 +38,7 @@ public class Flywheel extends SubsystemBase {
   public double speedModifier = 1;
   public boolean waitForSpeed = false;
   private double speedMultiplier = 0;
-  public double rotationMultiplier = 1;
+  public double rotationMultiplier = 0;
   private double reqSpeed;
   TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
   private RobotStateMachine robotStateMachine;
@@ -71,6 +71,13 @@ public class Flywheel extends SubsystemBase {
     } else {
       speedModifier = 1;
     }
+    if (!robotStateMachine.isFacingHub()) {
+      rotationMultiplier = 2;
+    }
+    else {
+      rotationMultiplier = 0;
+    }
+
     if (robotStateMachine.isActive()) {
       setSpeed(RangeFinder.getShotVelocity(
           robotStateMachine.getTurretPose().getTranslation()
@@ -79,6 +86,8 @@ public class Flywheel extends SubsystemBase {
 
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
+    SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
+
     SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
     SmartDashboard.putNumber("reqSpeed", reqSpeed);
     SmartDashboard.putNumber("actSpeed", getSpeed());
@@ -87,7 +96,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void setSpeed(double speed) {
-    reqSpeed = speed + (2 * speedMultiplier);
+    reqSpeed = speed + (2 * speedMultiplier) + rotationMultiplier;
 
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);
