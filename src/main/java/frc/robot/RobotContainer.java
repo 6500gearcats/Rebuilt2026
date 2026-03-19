@@ -177,7 +177,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
                 NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
                 NamedCommands.registerCommand("BopBop",
-                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.3)
+                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.2)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
                 NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
                 NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));

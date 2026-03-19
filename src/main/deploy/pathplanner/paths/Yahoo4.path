@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.81910128388017,
-        "y": 7.366704707560627
+        "x": 5.901,
+        "y": 2.502
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.186875891583452,
-        "y": 7.366704707560627
+        "x": 5.654466687304961,
+        "y": 2.460511137258172
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.937,
-        "y": 6.797
+        "x": 3.110322003577817,
+        "y": 2.502
       },
       "prevControl": {
-        "x": 6.92437945791726,
-        "y": 7.754864479315264
+        "x": 2.863282218058595,
+        "y": 2.4636418930261565
       },
       "nextControl": null,
       "isLocked": false,
@@ -38,17 +38,17 @@
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": false
+    "unlimited": true
   },
   "goalEndState": {
-    "velocity": 3.0,
-    "rotation": -50.0
+    "velocity": 0,
+    "rotation": -132.37447200345065
   },
   "reversed": false,
-  "folder": "Doomsday",
+  "folder": "WakeYahoo",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -132.0
   },
   "useDefaultConstraints": true
 }
