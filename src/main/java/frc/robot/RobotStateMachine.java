@@ -189,8 +189,8 @@ public final class RobotStateMachine {
                     speeds.omegaRadiansPerSecond);
         }
 
-        Pose2d nextPose = pose.plus(
-                new Transform2d(speeds.vxMetersPerSecond * 0.2, speeds.vyMetersPerSecond * 0.2, new Rotation2d()));
+        Pose2d nextPose = new Pose2d(pose.getX() + speeds.vxMetersPerSecond * 0.2,
+                pose.getY() + speeds.vyMetersPerSecond * 0.2, new Rotation2d());
 
         double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
@@ -206,10 +206,10 @@ public final class RobotStateMachine {
             return;
         }
 
-        targetPose = bestPose.get().transformBy(new Transform2d(
-                new Translation2d(-speeds.vxMetersPerSecond * timeOfFlight,
-                        -speeds.vyMetersPerSecond * timeOfFlight),
-                new Rotation2d()));
+        Pose2d best = bestPose.get();
+        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * timeOfFlight),
+                best.getY() + (-speeds.vyMetersPerSecond * timeOfFlight),
+                new Rotation2d());
 
         targetPosePublisher.set(targetPose);
     }
