@@ -41,11 +41,13 @@ public final class RobotStateMachine {
 
     private boolean switching = false;
     private boolean switchingRed = false;
+    private boolean switchingGreen = false;
     private boolean postedValue = false;
     private Color exampleColor;
     private Color whiteColor = new Color(237, 237, 237);
     private Color blackColor = new Color(49, 49, 49);
     private Color redColor = new Color (191, 0, 0);
+    private Color greenColor = new Color (0, 191, 0);
 
     private Pose2d turretPose = new Pose2d();
 
@@ -149,13 +151,21 @@ public final class RobotStateMachine {
 
     private void newPostedValue() {
         if (switchingRed) {
-                if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor)) {
+                if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor) || exampleColor.equals(greenColor)) {
                     exampleColor = redColor;
                 }
                 else if (exampleColor.equals(redColor)) {
                     exampleColor = blackColor;
                 }
             }
+        else if (switchingGreen) {
+            if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor) || exampleColor.equals(redColor)) {
+                    exampleColor = greenColor;
+                }
+                else if (exampleColor.equals(greenColor)) {
+                    exampleColor = blackColor;
+                }
+        }
         else if (switching) {
             if (exampleColor.equals(whiteColor)) {
                 exampleColor = blackColor;
@@ -327,17 +337,19 @@ public final class RobotStateMachine {
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 108) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 111) {
-                        switchingRed = true;
+                        switchingGreen = true;
                     } else if (DriverStation.getMatchTime() < 118) {
                         switching = true;
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 77) {
@@ -349,22 +361,25 @@ public final class RobotStateMachine {
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 58) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 61) {
-                        switchingRed = true;
+                        switchingGreen = true;
                     } else if (DriverStation.getMatchTime() < 68) {
                         switching = true;
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 30) {
                     switching = false;
                     switchingRed = false;
+                    switchingGreen = false;
                     exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 } else {
@@ -383,17 +398,19 @@ public final class RobotStateMachine {
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 83) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 86) {
-                        switchingRed = true;
+                        switchingGreen = true;
                     } else if (DriverStation.getMatchTime() < 93) {
                         switching = true;
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 52) {
@@ -405,22 +422,25 @@ public final class RobotStateMachine {
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 33) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 36) {
-                        switchingRed = true;
+                        switchingGreen = true;
                     } if (DriverStation.getMatchTime() < 43) {
                         switching = true;
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else {
                     switching = false;
                     switchingRed = false;
+                    switchingGreen = false;
                     exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 }
@@ -436,17 +456,19 @@ public final class RobotStateMachine {
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 108) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 111) {
-                        switchingRed = true;
+                        switchingGreen = true;
                     } else if (DriverStation.getMatchTime() < 118) {
                         switching = true;
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 77) {
@@ -458,23 +480,26 @@ public final class RobotStateMachine {
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 58) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 61) {
-                        switchingRed = true;
+                        switchingGreen = true;
                     } else if (DriverStation.getMatchTime() < 68) {
                         switching = true;
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 30) {
                     switching = false;
-                    switchingRed = false;
-                    exampleColor = blackColor;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 } else {
                     setState(RobotState.ACTIVE);
@@ -492,17 +517,19 @@ public final class RobotStateMachine {
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 83) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 86) {
-                        switchingRed = true;
+                        switchingGreen = true;
                     } else if (DriverStation.getMatchTime() < 93) {
                         switching = true;
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 52) {
@@ -514,22 +541,25 @@ public final class RobotStateMachine {
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else if (DriverStation.getMatchTime() > 33) {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 36) {
-                        switchingRed = true;
+                        switchingGreen = true;
                     } else if (DriverStation.getMatchTime() < 43) {
                         switching = true;
                     } else {
                         switching = false;
                         switchingRed = false;
+                        switchingGreen = false;
                         exampleColor = blackColor;
                     }
                 } else {
                     switching = false;
                     switchingRed = false;
+                    switchingGreen = false;
                     exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 }
