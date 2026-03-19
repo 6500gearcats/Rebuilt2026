@@ -60,7 +60,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "ShootFuel5s"
+                  "name": "NewShootFuel5s"
                 }
               }
             ]
@@ -81,7 +81,7 @@
         {
           "type": "named",
           "data": {
-            "name": "ShootFuel"
+            "name": "NewShootFuel5s"
           }
         }
       ]
