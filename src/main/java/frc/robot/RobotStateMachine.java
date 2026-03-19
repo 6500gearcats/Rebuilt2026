@@ -210,12 +210,12 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
         if (robotRelSpeeds.vxMetersPerSecond < 0 && robotRelSpeeds.vyMetersPerSecond < 0) {
-            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.omegaRadiansPerSecond * 1.3,
+            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.vyMetersPerSecond * 1.3,
                     speeds.omegaRadiansPerSecond);
         }
 
-        Pose2d nextPose = pose.plus(
-                new Transform2d(speeds.vxMetersPerSecond * 2, speeds.vyMetersPerSecond * 2, new Rotation2d()));
+        Pose2d nextPose = new Pose2d(pose.getX() + speeds.vxMetersPerSecond * 0.2,
+                pose.getY() + speeds.vyMetersPerSecond * 0.2, new Rotation2d());
 
         double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
@@ -224,17 +224,17 @@ public final class RobotStateMachine {
         double shootAng = Units.degreesToRadians(65);
         double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
         double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
-                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2)) - 2 * 9.8 * dh) / 9.8;
+                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2 * 9.8 * dh))) / 9.8;
 
         Optional<Pose2d> bestPose = getBestPoseTarget();
         if (bestPose.isEmpty()) {
             return;
         }
 
-        targetPose = bestPose.get().transformBy(new Transform2d(
-                new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
-                        speeds.vyMetersPerSecond * timeOfFlight),
-                new Rotation2d()));
+        Pose2d best = bestPose.get();
+        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * timeOfFlight),
+                best.getY() + (-speeds.vyMetersPerSecond * timeOfFlight),
+                new Rotation2d());
 
         targetPosePublisher.set(targetPose);
     }
