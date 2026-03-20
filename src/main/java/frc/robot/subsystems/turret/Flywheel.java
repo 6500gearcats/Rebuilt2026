@@ -106,6 +106,7 @@ public class Flywheel extends SubsystemBase {
 
       if (robotStateMachine.underTrench()) {
         speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
+        reqSpeed = speedValue;
       }
 
       m_motor.setControl(m_request.withVelocity(speedValue));
