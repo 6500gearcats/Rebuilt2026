@@ -46,8 +46,8 @@ public final class RobotStateMachine {
     private Color exampleColor;
     private Color whiteColor = new Color(237, 237, 237);
     private Color blackColor = new Color(49, 49, 49);
-    private Color redColor = new Color (191, 0, 0);
-    private Color greenColor = new Color (0, 191, 0);
+    private Color redColor = new Color(191, 0, 0);
+    private Color greenColor = new Color(0, 191, 0);
 
     private Pose2d turretPose = new Pose2d();
 
@@ -151,28 +151,24 @@ public final class RobotStateMachine {
 
     private void newPostedValue() {
         if (switchingRed) {
-                if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor) || exampleColor.equals(greenColor)) {
-                    exampleColor = redColor;
-                }
-                else if (exampleColor.equals(redColor)) {
-                    exampleColor = blackColor;
-                }
+            if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor) || exampleColor.equals(greenColor)) {
+                exampleColor = redColor;
+            } else if (exampleColor.equals(redColor)) {
+                exampleColor = blackColor;
             }
-        else if (switchingGreen) {
+        } else if (switchingGreen) {
             if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor) || exampleColor.equals(redColor)) {
-                    exampleColor = greenColor;
-                }
-                else if (exampleColor.equals(greenColor)) {
-                    exampleColor = blackColor;
-                }
-        }
-        else if (switching) {
+                exampleColor = greenColor;
+            } else if (exampleColor.equals(greenColor)) {
+                exampleColor = blackColor;
+            }
+        } else if (switching) {
             if (exampleColor.equals(whiteColor)) {
                 exampleColor = blackColor;
             } else if (exampleColor.equals(blackColor)) {
                 exampleColor = whiteColor;
-             }
-        } 
+            }
+        }
     }
 
     private void checkAlliance() {
@@ -277,7 +273,7 @@ public final class RobotStateMachine {
         double dx = targetPose.getX() - pose.getX();
         double dy = targetPose.getY() - pose.getY();
         double targetAngle = Math.atan2(dy, dx);
-        double delta = targetAngle - pose.getRotation().getRadians();
+        double delta = targetAngle - (pose.getRotation().getRadians() - Math.PI);
         delta = Math.atan2(Math.sin(delta), Math.cos(delta));
         double tolerance = Math.toRadians(20);
 
@@ -429,7 +425,8 @@ public final class RobotStateMachine {
                     setState(RobotState.INACTIVE);
                     if (DriverStation.getMatchTime() < 36) {
                         switchingGreen = true;
-                    } if (DriverStation.getMatchTime() < 43) {
+                    }
+                    if (DriverStation.getMatchTime() < 43) {
                         switching = true;
                     } else {
                         switching = false;
@@ -497,9 +494,9 @@ public final class RobotStateMachine {
                     }
                 } else if (DriverStation.getMatchTime() > 30) {
                     switching = false;
-                        switchingRed = false;
-                        switchingGreen = false;
-                        exampleColor = blackColor;
+                    switchingRed = false;
+                    switchingGreen = false;
+                    exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 } else {
                     setState(RobotState.ACTIVE);

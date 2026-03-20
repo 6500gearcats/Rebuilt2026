@@ -73,8 +73,7 @@ public class Flywheel extends SubsystemBase {
     }
     if (!robotStateMachine.isFacingHub()) {
       rotationMultiplier = 2;
-    }
-    else {
+    } else {
       rotationMultiplier = 0;
     }
 
@@ -100,7 +99,7 @@ public class Flywheel extends SubsystemBase {
 
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);
-    double speedValue = speed + (2 * speedMultiplier);
+    double speedValue = speed + (2 * speedMultiplier) + rotationMultiplier;
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
