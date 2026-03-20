@@ -90,6 +90,7 @@ public class Flywheel extends SubsystemBase {
     SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
     SmartDashboard.putNumber("reqSpeed", reqSpeed);
     SmartDashboard.putNumber("actSpeed", getSpeed());
+    SmartDashboard.putBoolean("isUnderTrench", robotStateMachine.underTrench());
 
     // This method will be called once per scheduler run
   }
@@ -102,6 +103,10 @@ public class Flywheel extends SubsystemBase {
     double speedValue = speed + (2 * speedMultiplier) + rotationMultiplier;
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
+
+      if (robotStateMachine.underTrench()) {
+        speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
+      }
 
       m_motor.setControl(m_request.withVelocity(speedValue));
       m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
