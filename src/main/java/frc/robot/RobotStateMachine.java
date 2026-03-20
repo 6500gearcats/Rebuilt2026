@@ -645,6 +645,26 @@ public final class RobotStateMachine {
         }
     }
 
+    public boolean underTrench() {
+        double xPose = pose.getX();
+        double yPose = pose.getY();
+        if (xPose>3.7 && xPose<5.3 && yPose>6.5 && yPose<8.3) {
+            return true;
+        } 
+        else if (xPose>3.7 && xPose<5.3 && yPose<1.8 && yPose>0) {
+            return true;
+        }
+        else if (xPose>10.9 && xPose<12.8 && yPose>6.5 && yPose<8.3) {
+            return true;
+        }
+        else if (xPose>10.9 && xPose<12.8 && yPose<1.8 && yPose>0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public String getGameData() {
         return gameData;
     }
