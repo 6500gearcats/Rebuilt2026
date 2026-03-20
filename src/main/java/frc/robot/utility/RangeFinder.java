@@ -20,7 +20,7 @@ public class RangeFinder {
     m_map.put(2.8, 57.0);
     m_map.put(3.0, 58.0);
     m_map.put(3.4, 63.0);
-    m_map.put(3.2, 59.0);
+    m_map.put(3.2, 61.0);
     m_map.put(3.6, 73.0);
     m_map.put(3.5, 69.0);
     m_map.put(4.0, 75.0);

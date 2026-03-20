@@ -162,8 +162,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
-                                new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.5),
-                                                new ShootingSequence(hopper, m_flywheel).withTimeout(0.2)));
+                                new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.5)));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
