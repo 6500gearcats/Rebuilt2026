@@ -173,8 +173,9 @@ public class RobotContainer {
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7.0));
                 NamedCommands.registerCommand("ShootFuel5s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
-                                NamedCommands.registerCommand("NewShootFuel5s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine).withTimeout(5.0));
+                NamedCommands.registerCommand("NewShootFuel5s",
+                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
+                                                .withTimeout(5.0));
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
                 NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
@@ -261,7 +262,7 @@ public class RobotContainer {
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
                                 .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate))); // Drive counterclockwise with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate * m_flywheel.speedModifier))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.

@@ -228,8 +228,8 @@ public final class RobotStateMachine {
         }
 
         Pose2d best = bestPose.get();
-        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * timeOfFlight),
-                best.getY() + (-speeds.vyMetersPerSecond * timeOfFlight),
+        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * timeOfFlight * 0.1),
+                best.getY() + (-speeds.vyMetersPerSecond * timeOfFlight * 0.1),
                 new Rotation2d());
 
         targetPosePublisher.set(targetPose);
