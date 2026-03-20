@@ -628,10 +628,10 @@ public final class RobotStateMachine {
         // < 4.52 m is the blue alliance's trench, > 11.63 m is the red alliance's
         // trench, and in between is the neutral zone
         Alliance alliance = getAlliance();
-        if (pose.getX() < 4.52) {
+        if (pose.getX() < 5.4) {
             currentZone = alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
             return currentZone;
-        } else if (pose.getX() > 11.63) {
+        } else if (pose.getX() > 11.0) {
             currentZone = alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
             return currentZone;
         } else {
