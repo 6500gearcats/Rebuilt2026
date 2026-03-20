@@ -214,7 +214,7 @@ public class RobotContainer {
                                                 m_ll,
                                                 m_ll2);
                                 m_turret.goToZero();
-                                // m_turretSysID = new SysIDUtil(m_turret);
+                                m_turretSysID = new SysIDUtil(m_turret);
                                 m_flywheelSysID = new SysIDUtil(m_flywheel);
                                 break;
                         case SIM:
@@ -311,15 +311,12 @@ public class RobotContainer {
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
 
-                if (m_turretSysID.isPresent()) {
-                        // Driver Back + A
-                        joystick.b(
-
-                        )
-                                        .onTrue(m_flywheelSysID.sysIdAll().get()
-                                                        .andThen(new InstantCommand(() -> System.out
-                                                                        .println("Get Hoot Logs from TunerX"))));
-                }
+                // if (m_turretSysID.isPresent()) {
+                // // Driver Back + A
+                // joystick.b().onTrue(m_turretSysID.sysIdAll().get()
+                // .andThen(new InstantCommand(() -> System.out
+                // .println("Get Hoot Logs from TunerX"))));
+                // }
         }
 
         /**
