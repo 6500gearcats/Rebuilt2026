@@ -6,8 +6,10 @@
     "Artemis2",
     "FinalHope",
     "LeftProjectHailMary",
-    "WakeYahoo",
-    "RightProjectHailMary"
+    "WakeCenter",
+    "RightProjectHailMary",
+    "WakeLeft",
+    "WakeRight"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,
