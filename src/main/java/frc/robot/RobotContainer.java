@@ -178,6 +178,9 @@ public class RobotContainer {
                 NamedCommands.registerCommand("NewShootFuel10s",
                                 new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
                                                 .withTimeout(10.0));
+                NamedCommands.registerCommand("NewShootFuel4s",
+                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
+                                                .withTimeout(4.0));
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
                 NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
@@ -214,7 +217,7 @@ public class RobotContainer {
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2,
-                                                m_ll,
+                                                // m_ll);
                                                 m_ll2);
                                 m_turret.goToZero();
                                 m_turretSysID = new SysIDUtil(m_turret);
@@ -382,11 +385,11 @@ public class RobotContainer {
                 }
         }
 
-        public void disableInitCode() {
-                m_vision.throttleLimelight();
-        }
+        // public void disableInitCode() {
+        // m_vision.throttleLimelight();
+        // }
 
-        public void disableExitCode() {
-                m_vision.resetLimelightThrottle();
-        }
+        // public void disableExitCode() {
+        // m_vision.resetLimelightThrottle();
+        // }
 }

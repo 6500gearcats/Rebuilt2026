@@ -90,7 +90,7 @@
     {
       "name": "IntakeFuel",
       "waypointRelativePos": 1.578571428571429,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 3.0,
       "command": {
         "type": "named",
         "data": {

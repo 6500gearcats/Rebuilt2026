@@ -5,21 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "IntakeLong"
+            "pathName": "ModFinalHope3"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "ModifiedFinalHope1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "FinalHope2"
+            "pathName": "FinalHope4"
           }
         },
         {
@@ -51,7 +51,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.5
+                        "waitTime": 3.0
                       }
                     },
                     {
@@ -66,28 +66,10 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel5s"
+                  "name": "NewShootFuel10s"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "FinalHope3"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "FinalHope4"
           }
         }
       ]

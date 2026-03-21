@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -43,7 +44,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    m_robotContainer.disableInitCode();
+    // m_robotContainer.disableInitCode();
   }
 
   @Override
@@ -52,7 +53,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledExit() {
-    m_robotContainer.disableExitCode();
+    // m_robotContainer.disableExitCode();
   }
 
   @Override
@@ -63,15 +64,19 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
+    SignalLogger.start();
     m_RobotStateMachine.setState(RobotState.ACTIVE);
   }
 
   @Override
   public void autonomousPeriodic() {
+    SignalLogger.writeStruct("odometry", Pose2d.struct, m_RobotStateMachine.getPose());
+    SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(), "seconds");
   }
 
   @Override
   public void autonomousExit() {
+    SignalLogger.stop();
   }
 
   @Override

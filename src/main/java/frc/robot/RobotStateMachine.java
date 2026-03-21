@@ -205,7 +205,7 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
-        if (robotRelSpeeds.vxMetersPerSecond < 0 && robotRelSpeeds.vyMetersPerSecond < 0) {
+        if (speeds.vxMetersPerSecond < 0 && speeds.vyMetersPerSecond < 0) {
             speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.vyMetersPerSecond * 1.3,
                     speeds.omegaRadiansPerSecond);
         }
@@ -252,6 +252,10 @@ public final class RobotStateMachine {
     public void resetVisionPose(Pose2d pose) {
         m_vision.resetVisionPose(pose);
     }
+
+    // public void getVisionEst(String name) {
+    // m_vision.getEstPoses(name);
+    // }
 
     public void bindDrivetrain(CommandSwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
@@ -619,6 +623,10 @@ public final class RobotStateMachine {
         }
     }
 
+    public double getPoseTime() {
+        return m_vision.getPoseTime();
+    }
+
     /**
      * Determines the field zone based on the current pose and alliance.
      *
@@ -648,19 +656,15 @@ public final class RobotStateMachine {
     public boolean underTrench() {
         double xPose = pose.getX();
         double yPose = pose.getY();
-        if (xPose>3.7 && xPose<5.3 && yPose>6.5 && yPose<8.3) {
+        if (xPose > 3.7 && xPose < 5.3 && yPose > 6.5 && yPose < 8.3) {
             return true;
-        } 
-        else if (xPose>3.7 && xPose<5.3 && yPose<1.8 && yPose>0) {
+        } else if (xPose > 3.7 && xPose < 5.3 && yPose < 1.8 && yPose > 0) {
             return true;
-        }
-        else if (xPose>10.9 && xPose<12.8 && yPose>6.5 && yPose<8.3) {
+        } else if (xPose > 10.9 && xPose < 12.8 && yPose > 6.5 && yPose < 8.3) {
             return true;
-        }
-        else if (xPose>10.9 && xPose<12.8 && yPose<1.8 && yPose>0) {
+        } else if (xPose > 10.9 && xPose < 12.8 && yPose < 1.8 && yPose > 0) {
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
