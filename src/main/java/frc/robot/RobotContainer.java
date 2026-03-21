@@ -354,7 +354,7 @@ public class RobotContainer {
 
                                 // GCC
                                 LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
+                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0,
                                                 0);
 
                                 LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
