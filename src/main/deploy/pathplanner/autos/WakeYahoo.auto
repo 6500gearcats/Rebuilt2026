@@ -79,9 +79,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "NewShootFuel5s"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "NewShootFuel5s"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "BopBop"
+                }
+              }
+            ]
           }
         }
       ]

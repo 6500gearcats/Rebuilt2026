@@ -26,6 +26,7 @@ import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
 import frc.robot.utility.RangeFinder;
 import frc.robot.Constants.MotorConstants;
+import frc.robot.RobotStateMachine.FieldZone;
 
 /**
  * Flywheel subsystem that controls the shooter motors.
@@ -77,7 +78,7 @@ public class Flywheel extends SubsystemBase {
       rotationMultiplier = 0;
     }
 
-    if (robotStateMachine.isActive()) {
+    if (robotStateMachine.isActive() /* && robotStateMachine.checkZone() == FieldZone.ALLIANCE */) {
       setSpeed(RangeFinder.getShotVelocity(
           robotStateMachine.getTurretPose().getTranslation()
               .getDistance(robotStateMachine.getHubPose().getTranslation())));
