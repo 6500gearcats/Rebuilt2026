@@ -206,11 +206,11 @@ public class RobotContainer {
                                                 new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
                                 LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
-                                                true);
+                                                false);
                                 LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
-                                                true);
+                                                false);
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
