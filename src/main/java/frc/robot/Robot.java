@@ -8,6 +8,7 @@ import com.ctre.phoenix6.SignalLogger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -31,6 +32,7 @@ public class Robot extends TimedRobot {
     if (m_gcTimer.advanceIfElapsed(5)) {
       System.gc();
     }
+    DataLogManager.start();
   }
 
   @Override
@@ -40,6 +42,8 @@ public class Robot extends TimedRobot {
     if (m_gcTimer.advanceIfElapsed(0.1)) {
       System.gc();
     }
+    SignalLogger.writeStruct("odometry", Pose2d.struct, m_RobotStateMachine.getPose());
+    SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(), "seconds");
   }
 
   @Override
@@ -126,6 +130,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {
+    SignalLogger.stop();
+
   }
 
   @Override

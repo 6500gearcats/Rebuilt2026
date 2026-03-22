@@ -74,6 +74,7 @@ import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
+import frc.robot.commands.SetTurretAngle;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.commands.ShootingSequenceUTS;
@@ -162,7 +163,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
-                                new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.5)));
+                                new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
@@ -172,6 +173,14 @@ public class RobotContainer {
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7.0));
                 NamedCommands.registerCommand("ShootFuel5s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
+                NamedCommands.registerCommand("NewShootFuel3s",
+                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
+                                                .withTimeout(3.0));
+                NamedCommands.registerCommand("ManualShootFuel3s",
+                                new ShootingSequenceUTS(hopper, m_flywheel)
+                                                .withTimeout(3.0));
+                NamedCommands.registerCommand("TrenchStartAngle",
+                                new SetTurretAngle(m_turret, -90).withTimeout(1));
                 NamedCommands.registerCommand("NewShootFuel5s",
                                 new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
                                                 .withTimeout(5.0));
@@ -194,6 +203,7 @@ public class RobotContainer {
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
                 autoChooser = AutoBuilder.buildAutoChooser("testAuto");
+
                 SmartDashboard.putData("Auto Chooser", autoChooser);
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
