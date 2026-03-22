@@ -155,11 +155,11 @@ public class Vision extends SubsystemBase {
     for (VisionIO visionIO : m_visionOdometryCams) {
       visionIO.getVisionEst().ifPresent(est -> {
 
-        if (lastPose.minus(est.getPose()).getTranslation().getNorm() < 4) {
+        // if (lastPose.minus(est.getPose()).getTranslation().getNorm() < 4) {
 
-          estimator.addVisionMeasurement(est.getPose(), est.getTimestamp());
+        estimator.addVisionMeasurement(est.getPose(), est.getTimestamp());
 
-        }
+        // }
 
       });
       if (visionIO.getName().contains("gcc")) {
