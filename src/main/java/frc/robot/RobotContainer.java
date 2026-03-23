@@ -362,7 +362,7 @@ public class RobotContainer {
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
 
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.26, 0.273, 0.15, 0, 150,
                                                 45);
 
                                 // GCC
@@ -370,7 +370,7 @@ public class RobotContainer {
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0,
                                                 0);
 
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.26, -0.273, 0.15,
                                                 0, 150,
                                                 -45);
                         } else {
@@ -383,7 +383,7 @@ public class RobotContainer {
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);
 
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.3, 0.25, 0.15, 0, 150,
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.26, 0.273, 0.15, 0, 150,
                                                 45);
 
                                 // GCC
@@ -391,7 +391,7 @@ public class RobotContainer {
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);
 
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.3, -0.25, 0.15,
+                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.26, -0.273, 0.15,
                                                 0, 150,
                                                 -45);
                         }
