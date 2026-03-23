@@ -398,11 +398,11 @@ public class RobotContainer {
                 }
         }
 
-        // public void disableInitCode() {
-        // m_vision.throttleLimelight();
-        // }
+        public void disableInitCode() {
+                m_vision.throttleLimelight();
+        }
 
-        // public void disableExitCode() {
-        // m_vision.resetLimelightThrottle();
-        // }
+        public void disableExitCode() {
+                m_vision.resetLimelightThrottle();
+        }
 }

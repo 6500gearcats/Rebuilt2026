@@ -72,11 +72,11 @@ public class Flywheel extends SubsystemBase {
     } else {
       speedModifier = 1;
     }
-    if (!robotStateMachine.isFacingHub()) {
-      rotationMultiplier = 2;
-    } else {
-      rotationMultiplier = 0;
-    }
+    // if (!robotStateMachine.isFacingHub()) {
+    // rotationMultiplier = 2;
+    // } else {
+    // rotationMultiplier = 0;
+    // }
 
     if (robotStateMachine.isActive() /* && robotStateMachine.checkZone() == FieldZone.ALLIANCE */) {
       setSpeed(RangeFinder.getShotVelocity(
