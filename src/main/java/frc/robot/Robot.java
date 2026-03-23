@@ -74,8 +74,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    SignalLogger.writeStruct("odometry", Pose2d.struct, m_RobotStateMachine.getPose());
-    SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(), "seconds");
   }
 
   @Override

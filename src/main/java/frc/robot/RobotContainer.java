@@ -190,11 +190,14 @@ public class RobotContainer {
                 NamedCommands.registerCommand("NewShootFuel4s",
                                 new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
                                                 .withTimeout(4.0));
+                NamedCommands.registerCommand("NewShootFuel8s",
+                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
+                                                .withTimeout(8.0));
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
                 NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
                 NamedCommands.registerCommand("BopBop",
-                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.2)
+                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
                 NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
                 NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));
@@ -294,8 +297,8 @@ public class RobotContainer {
                 // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
                 new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
-                                .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.25)
-                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.1)));
+                                .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
+                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.2)));
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 

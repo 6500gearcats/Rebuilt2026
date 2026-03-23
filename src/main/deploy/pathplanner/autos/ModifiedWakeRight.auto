@@ -24,18 +24,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "TrenchStartAngle"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ManualShootFuel3s"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "ModYahoo1.2"
@@ -78,6 +66,12 @@
                       "data": {
                         "waitTime": 1.5
                       }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "BopBop"
+                      }
                     }
                   ]
                 }
@@ -85,7 +79,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel5s"
+                  "name": "NewShootFuel8s"
                 }
               }
             ]
