@@ -53,17 +53,18 @@ public class AlignTurretToHub extends Command {
     SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
     SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
     SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
-    /* if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
-        && prevPose.minus(currPose).getRotation().getDegrees() < 2 && errorFromPrevRot < 1) {
-      return;
-    } */
+    /*
+     * if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
+     * && prevPose.minus(currPose).getRotation().getDegrees() < 2 &&
+     * errorFromPrevRot < 1) {
+     * return;
+     * }
+     */
     Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
     Translation2d robotToTarget = m_targetPose.getTranslation()
         .minus(m_StateMachine.getTurretPose().getTranslation()); // gets x and y difference between robot and april tag
-    Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation()
-        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));// gets rotation of motor in
-                                                                                     // relation to field
+    Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation();
 
     Pose2d newTurretPose = new Pose2d(m_StateMachine.getTurretPose().getTranslation(), turretAndRobot);
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());

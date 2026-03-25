@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.turret.Flywheel;
+import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.utility.RangeFinder;
 
@@ -53,6 +54,7 @@ public final class RobotStateMachine {
 
     private Vision m_vision;
     private Flywheel m_Flywheel = new Flywheel(this);
+    private Turret m_Turret = new Turret();
 
     public static Pose3d Tag_POSE2D;
 
@@ -137,6 +139,7 @@ public final class RobotStateMachine {
         posePublisher.set(pose);
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
+        turretPose.rotateBy(new Rotation2d(Math.toRadians(m_Turret.getConvertedTurretPosition())));
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
         newPostedValue();
@@ -210,17 +213,26 @@ public final class RobotStateMachine {
                     speeds.omegaRadiansPerSecond);
         }
 
-        Pose2d nextPose = new Pose2d(pose.getX() + speeds.vxMetersPerSecond * 0.2,
-                pose.getY() + speeds.vyMetersPerSecond * 0.2, new Rotation2d());
-
-        double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+        double distance = getTurretPose().getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
 
+        double tof = getTOF(shotVelocity);// RangeFinder.getTOF(distance);
+
+        Pose2d nextPose = getTurretPose();
+
+        for (int i = 0; i < 20; i++) {
+            nextPose = new Pose2d(nextPose.getX() + (speeds.vxMetersPerSecond * tof),
+                    nextPose.getY() + (speeds.vyMetersPerSecond * tof), new Rotation2d());
+            distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+            tof = getTOF(shotVelocity);// RangeFinder.getTOF(distance);
+        }
+
         // Apx launch angle is 65 deg
-        double shootAng = Units.degreesToRadians(65);
-        double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
-        double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
-                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2 * 9.8 * dh))) / 9.8;
+        // double shootAng = Units.degreesToRadians(65);
+        // double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
+        // double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
+        // + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2
+        // * 9.8 * dh))) / 9.8;
 
         Optional<Pose2d> bestPose = getBestPoseTarget();
         if (bestPose.isEmpty()) {
@@ -228,11 +240,25 @@ public final class RobotStateMachine {
         }
 
         Pose2d best = bestPose.get();
-        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * timeOfFlight * 0.1),
-                best.getY() + (-speeds.vyMetersPerSecond * timeOfFlight * 0.1),
+        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * getTOF(shotVelocity)),
+                best.getY() + (-speeds.vyMetersPerSecond * getTOF(shotVelocity)),
                 new Rotation2d());
 
         targetPosePublisher.set(targetPose);
+    }
+
+    public double getTOF(double shotVelocity) {
+        // Apx launch angle is 65 deg
+        double shootAng = Units.degreesToRadians(65);
+        double dh = Units.inchesToMeters(56.375 - 19);
+        double term = Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2 * 9.8 * dh);
+        double safeTerm = Math.max(0.0, term);
+        double timeOfFlight = ((shotVelocity * Math.sin(shootAng)) + Math.sqrt(safeTerm)) / 9.8;
+        return timeOfFlight;
+    }
+
+    public Turret getTurret() {
+        return m_Turret;
     }
 
     public ChassisSpeeds getFieldSpeeds() {
@@ -333,17 +359,25 @@ public final class RobotStateMachine {
         // 1. Calculate the target time for the countdown
         // "R" Red and "B" Blue share the exact same schedule
         if ((gameData.contains("R") && isRed) || (gameData.contains("B") && !isRed)) {
-            if (matchTime > 127) nextTargetTime = 127;
-            else if (matchTime > 108) nextTargetTime = 108;
-            else if (matchTime > 77) nextTargetTime = 77;
-            else if (matchTime > 58) nextTargetTime = 58;
-        } 
+            if (matchTime > 127)
+                nextTargetTime = 127;
+            else if (matchTime > 108)
+                nextTargetTime = 108;
+            else if (matchTime > 77)
+                nextTargetTime = 77;
+            else if (matchTime > 58)
+                nextTargetTime = 58;
+        }
         // "R" Blue and "B" Red share the exact same schedule
         else if ((gameData.contains("R") && !isRed) || (gameData.contains("B") && isRed)) {
-            if (matchTime > 102) nextTargetTime = 102;
-            else if (matchTime > 83) nextTargetTime = 83;
-            else if (matchTime > 52) nextTargetTime = 52;
-            else if (matchTime > 33) nextTargetTime = 33;
+            if (matchTime > 102)
+                nextTargetTime = 102;
+            else if (matchTime > 83)
+                nextTargetTime = 83;
+            else if (matchTime > 52)
+                nextTargetTime = 52;
+            else if (matchTime > 33)
+                nextTargetTime = 33;
         }
 
         // Sets the live countdown (prevents dropping below 0)
@@ -454,7 +488,7 @@ public final class RobotStateMachine {
                     setState(RobotState.INACTIVE);
                     if (matchTime < 36) {
                         switchingGreen = true;
-                    } else if (matchTime < 43) { 
+                    } else if (matchTime < 43) {
                         switching = true;
                     } else {
                         switching = false;
@@ -593,6 +627,7 @@ public final class RobotStateMachine {
 
         return state;
     }
+
     /**
      * Update state and refresh pose from vision.
      */

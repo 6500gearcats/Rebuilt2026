@@ -131,14 +131,15 @@ public class RobotContainer {
 
         private final Flywheel m_flywheel;
 
-        private final Turret m_turret = new Turret();
-
         private final Intake m_intake = new Intake();
 
         private final Climber m_climber = new Climber();
 
         private final RangeFinder rangeFinder = new RangeFinder();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
+
+        private final Turret m_turret = robotStateMachine.getTurret();
+
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
         SysIDUtil m_turretSysID = new SysIDUtil();
