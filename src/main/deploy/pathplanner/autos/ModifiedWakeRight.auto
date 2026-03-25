@@ -5,21 +5,34 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "IntakeLong"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "ModYahoo1.1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeLong"
+                }
+              }
+            ]
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "ModifiedFinalHope1"
+            "pathName": "ModYahoo1.2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "FinalHope2"
+            "pathName": "Yahoo2"
           }
         },
         {
@@ -66,7 +79,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel5s"
+                  "name": "NewShootFuel8s"
                 }
               }
             ]
@@ -75,19 +88,32 @@
         {
           "type": "path",
           "data": {
-            "pathName": "FinalHope3"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "pathName": "Yahoo3"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "FinalHope4"
+            "pathName": "Yahoo4"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "NewShootFuel5s"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "BopBop"
+                }
+              }
+            ]
           }
         }
       ]

@@ -5,6 +5,7 @@
 package frc.robot.subsystems.vision;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.photonvision.simulation.VisionSystemSim;
@@ -20,6 +21,10 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -78,6 +83,16 @@ public class Vision extends SubsystemBase {
 
   public Field2d m_field = new Field2d();
 
+  private final StructPublisher<Pose2d> gccPub = NetworkTableInstance.getDefault()
+      .getTable("StateMachine")
+      .getStructTopic("GCC", Pose2d.struct)
+      .publish();
+
+  private final StructPublisher<Pose2d> gcdPub = NetworkTableInstance.getDefault()
+      .getTable("StateMachine")
+      .getStructTopic("GCD", Pose2d.struct)
+      .publish();
+
   /**
    * Creates a vision subsystem with live camera IO.
    *
@@ -133,11 +148,26 @@ public class Vision extends SubsystemBase {
     if (isReplay) {
       return;
     }
+    Pose2d lastPose = getEstimatedPose();
     estimator.update(
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
     for (VisionIO visionIO : m_visionOdometryCams) {
-      visionIO.getVisionEst().ifPresent(est -> estimator.addVisionMeasurement(est.getPose(), est.getTimestamp()));
+      visionIO.getVisionEst().ifPresent(est -> {
+
+        // if (lastPose.minus(est.getPose()).getTranslation().getNorm() < 4) {
+
+        estimator.addVisionMeasurement(est.getPose(), est.getTimestamp());
+
+        // }
+
+      });
+      if (visionIO.getName().contains("gcc")) {
+        visionIO.getVisionEst().ifPresent(est -> gccPub.set(est.getPose()));
+      } else if (visionIO.getName().contains("gcd")) {
+        visionIO.getVisionEst().ifPresent(est -> gcdPub.set(est.getPose()));
+      }
+
     }
     // In sim, fall back to drivetrain sim pose if module positions aren't simulated
     if (RobotBase.isSimulation() && m_poseSupplier != null) {
@@ -180,22 +210,42 @@ public class Vision extends SubsystemBase {
     return estimator.getEstimatedPosition();
   }
 
+  public double getPoseTime() {
+    for (VisionIO io : m_visionOdometryCams) {
+      if (io instanceof LimelightIO) {
+        return ((LimelightIO) io).getPoseTime();
+      }
+    }
+    return 0;
+  }
+
+  // public Optional<Pose2d> getEstPoses(String name) {
+  // for (VisionIO io : m_visionOdometryCams) {
+  // if (io instanceof LimelightIO) {
+  // if (name.equals(io.getName())) {
+  // return Optional.of(((LimelightIO) io).getEstPoses());
+  // }
+  // }
+  // }
+  // return Optional.empty();
+  // }
+
   public void resetVisionPose(Pose2d pose) {
     estimator.resetPose(pose);
   }
-  
+
   public void throttleLimelight() {
-    for(VisionIO vision : m_visionOdometryCams) {
-      if(vision instanceof LimelightIO) {
-        ((LimelightIO)vision).throttleTemp();
+    for (VisionIO vision : m_visionOdometryCams) {
+      if (vision instanceof LimelightIO) {
+        ((LimelightIO) vision).throttleTemp();
       }
     }
   }
 
   public void resetLimelightThrottle() {
-    for(VisionIO vision : m_visionOdometryCams) {
-      if(vision instanceof LimelightIO) {
-        ((LimelightIO)vision).resetThrottle();
+    for (VisionIO vision : m_visionOdometryCams) {
+      if (vision instanceof LimelightIO) {
+        ((LimelightIO) vision).resetThrottle();
       }
     }
   }

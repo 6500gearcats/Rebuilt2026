@@ -9,6 +9,7 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.config.LimitSwitchConfig;
@@ -32,7 +33,7 @@ public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private PositionVoltage m_request;
-  private final DigitalInput m_switch = new DigitalInput(3);
+  private final DigitalInput m_switch = new DigitalInput(4);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
@@ -79,6 +80,7 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putBoolean("switch on or off", m_switch.get());
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
@@ -150,6 +152,13 @@ public class Turret extends SubsystemBase {
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }
 
+  /*
+   * Gets Speed in RPS
+   */
+  public double getSpeed() {
+    return m_motor.getVelocity().getValueAsDouble();
+  }
+
   public void goToZero() {
     toZeroPos = true;
   }
@@ -162,5 +171,9 @@ public class Turret extends SubsystemBase {
     slot.kI = SmartDashboard.getNumber("kI", 0);
     slot.kD = SmartDashboard.getNumber("kD", 0);
     m_request = new PositionVoltage(0).withSlot(1);
+  }
+
+  public void setControl(ControlRequest req) {
+    m_motor.setControl(req);
   }
 }

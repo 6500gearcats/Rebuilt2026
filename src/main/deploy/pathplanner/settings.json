@@ -3,11 +3,13 @@
   "robotLength": 0.86,
   "holonomicMode": true,
   "pathFolders": [
-    "FinalHope",
     "Artemis2",
-    "Doomsday",
+    "FinalHope",
     "LeftProjectHailMary",
-    "RightProjectHailMary"
+    "WakeCenter",
+    "RightProjectHailMary",
+    "WakeLeft",
+    "WakeRight"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,

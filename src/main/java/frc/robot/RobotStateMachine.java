@@ -2,9 +2,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meter;
 
-import java.lang.StackWalker.Option;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -17,12 +16,13 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.utility.RangeFinder;
 
@@ -36,12 +36,23 @@ public final class RobotStateMachine {
     private String gameData = "";
     private boolean gotData = false;
 
+    public double shooterSpeed;
+    public double reqShooterSpeed;
+
     private boolean switching = false;
+    private boolean switchingRed = false;
+    private boolean switchingGreen = false;
     private boolean postedValue = false;
+    private Color exampleColor;
+    private Color whiteColor = new Color(237, 237, 237);
+    private Color blackColor = new Color(49, 49, 49);
+    private Color redColor = new Color(191, 0, 0);
+    private Color greenColor = new Color(0, 191, 0);
 
     private Pose2d turretPose = new Pose2d();
 
     private Vision m_vision;
+    private Flywheel m_Flywheel = new Flywheel(this);
 
     public static Pose3d Tag_POSE2D;
 
@@ -77,8 +88,14 @@ public final class RobotStateMachine {
     private RobotStateMachine() {
         checkAlliance();
 
+        exampleColor = whiteColor;
+
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+    }
+
+    public Flywheel getFlywheel() {
+        return m_Flywheel;
     }
 
     public CommandXboxController getDriver() {
@@ -108,6 +125,8 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        reqShooterSpeed = m_Flywheel.getReqSpeed();
+        shooterSpeed = m_Flywheel.getSpeed();
         SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
         SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
         gameData = DriverStation.getGameSpecificMessage();
@@ -119,22 +138,37 @@ public final class RobotStateMachine {
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
         turretPosePublisher.set(turretPose);
-        SmartDashboard.putBoolean("Hey guys we're switching", newPostedValue());
+        SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
+        newPostedValue();
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
         SmartDashboard.putBoolean("IsActive", isActive());
         SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+        SmartDashboard.putNumber("distToTag2", distToTag());
+        SmartDashboard.putBoolean("isFacing", isFacingHub());
         updateTargetPose();
     }
 
-    private boolean newPostedValue() {
-        if (switching) {
-            postedValue = !postedValue;
-            return postedValue;
-        } else {
-            return false;
+    private void newPostedValue() {
+        if (switchingRed) {
+            if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor) || exampleColor.equals(greenColor)) {
+                exampleColor = redColor;
+            } else if (exampleColor.equals(redColor)) {
+                exampleColor = blackColor;
+            }
+        } else if (switchingGreen) {
+            if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor) || exampleColor.equals(redColor)) {
+                exampleColor = greenColor;
+            } else if (exampleColor.equals(greenColor)) {
+                exampleColor = blackColor;
+            }
+        } else if (switching) {
+            if (exampleColor.equals(whiteColor)) {
+                exampleColor = blackColor;
+            } else if (exampleColor.equals(blackColor)) {
+                exampleColor = whiteColor;
+            }
         }
-
     }
 
     private void checkAlliance() {
@@ -146,6 +180,10 @@ public final class RobotStateMachine {
         HubPose = Tag_POSE2D.toPose2d().transformBy(
                 new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter),
                         new Rotation2d()));
+    }
+
+    public Pose2d getHubPose() {
+        return HubPose;
     }
 
     public Pose2d getTurretPose() {
@@ -167,13 +205,13 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
-        if (robotRelSpeeds.vxMetersPerSecond < 0 && robotRelSpeeds.vyMetersPerSecond < 0) {
-            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.omegaRadiansPerSecond * 1.3,
+        if (speeds.vxMetersPerSecond < 0 && speeds.vyMetersPerSecond < 0) {
+            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.vyMetersPerSecond * 1.3,
                     speeds.omegaRadiansPerSecond);
         }
 
-        Pose2d nextPose = pose.plus(
-                new Transform2d(speeds.vxMetersPerSecond * 2, speeds.vyMetersPerSecond * 2, new Rotation2d()));
+        Pose2d nextPose = new Pose2d(pose.getX() + speeds.vxMetersPerSecond * 0.2,
+                pose.getY() + speeds.vyMetersPerSecond * 0.2, new Rotation2d());
 
         double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
@@ -182,17 +220,17 @@ public final class RobotStateMachine {
         double shootAng = Units.degreesToRadians(65);
         double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
         double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
-                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2)) - 2 * 9.8 * dh) / 9.8;
+                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2 * 9.8 * dh))) / 9.8;
 
         Optional<Pose2d> bestPose = getBestPoseTarget();
         if (bestPose.isEmpty()) {
             return;
         }
 
-        targetPose = bestPose.get().transformBy(new Transform2d(
-                new Translation2d(speeds.vxMetersPerSecond * timeOfFlight,
-                        speeds.vyMetersPerSecond * timeOfFlight),
-                new Rotation2d()));
+        Pose2d best = bestPose.get();
+        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * timeOfFlight * 0.1),
+                best.getY() + (-speeds.vyMetersPerSecond * timeOfFlight * 0.1),
+                new Rotation2d());
 
         targetPosePublisher.set(targetPose);
     }
@@ -215,8 +253,35 @@ public final class RobotStateMachine {
         m_vision.resetVisionPose(pose);
     }
 
+    // public void getVisionEst(String name) {
+    // m_vision.getEstPoses(name);
+    // }
+
     public void bindDrivetrain(CommandSwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
+    }
+
+    public double distToTag() {
+        return pose.getTranslation().getDistance(HubPose.getTranslation());
+    }
+
+    public BooleanSupplier isFarEnough() {
+        return () -> distToTag() > 4.2;
+    }
+
+    public boolean isUpToSpeed() {
+        return Math.abs(reqShooterSpeed - shooterSpeed) < 2;
+    }
+
+    public boolean isFacingHub() {
+        double dx = targetPose.getX() - pose.getX();
+        double dy = targetPose.getY() - pose.getY();
+        double targetAngle = Math.atan2(dy, dx);
+        double delta = targetAngle - (pose.getRotation().getRadians() - Math.PI);
+        delta = Math.atan2(Math.sin(delta), Math.cos(delta));
+        double tolerance = Math.toRadians(20);
+
+        return Math.abs(delta) < tolerance;
     }
 
     /**
@@ -261,152 +326,266 @@ public final class RobotStateMachine {
      * @return current state enum
      */
     public RobotState getState() {
+        double matchTime = DriverStation.getMatchTime();
+        double nextTargetTime = 0.0;
+        boolean isRed = alliance.equals(DriverStation.Alliance.Red);
+
+        // 1. Calculate the target time for the countdown
+        // "R" Red and "B" Blue share the exact same schedule
+        if ((gameData.contains("R") && isRed) || (gameData.contains("B") && !isRed)) {
+            if (matchTime > 127) nextTargetTime = 127;
+            else if (matchTime > 108) nextTargetTime = 108;
+            else if (matchTime > 77) nextTargetTime = 77;
+            else if (matchTime > 58) nextTargetTime = 58;
+        } 
+        // "R" Blue and "B" Red share the exact same schedule
+        else if ((gameData.contains("R") && !isRed) || (gameData.contains("B") && isRed)) {
+            if (matchTime > 102) nextTargetTime = 102;
+            else if (matchTime > 83) nextTargetTime = 83;
+            else if (matchTime > 52) nextTargetTime = 52;
+            else if (matchTime > 33) nextTargetTime = 33;
+        }
+
+        // Sets the live countdown (prevents dropping below 0)
+        double timeUntilSwitch = Math.max(0, matchTime - nextTargetTime);
+        SmartDashboard.putNumber("Time Until Switch", timeUntilSwitch);
+
+        // 2. Main State Machine
         if (gameData.contains("R")) {
-            if (alliance.equals(DriverStation.Alliance.Red)) {
-                if (DriverStation.getMatchTime() > 130) {
+            if (isRed) {
+                if (matchTime > 127) {
                     setState(RobotState.ACTIVE);
-                    if (DriverStation.getMatchTime() < 140) {
+                    if (matchTime < 130) {
+                        switchingRed = true;
+                    } else if (matchTime < 137) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 105) {
+                } else if (matchTime > 108) {
                     setState(RobotState.INACTIVE);
-                    if (DriverStation.getMatchTime() < 115) {
+                    if (matchTime < 111) {
+                        switchingGreen = true;
+                    } else if (matchTime < 118) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 80) {
+                } else if (matchTime > 77) {
                     setState(RobotState.ACTIVE);
-                    if (DriverStation.getMatchTime() < 90) {
+                    if (matchTime < 80) {
+                        switchingRed = true;
+                    } else if (matchTime < 87) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 55) {
+                } else if (matchTime > 58) {
                     setState(RobotState.INACTIVE);
-                    if (DriverStation.getMatchTime() < 65) {
+                    if (matchTime < 61) {
+                        switchingGreen = true;
+                    } else if (matchTime < 68) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 30) {
-                    if (DriverStation.getMatchTime() < 40) {
-                        switching = true;
-                    } else {
-                        switching = false;
-                    }
+                } else if (matchTime > 30) {
+                    switching = false;
+                    switchingRed = false;
+                    switchingGreen = false;
+                    exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 } else {
-                    switching = false;
                     setState(RobotState.ACTIVE);
                 }
-            } else {
-                if (DriverStation.getMatchTime() > 130) {
+            } else { // Blue Alliance
+                if (matchTime > 130) {
                     setState(RobotState.ACTIVE);
-                } else if (DriverStation.getMatchTime() > 105) {
+                    switching = false;
+                } else if (matchTime > 102) {
                     setState(RobotState.ACTIVE);
-                    if (DriverStation.getMatchTime() < 115) {
+                    if (matchTime < 105) {
+                        switchingRed = true;
+                    } else if (matchTime < 112) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 80) {
+                } else if (matchTime > 83) {
                     setState(RobotState.INACTIVE);
-                    if (DriverStation.getMatchTime() < 90) {
+                    if (matchTime < 86) {
+                        switchingGreen = true;
+                    } else if (matchTime < 93) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 55) {
+                } else if (matchTime > 52) {
                     setState(RobotState.ACTIVE);
-                    if (DriverStation.getMatchTime() < 65) {
+                    if (matchTime < 55) {
+                        switchingRed = true;
+                    } else if (matchTime < 62) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 30) {
+                } else if (matchTime > 33) {
                     setState(RobotState.INACTIVE);
-                    if (DriverStation.getMatchTime() < 40) {
+                    if (matchTime < 36) {
+                        switchingGreen = true;
+                    } else if (matchTime < 43) { 
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
                 } else {
                     switching = false;
+                    switchingRed = false;
+                    switchingGreen = false;
+                    exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 }
             }
         } else if (gameData.contains("B")) {
-            if (alliance.equals(DriverStation.Alliance.Blue)) {
-                if (DriverStation.getMatchTime() > 130) {
+            if (!isRed) { // Blue Alliance
+                if (matchTime > 127) {
                     setState(RobotState.ACTIVE);
-                    if (DriverStation.getMatchTime() < 140) {
+                    if (matchTime < 130) {
+                        switchingRed = true;
+                    } else if (matchTime < 137) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 105) {
+                } else if (matchTime > 108) {
                     setState(RobotState.INACTIVE);
-                    if (DriverStation.getMatchTime() < 115) {
+                    if (matchTime < 111) {
+                        switchingGreen = true;
+                    } else if (matchTime < 118) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 80) {
+                } else if (matchTime > 77) {
                     setState(RobotState.ACTIVE);
-                    if (DriverStation.getMatchTime() < 90) {
+                    if (matchTime < 80) {
+                        switchingRed = true;
+                    } else if (matchTime < 87) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 55) {
+                } else if (matchTime > 58) {
                     setState(RobotState.INACTIVE);
-                    if (DriverStation.getMatchTime() < 65) {
+                    if (matchTime < 61) {
+                        switchingGreen = true;
+                    } else if (matchTime < 68) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 30) {
+                } else if (matchTime > 30) {
                     switching = false;
+                    switchingRed = false;
+                    switchingGreen = false;
+                    exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 } else {
                     setState(RobotState.ACTIVE);
                 }
-            } else {
-                if (DriverStation.getMatchTime() > 130) {
+            } else { // Red Alliance
+                if (matchTime > 130) {
                     setState(RobotState.ACTIVE);
-                } else if (DriverStation.getMatchTime() > 105) {
+                    switching = false;
+                } else if (matchTime > 102) {
                     setState(RobotState.ACTIVE);
-                    if (DriverStation.getMatchTime() < 115) {
+                    if (matchTime < 105) {
+                        switchingRed = true;
+                    } else if (matchTime < 112) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 80) {
+                } else if (matchTime > 83) {
                     setState(RobotState.INACTIVE);
-                    if (DriverStation.getMatchTime() < 90) {
+                    if (matchTime < 86) {
+                        switchingGreen = true;
+                    } else if (matchTime < 93) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 55) {
+                } else if (matchTime > 52) {
                     setState(RobotState.ACTIVE);
-                    if (DriverStation.getMatchTime() < 65) {
+                    if (matchTime < 55) {
+                        switchingRed = true;
+                    } else if (matchTime < 62) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
-                } else if (DriverStation.getMatchTime() > 30) {
+                } else if (matchTime > 33) {
                     setState(RobotState.INACTIVE);
-                    if (DriverStation.getMatchTime() < 40) {
+                    if (matchTime < 36) {
+                        switchingGreen = true;
+                    } else if (matchTime < 43) {
                         switching = true;
                     } else {
                         switching = false;
+                        switchingRed = false;
+                        switchingGreen = false;
+                        exampleColor = blackColor;
                     }
                 } else {
                     switching = false;
+                    switchingRed = false;
+                    switchingGreen = false;
+                    exampleColor = blackColor;
                     setState(RobotState.ACTIVE);
                 }
             }
@@ -414,7 +593,6 @@ public final class RobotStateMachine {
 
         return state;
     }
-
     /**
      * Update state and refresh pose from vision.
      */
@@ -468,6 +646,10 @@ public final class RobotStateMachine {
         }
     }
 
+    public double getPoseTime() {
+        return m_vision.getPoseTime();
+    }
+
     /**
      * Determines the field zone based on the current pose and alliance.
      *
@@ -477,10 +659,10 @@ public final class RobotStateMachine {
         // < 4.52 m is the blue alliance's trench, > 11.63 m is the red alliance's
         // trench, and in between is the neutral zone
         Alliance alliance = getAlliance();
-        if (pose.getX() < 4.52) {
+        if (pose.getX() < 5.4) {
             currentZone = alliance.equals(Alliance.Blue) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
             return currentZone;
-        } else if (pose.getX() > 11.63) {
+        } else if (pose.getX() > 11.0) {
             currentZone = alliance.equals(Alliance.Red) ? FieldZone.ALLIANCE : FieldZone.OPPONENT;
             return currentZone;
         } else {
@@ -491,6 +673,22 @@ public final class RobotStateMachine {
             } else {
                 return FieldZone.NEUTRAL_CENTER;
             }
+        }
+    }
+
+    public boolean underTrench() {
+        double xPose = pose.getX();
+        double yPose = pose.getY();
+        if (xPose > 3.7 && xPose < 5.3 && yPose > 6.5 && yPose < 8.3) {
+            return true;
+        } else if (xPose > 3.7 && xPose < 5.3 && yPose < 1.8 && yPose > 0) {
+            return true;
+        } else if (xPose > 10.9 && xPose < 12.8 && yPose > 6.5 && yPose < 8.3) {
+            return true;
+        } else if (xPose > 10.9 && xPose < 12.8 && yPose < 1.8 && yPose > 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -521,6 +719,10 @@ public final class RobotStateMachine {
 
     public boolean isActive() {
         return getState() == RobotState.ACTIVE;
+    }
+
+    public boolean isInAlliance() {
+        return checkZone() == FieldZone.ALLIANCE;
     }
 
     private Optional<Pose2d> getBestPoseTarget() {

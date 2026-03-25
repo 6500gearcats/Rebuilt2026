@@ -13,13 +13,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "ModifiedFinalHope1"
+            "pathName": "Yahoo1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "FinalHope2"
+            "pathName": "Yahoo2"
           }
         },
         {
@@ -53,12 +53,6 @@
                       "data": {
                         "waitTime": 1.5
                       }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "BopBop"
-                      }
                     }
                   ]
                 }
@@ -75,19 +69,32 @@
         {
           "type": "path",
           "data": {
-            "pathName": "FinalHope3"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "pathName": "Yahoo3"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "FinalHope4"
+            "pathName": "Yahoo4"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "NewShootFuel5s"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "BopBop"
+                }
+              }
+            ]
           }
         }
       ]

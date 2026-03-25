@@ -8,8 +8,10 @@ import java.util.function.DoubleSupplier;
 import java.util.logging.Logger;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
@@ -21,7 +23,10 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotStateMachine;
+import frc.robot.utility.RangeFinder;
 import frc.robot.Constants.MotorConstants;
+import frc.robot.RobotStateMachine.FieldZone;
 
 /**
  * Flywheel subsystem that controls the shooter motors.
@@ -32,23 +37,27 @@ public class Flywheel extends SubsystemBase {
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
+  public boolean waitForSpeed = false;
   private double speedMultiplier = 0;
+  public double rotationMultiplier = 0;
+  private double reqSpeed;
   TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
+  private RobotStateMachine robotStateMachine;
 
   TalonFXConfiguration talonFXConfigs;
 
   // TODO: Add a constant Spin to the motors to not have to fight static friction
 
-  public Flywheel() {
-
-    talonFXConfigs = new TalonFXConfiguration();
+  public Flywheel(RobotStateMachine robotStateMachine) {
+    this.robotStateMachine = robotStateMachine;
+    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6));
 
     // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 9; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0Configs.kP = 0.45; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kS = 0.3087; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = 0.026467; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0;
 
@@ -63,24 +72,63 @@ public class Flywheel extends SubsystemBase {
     } else {
       speedModifier = 1;
     }
+    // if (!robotStateMachine.isFacingHub()) {
+    // rotationMultiplier = 2;
+    // } else {
+    // rotationMultiplier = 0;
+    // }
+
+    // if (robotStateMachine.isActive() /* && robotStateMachine.checkZone() ==
+    // FieldZone.ALLIANCE */) {
+    // setSpeed(RangeFinder.getShotVelocity(
+    // robotStateMachine.getTurretPose().getTranslation()
+    // .getDistance(robotStateMachine.getHubPose().getTranslation())));
+    // }
+
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
+    SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
+
+    SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
+    SmartDashboard.putNumber("reqSpeed", reqSpeed);
+    SmartDashboard.putNumber("actSpeed", getSpeed());
+    SmartDashboard.putBoolean("isUnderTrench", robotStateMachine.underTrench());
+
     // This method will be called once per scheduler run
   }
 
   public void setSpeed(double speed) {
-    // create a velocity closed-loop request, voltage output, slot 0 configs
-    // m_motor.set(speed);
+    reqSpeed = speed + (2 * speedMultiplier) + rotationMultiplier;
 
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);
-    double speedValue = speed + (0.05 * speedMultiplier);
+    double speedValue = speed + (2 * speedMultiplier) + rotationMultiplier;
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
-      m_motor.setControl(m_request.withVelocity(speedValue).withFeedForward(0.5));
+      if (robotStateMachine.underTrench()) {
+        speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
+        reqSpeed = speedValue;
+      }
+
+      m_motor.setControl(m_request.withVelocity(speedValue));
       m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
     }
+  }
+
+  /*
+   * Gets Speed in RPS
+   */
+  public double getSpeed() {
+    return m_motor.getVelocity().getValueAsDouble();
+  }
+
+  public double getReqSpeed() {
+    return reqSpeed;
+  }
+
+  public boolean isUpToSpeed() {
+    return Math.abs(reqSpeed - getSpeed()) < 2;
   }
 
   public void stopMotor() {
@@ -94,6 +142,11 @@ public class Flywheel extends SubsystemBase {
 
   public void incrementMultiplierDown() {
     speedMultiplier--;
+  }
+
+  public void setControl(ControlRequest req) {
+    m_motor.setControl(req);
+    // m_motor2.setControl(req);
   }
 
   public void updateMotorConfigs() {

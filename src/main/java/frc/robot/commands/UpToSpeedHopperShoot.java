@@ -4,41 +4,24 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.hal.simulation.RoboRioDataJNI;
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
 import frc.robot.RobotStateMachine.FieldZone;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.utility.RangeFinder;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-/**
- * Command that runs the flywheel at a supplied speed.
- */
-public class ShootFuel extends Command {
-  /** Creates a new ShootFuel. */
+public class UpToSpeedHopperShoot extends Command {
+  /** Creates a new JasonsShooting. */
+  Hopper m_Hopper;
   Flywheel m_Flywheel;
-  DoubleSupplier supplier;
+  private RobotStateMachine stateMachine = RobotStateMachine.getInstance();
 
-  RobotStateMachine stateMachine = RobotStateMachine.getInstance();
-  int counter; // Delays time between spin-up and first ball
-
-  /**
-   * Creates a new ShootFuel command.
-   *
-   * @param flywheel      flywheel subsystem
-   * @param speedSupplier speed command supplier
-   */
-  public ShootFuel(Flywheel flywheel) {
-    m_Flywheel = flywheel;
-    addRequirements(m_Flywheel);
-
-    // Use addRequirements() here to declare subsystem dependencies.
+  public UpToSpeedHopperShoot(Hopper m_Hopper, Flywheel m_Flywheel) {
+    this.m_Hopper = m_Hopper;
+    this.m_Flywheel = m_Flywheel;
   }
 
   // Called when the command is initially scheduled.
@@ -53,17 +36,21 @@ public class ShootFuel extends Command {
     if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
       return;
     }
-    m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
-        stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+    // m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+    // stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+    m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
 
-    // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+    if (m_Flywheel.isUpToSpeed()) {
+      m_Hopper.startAllMotors(-0.9, 1);
+    }
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_Flywheel.setSpeed(60);
-    counter = 0;
+    m_Hopper.stopAllMotors();
+    m_Flywheel.setSpeed(0);
   }
 
   // Returns true when the command should end.

@@ -13,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "ModifiedFinalHope1"
+            "pathName": "FinalHope1"
           }
         },
         {
@@ -66,28 +66,35 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel5s"
+                  "name": "ShootFuel5s"
                 }
               }
             ]
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "FinalHope3"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Climb Auto"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ClimbUp2s"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "FinalHope4"
+            "name": "ClimbDown2s"
           }
         }
       ]
