@@ -78,6 +78,7 @@ import frc.robot.commands.SetTurretAngle;
 import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.commands.ShootingSequenceUTS;
+import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants2;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -101,8 +102,8 @@ import frc.robot.utility.SysIDUtil;
 public class RobotContainer {
         @SuppressWarnings("unused")
         private double speedModify = 1;
-        private double MaxSpeed = TunerConstants2.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
-                                                                                       // speed
+        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+                                                                                      // speed
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
                                                                                           // max angular velocity
@@ -121,7 +122,7 @@ public class RobotContainer {
         private final CommandXboxController joystick2 = new CommandXboxController(1);
         private final XboxController m_gunner;
 
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
         private LedCANdle m_candle = new LedCANdle();
 
@@ -278,9 +279,9 @@ public class RobotContainer {
         //robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate * m_flywheel.speedModifier))); // Drive counterclockwise with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(joystick.getRightX(), 0.1) * MaxAngularRate * m_flywheel.speedModifier))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
@@ -330,12 +331,12 @@ public class RobotContainer {
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
 
-                // if (m_turretSysID.isPresent()) {
-                // // Driver Back + A
-                // joystick.b().onTrue(m_turretSysID.sysIdAll().get()
-                // .andThen(new InstantCommand(() -> System.out
-                // .println("Get Hoot Logs from TunerX"))));
-                // }
+                if (m_flywheelSysID.isPresent()) {
+                        // Driver Back + A
+                        joystick.b().onTrue(m_flywheelSysID.sysIdAll().get()
+                                        .andThen(new InstantCommand(() -> System.out
+                                                        .println("Get Hoot Logs from TunerX"))));
+                }
         }
 
         /**

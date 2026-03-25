@@ -54,10 +54,10 @@ public class Flywheel extends SubsystemBase {
 
     // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.31134; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 0.075575; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kA = 0.0064695; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0Configs.kP = 0.030814; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kS = 0.3087; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = 0.026467; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0;
 
@@ -78,11 +78,12 @@ public class Flywheel extends SubsystemBase {
     // rotationMultiplier = 0;
     // }
 
-    if (robotStateMachine.isActive() /* && robotStateMachine.checkZone() == FieldZone.ALLIANCE */) {
-      setSpeed(RangeFinder.getShotVelocity(
-          robotStateMachine.getTurretPose().getTranslation()
-              .getDistance(robotStateMachine.getHubPose().getTranslation())));
-    }
+    // if (robotStateMachine.isActive() /* && robotStateMachine.checkZone() ==
+    // FieldZone.ALLIANCE */) {
+    // setSpeed(RangeFinder.getShotVelocity(
+    // robotStateMachine.getTurretPose().getTranslation()
+    // .getDistance(robotStateMachine.getHubPose().getTranslation())));
+    // }
 
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);

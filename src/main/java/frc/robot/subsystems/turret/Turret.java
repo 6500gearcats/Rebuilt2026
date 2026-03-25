@@ -33,7 +33,7 @@ public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private PositionVoltage m_request;
-  private final DigitalInput m_switch = new DigitalInput(3);
+  private final DigitalInput m_switch = new DigitalInput(4);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
@@ -80,6 +80,7 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putBoolean("switch on or off", m_switch.get());
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());

@@ -25,14 +25,14 @@ public class Robot extends TimedRobot {
   private final RobotStateMachine m_RobotStateMachine;
 
   public Robot() {
-    SignalLogger.setPath("media/sda1/ctre-logs/");
+    // SignalLogger.setPath("media/sda1/ctre-logs/");
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);
     if (m_gcTimer.advanceIfElapsed(5)) {
       System.gc();
     }
-    DataLogManager.start();
+    // DataLogManager.start();
   }
 
   @Override
@@ -42,8 +42,10 @@ public class Robot extends TimedRobot {
     if (m_gcTimer.advanceIfElapsed(0.1)) {
       System.gc();
     }
-    SignalLogger.writeStruct("odometry", Pose2d.struct, m_RobotStateMachine.getPose());
-    SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(), "seconds");
+    // SignalLogger.writeStruct("odometry", Pose2d.struct,
+    // m_RobotStateMachine.getPose());
+    // SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(),
+    // "seconds");
   }
 
   @Override
@@ -68,7 +70,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
-    SignalLogger.start();
+    // SignalLogger.start();
     m_RobotStateMachine.setState(RobotState.ACTIVE);
   }
 
@@ -78,7 +80,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousExit() {
-    SignalLogger.stop();
+    // SignalLogger.stop();
   }
 
   @Override
@@ -128,7 +130,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {
-    SignalLogger.stop();
+    // SignalLogger.stop();
 
   }
 
