@@ -33,16 +33,17 @@ public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private PositionVoltage m_request;
-  private final DigitalInput m_switch = new DigitalInput(3);
+  private final DigitalInput m_switch = new DigitalInput(4);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
-  private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
+  private final RobotStateMachine robotStateMachine;
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
   private boolean overridden = false;
   private boolean toZeroPos = false;
   TalonFXConfiguration talonFXConfigs;
   // BOUNDS: 0.0 to 55
 
-  public Turret() {
+  public Turret(RobotStateMachine robotStateMachine) {
+    this.robotStateMachine = robotStateMachine;
     m_request = new PositionVoltage(0).withSlot(2);
     talonFXConfigs = new TalonFXConfiguration();
 

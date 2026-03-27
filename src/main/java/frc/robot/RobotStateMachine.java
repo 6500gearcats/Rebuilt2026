@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -43,7 +42,6 @@ public final class RobotStateMachine {
     private boolean switching = false;
     private boolean switchingRed = false;
     private boolean switchingGreen = false;
-    private boolean postedValue = false;
     private Color exampleColor;
     private Color whiteColor = new Color(237, 237, 237);
     private Color blackColor = new Color(49, 49, 49);
@@ -53,8 +51,8 @@ public final class RobotStateMachine {
     private Pose2d turretPose = new Pose2d();
 
     private Vision m_vision;
-    private Flywheel m_Flywheel = new Flywheel(this);
-    private Turret m_Turret = new Turret();
+    private Flywheel m_Flywheel;
+    private Turret m_Turret;
 
     public static Pose3d Tag_POSE2D;
 
@@ -91,6 +89,9 @@ public final class RobotStateMachine {
         checkAlliance();
 
         exampleColor = whiteColor;
+
+        m_Flywheel = new Flywheel(this);
+        m_Turret = new Turret(this);
 
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
@@ -200,39 +201,31 @@ public final class RobotStateMachine {
 
     public void updateTargetPose() {
         ChassisSpeeds speeds = getFieldSpeeds();
-        ChassisSpeeds robotRelSpeeds = getChassisSpeeds();
-        if (speeds == null && robotRelSpeeds == null) {
+
+        if (speeds == null) {
             return;
         }
 
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
-        if (speeds.vxMetersPerSecond < 0 && speeds.vyMetersPerSecond < 0) {
-            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.vyMetersPerSecond * 1.3,
-                    speeds.omegaRadiansPerSecond);
-        }
-
         double distance = getTurretPose().getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
 
-        double tof = getTOF(shotVelocity);// RangeFinder.getTOF(distance);
+        double tof = getTOF(distance);// RangeFinder.getTOF(distance);
 
         Pose2d nextPose = getTurretPose();
 
         for (int i = 0; i < 20; i++) {
-            nextPose = new Pose2d(nextPose.getX() + (speeds.vxMetersPerSecond * tof),
-                    nextPose.getY() + (speeds.vyMetersPerSecond * tof), new Rotation2d());
-            distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
-            tof = getTOF(shotVelocity);// RangeFinder.getTOF(distance);
-        }
+            shotVelocity = RangeFinder.getShotVelocity(distance);
+            tof = getTOF(distance);// RangeFinder.getTOF(distance);
 
-        // Apx launch angle is 65 deg
-        // double shootAng = Units.degreesToRadians(65);
-        // double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
-        // double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
-        // + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2
-        // * 9.8 * dh))) / 9.8;
+            nextPose = new Pose2d(
+                    getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
+                    getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
+                    new Rotation2d());
+            distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+        }
 
         Optional<Pose2d> bestPose = getBestPoseTarget();
         if (bestPose.isEmpty()) {
@@ -240,21 +233,26 @@ public final class RobotStateMachine {
         }
 
         Pose2d best = bestPose.get();
-        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * getTOF(shotVelocity)),
-                best.getY() + (-speeds.vyMetersPerSecond * getTOF(shotVelocity)),
+        targetPose = new Pose2d(
+                best.getX() + (-speeds.vxMetersPerSecond * getTOF(distance)),
+                best.getY() + (-speeds.vyMetersPerSecond * getTOF(distance)),
                 new Rotation2d());
 
         targetPosePublisher.set(targetPose);
     }
 
-    public double getTOF(double shotVelocity) {
+    public double getTOF(double dist) {
         // Apx launch angle is 65 deg
-        double shootAng = Units.degreesToRadians(65);
-        double dh = Units.inchesToMeters(56.375 - 19);
-        double term = Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2 * 9.8 * dh);
-        double safeTerm = Math.max(0.0, term);
-        double timeOfFlight = ((shotVelocity * Math.sin(shootAng)) + Math.sqrt(safeTerm)) / 9.8;
-        return timeOfFlight;
+        // double shootAng = Units.degreesToRadians(65);
+        // double dh = Units.inchesToMeters(52 - 19);
+        // double term = Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) -
+        // (2 * 9.8 * dh);
+        // double safeTerm = Math.max(0.0, term);
+        // double timeOfFlight = ((shotVelocity * Math.sin(shootAng)) +
+        // Math.sqrt(safeTerm)) / 9.8;
+        // return timeOfFlight;
+
+        return RangeFinder.getTOF(dist);
     }
 
     public Turret getTurret() {
