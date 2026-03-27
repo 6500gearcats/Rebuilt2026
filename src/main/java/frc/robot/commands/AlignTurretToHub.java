@@ -75,7 +75,8 @@ public class AlignTurretToHub extends Command {
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
 
     double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
-    newError = (Math.abs(newError) - 180) * (newError / Math.abs(newError));
+    newError = (Math.abs(newError) - 180) * Math.signum(newError); // (newError / Math.abs(newError)); Signum handles
+                                                                   // divide by zero
     if (newError > 0) {
       if (Math.abs(newError) > 110) {
         newError = 110 * (Math.abs(newError) / newError);
