@@ -78,12 +78,14 @@ public class Flywheel extends SubsystemBase {
     // rotationMultiplier = 0;
     // }
 
-    // if (robotStateMachine.isActive() /* && robotStateMachine.checkZone() ==
-    // FieldZone.ALLIANCE */) {
-    // setSpeed(RangeFinder.getShotVelocity(
-    // robotStateMachine.getTurretPose().getTranslation()
-    // .getDistance(robotStateMachine.getHubPose().getTranslation())));
-    // }
+    if (robotStateMachine.isActive() /*
+                                      * && robotStateMachine.checkZone() ==
+                                      * FieldZone.ALLIANCE
+                                      */) {
+      setSpeed(RangeFinder.getShotVelocity(
+          robotStateMachine.getTurretPose().getTranslation()
+              .getDistance(robotStateMachine.getHubPose().getTranslation())));
+    }
 
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
@@ -106,10 +108,10 @@ public class Flywheel extends SubsystemBase {
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
-      if (robotStateMachine.underTrench()) {
-        speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
-        reqSpeed = speedValue;
-      }
+      // if (robotStateMachine.underTrench()) {
+      // speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
+      // reqSpeed = speedValue;
+      // }
 
       m_motor.setControl(m_request.withVelocity(speedValue));
       m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
@@ -128,7 +130,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public boolean isUpToSpeed() {
-    return Math.abs(reqSpeed - getSpeed()) < 2;
+    return Math.abs(reqSpeed - getSpeed()) < 5;
   }
 
   public void stopMotor() {
