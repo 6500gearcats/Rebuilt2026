@@ -6,26 +6,17 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
-import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.turret.Turret;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignTurretToHub extends Command {
   /** Creates a new AlignTurretToHub. */
-  private double kP = 0.05;
-  private double kI = 0;
-  private double kD = 0;
 
-  private PIDController pid = new PIDController(kP, kI, kD);
   private Turret m_turret;
   private RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
 
@@ -53,17 +44,12 @@ public class AlignTurretToHub extends Command {
     SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
     SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
     SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
-    /* if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
-        && prevPose.minus(currPose).getRotation().getDegrees() < 2 && errorFromPrevRot < 1) {
-      return;
-    } */
+
     Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
     Translation2d robotToTarget = m_targetPose.getTranslation()
         .minus(m_StateMachine.getTurretPose().getTranslation()); // gets x and y difference between robot and april tag
-    Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation()
-        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));// gets rotation of motor in
-                                                                                     // relation to field
+    Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation();
 
     Pose2d newTurretPose = new Pose2d(m_StateMachine.getTurretPose().getTranslation(), turretAndRobot);
     SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
@@ -74,7 +60,9 @@ public class AlignTurretToHub extends Command {
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
 
     double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
-    newError = (Math.abs(newError) - 180) * (newError / Math.abs(newError));
+    newError = (Math.abs(newError) - 180) * Math.signum(newError); // (newError / Math.abs(newError)); Signum handles
+                                                                   // divide by zero
+
     if (newError > 0) {
       if (Math.abs(newError) > 110) {
         newError = 110 * (Math.abs(newError) / newError);
@@ -89,12 +77,7 @@ public class AlignTurretToHub extends Command {
       m_turret.setPosition(newError);
     }
 
-    // double error = pid.calculate(m_turret.getConvertedTurretPosition(),
-    // newError); // sets turret speed
-    // m_turret.setSpeed(error);
     SmartDashboard.putNumber("tunring_pos_setpoint", newError);
-    // SmartDashboard.putNumber("turretTurnRate", rate);
-    // m_turret.setSpeed(rate);
   }
 
   // Called once the command ends or is interrupted.

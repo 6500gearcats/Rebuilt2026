@@ -63,6 +63,7 @@ public class Flywheel extends SubsystemBase {
 
     m_motor.getConfigurator().apply(talonFXConfigs);
     m_motor2.getConfigurator().apply(talonFXConfigs);
+    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
   }
 
   @Override
@@ -114,7 +115,6 @@ public class Flywheel extends SubsystemBase {
       // }
 
       m_motor.setControl(m_request.withVelocity(speedValue));
-      m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
     }
   }
 

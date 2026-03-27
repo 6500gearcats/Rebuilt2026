@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -23,6 +22,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.turret.Flywheel;
+import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.utility.RangeFinder;
 
@@ -42,7 +42,6 @@ public final class RobotStateMachine {
     private boolean switching = false;
     private boolean switchingRed = false;
     private boolean switchingGreen = false;
-    private boolean postedValue = false;
     private Color exampleColor;
     private Color whiteColor = new Color(237, 237, 237);
     private Color blackColor = new Color(49, 49, 49);
@@ -52,7 +51,8 @@ public final class RobotStateMachine {
     private Pose2d turretPose = new Pose2d();
 
     private Vision m_vision;
-    private Flywheel m_Flywheel = new Flywheel(this);
+    private Flywheel m_Flywheel;
+    private Turret m_Turret;
 
     public static Pose3d Tag_POSE2D;
 
@@ -89,6 +89,9 @@ public final class RobotStateMachine {
         checkAlliance();
 
         exampleColor = whiteColor;
+
+        m_Flywheel = new Flywheel(this);
+        m_Turret = new Turret(this);
 
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
@@ -136,7 +139,8 @@ public final class RobotStateMachine {
         currentZone = checkZone();
         posePublisher.set(pose);
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
-                .rotateAround(pose.getTranslation(), pose.getRotation());
+                .rotateAround(pose.getTranslation(), pose.getRotation())
+                .plus(new Transform2d(0, 0, new Rotation2d(Math.toRadians(m_Turret.getConvertedTurretPosition()))));
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
         newPostedValue();
@@ -197,30 +201,31 @@ public final class RobotStateMachine {
 
     public void updateTargetPose() {
         ChassisSpeeds speeds = getFieldSpeeds();
-        ChassisSpeeds robotRelSpeeds = getChassisSpeeds();
-        if (speeds == null && robotRelSpeeds == null) {
+
+        if (speeds == null) {
             return;
         }
 
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
-        if (speeds.vxMetersPerSecond < 0 && speeds.vyMetersPerSecond < 0) {
-            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.vyMetersPerSecond * 1.3,
-                    speeds.omegaRadiansPerSecond);
-        }
-
-        Pose2d nextPose = new Pose2d(pose.getX() + speeds.vxMetersPerSecond * 0.2,
-                pose.getY() + speeds.vyMetersPerSecond * 0.2, new Rotation2d());
-
-        double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+        double distance = getTurretPose().getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
 
-        // Apx launch angle is 65 deg
-        double shootAng = Units.degreesToRadians(65);
-        double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
-        double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
-                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2 * 9.8 * dh))) / 9.8;
+        double tof = getTOF(distance);// RangeFinder.getTOF(distance);
+
+        Pose2d nextPose = getTurretPose();
+
+        for (int i = 0; i < 20; i++) {
+            shotVelocity = RangeFinder.getShotVelocity(distance);
+            tof = getTOF(distance);// RangeFinder.getTOF(distance);
+
+            nextPose = new Pose2d(
+                    getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
+                    getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
+                    new Rotation2d());
+            distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+        }
 
         Optional<Pose2d> bestPose = getBestPoseTarget();
         if (bestPose.isEmpty()) {
@@ -228,11 +233,72 @@ public final class RobotStateMachine {
         }
 
         Pose2d best = bestPose.get();
-        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * timeOfFlight * 0.1),
-                best.getY() + (-speeds.vyMetersPerSecond * timeOfFlight * 0.1),
+        targetPose = new Pose2d(
+                best.getX() + (-speeds.vxMetersPerSecond * getTOF(distance)),
+                best.getY() + (-speeds.vyMetersPerSecond * getTOF(distance)),
                 new Rotation2d());
-
         targetPosePublisher.set(targetPose);
+
+        // @formatter:off
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##**+++++**##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*+===---=----====++*#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+-======--:::--:::::-====##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##+:::::------=--::::...::----==+#%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+::=####*#+-.:-:::.--.-....:..:::-:=-*%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*=-+##%%%%####%###-.::::..--:........--:--+#%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%#=:+####%%#######%#%###+.=::. . :-..:.. .::.::-=**#%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%#--#######**********##%%##- =:::.:. ::.:.  . ::-:::+#%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%#-:+*#####***+++********####**.=:.::...  ...:.. ::.:::=#%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%--#%%##***+++++++*******######:-=:  ...  . ...: .:...:-*%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%+:##%#*+++++++++++*******##%###.-=    ........ ...: .::-=#%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%+:#%%#*++++++++++++******##%%#%=::-:....... ...... ...::-+%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%*-#%%#**++++++++++++*****##%%##-..::      .:.....  . :::.-+#%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%-+%%##*+++++++++++++*****#%##%. .:::    ...  .::::   .::::*%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%-=#*##*+++++++++++++****##%##=......      ..::::::.......-#%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%+:*####*+++++++++++++***#%%#-..:.          . .:..:..    .*%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%#.-##%###+++++++++++*#%#%#+....                 .    .:==+#%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%+.-##*#%%###*****##%%%*=:...                        :+%%+#%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%#::+#%%%%%%%#%%####+:.... .                      :=**#%%#%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%##=..=*#####**+=::.   .                       ..:-=+*##%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%##*+-:.::......... .                         ...:-=+**##%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%#**=-:.  .   .              ..::::::::::::::---==+**###%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%##*+=-:.                ..:--=+++++++++++++++****###%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%##*+=-::....     ...::--=+**##################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%###**++==--------===++**###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%####************####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%############%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        // @formatter:on
+    }
+
+    public double getTOF(double dist) {
+        // Apx launch angle is 65 deg
+        // double shootAng = Units.degreesToRadians(65);
+        // double dh = Units.inchesToMeters(52 - 19);
+        // double term = Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) -
+        // (2 * 9.8 * dh);
+        // double safeTerm = Math.max(0.0, term);
+        // double timeOfFlight = ((shotVelocity * Math.sin(shootAng)) +
+        // Math.sqrt(safeTerm)) / 9.8;
+        // return timeOfFlight;
+
+        return RangeFinder.getTOF(dist);
+    }
+
+    public Turret getTurret() {
+        return m_Turret;
     }
 
     public ChassisSpeeds getFieldSpeeds() {
@@ -333,17 +399,25 @@ public final class RobotStateMachine {
         // 1. Calculate the target time for the countdown
         // "R" Red and "B" Blue share the exact same schedule
         if ((gameData.contains("R") && isRed) || (gameData.contains("B") && !isRed)) {
-            if (matchTime > 127) nextTargetTime = 127;
-            else if (matchTime > 108) nextTargetTime = 108;
-            else if (matchTime > 77) nextTargetTime = 77;
-            else if (matchTime > 58) nextTargetTime = 58;
-        } 
+            if (matchTime > 127)
+                nextTargetTime = 127;
+            else if (matchTime > 108)
+                nextTargetTime = 108;
+            else if (matchTime > 77)
+                nextTargetTime = 77;
+            else if (matchTime > 58)
+                nextTargetTime = 58;
+        }
         // "R" Blue and "B" Red share the exact same schedule
         else if ((gameData.contains("R") && !isRed) || (gameData.contains("B") && isRed)) {
-            if (matchTime > 102) nextTargetTime = 102;
-            else if (matchTime > 83) nextTargetTime = 83;
-            else if (matchTime > 52) nextTargetTime = 52;
-            else if (matchTime > 33) nextTargetTime = 33;
+            if (matchTime > 102)
+                nextTargetTime = 102;
+            else if (matchTime > 83)
+                nextTargetTime = 83;
+            else if (matchTime > 52)
+                nextTargetTime = 52;
+            else if (matchTime > 33)
+                nextTargetTime = 33;
         }
 
         // Sets the live countdown (prevents dropping below 0)
@@ -454,7 +528,7 @@ public final class RobotStateMachine {
                     setState(RobotState.INACTIVE);
                     if (matchTime < 36) {
                         switchingGreen = true;
-                    } else if (matchTime < 43) { 
+                    } else if (matchTime < 43) {
                         switching = true;
                     } else {
                         switching = false;
@@ -593,6 +667,7 @@ public final class RobotStateMachine {
 
         return state;
     }
+
     /**
      * Update state and refresh pose from vision.
      */

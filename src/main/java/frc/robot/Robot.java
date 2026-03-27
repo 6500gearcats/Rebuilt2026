@@ -33,12 +33,14 @@ public class Robot extends TimedRobot {
       System.gc();
     }
     // DataLogManager.start();
+    DataLogManager.start();
+    addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    m_RobotStateMachine.periodic();
+    // m_RobotStateMachine.periodic();
     if (m_gcTimer.advanceIfElapsed(0.1)) {
       System.gc();
     }
