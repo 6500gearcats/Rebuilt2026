@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
 
@@ -36,6 +37,7 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Deploy Current", getDeployCurrent());
   }
 
   public void setIntakeSpeed(double speed) {
@@ -44,6 +46,10 @@ public class Intake extends SubsystemBase {
 
   public void deployIntake(double speed) {
     m_intakeDeployMotor.set(speed);
+  }
+
+  public double getDeployCurrent() {
+    return m_intakeDeployMotor.getStatorCurrent().getValueAsDouble();
   }
 
   public void goToIntakePos(double pos) {
