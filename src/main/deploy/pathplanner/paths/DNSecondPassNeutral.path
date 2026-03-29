@@ -3,39 +3,48 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.580552806712963,
-        "y": 0.637161747685185
+        "x": 4.385,
+        "y": 0.637
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.580552806712962,
-        "y": 0.637161747685185
+        "x": 6.728586762075135,
+        "y": 0.6844543828264751
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.385,
-        "y": 0.637
+        "x": 6.890840787119857,
+        "y": 3.4914490161001788
       },
       "prevControl": {
-        "x": 3.385,
-        "y": 0.6370000000000001
+        "x": 6.939516994633274,
+        "y": 0.862933810375671
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.2,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 0.55,
+      "rotationDegrees": 90.0
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.0,
-      "maxWaypointRelativePos": 0.1500000000000002,
+      "minWaypointRelativePos": 0.697619047619048,
+      "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 0.5,
+        "maxVelocity": 1.0,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -47,15 +56,10 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "DeployIntakeFast",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": 0.25476190476190474,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "DeployIntakeFast"
-        }
-      }
+      "name": "IntakeFuel",
+      "waypointRelativePos": 0.30476190476190435,
+      "endWaypointRelativePos": 1.0,
+      "command": null
     }
   ],
   "globalConstraints": {
@@ -67,13 +71,13 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 3.0,
-    "rotation": 0.0
+    "velocity": 0,
+    "rotation": 97.43140797117263
   },
   "reversed": false,
   "folder": "DeadNuts",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 3.0,
     "rotation": 0.0
   },
   "useDefaultConstraints": true
