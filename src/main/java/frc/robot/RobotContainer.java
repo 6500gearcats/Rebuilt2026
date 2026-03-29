@@ -71,6 +71,7 @@ import frc.robot.commands.ClimbPole;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import frc.robot.commands.CoolSnurbo;
+import frc.robot.commands.HomeIntake;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
@@ -165,6 +166,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
                                 new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
+                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
