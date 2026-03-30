@@ -69,7 +69,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     if (snurboEnable) {
-      speedModifier = 0.15;
+      speedModifier = 0.4;//0.15;
     } else {
       speedModifier = 1;
     }
