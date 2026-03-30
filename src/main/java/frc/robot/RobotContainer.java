@@ -132,7 +132,7 @@ public class RobotContainer {
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
                 NamedCommands.registerCommand("AlignTurretFromRightTrench",
-                                new RunCommand(() -> m_turret.setPosition(104), m_turret));
+                                new RunCommand(() -> m_turret.setPosition(90), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
@@ -294,6 +294,8 @@ public class RobotContainer {
                 joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
+                joystick.x().onTrue(new HomeIntake(m_intake));
+
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
                 new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
                 new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5));
@@ -305,11 +307,12 @@ public class RobotContainer {
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
 
-                if (m_turretSysID.isPresent()) {
-                // Driver Back + A
-                joystick.b().onTrue(m_turretSysID.sysIdAll().get()
-                        .andThen(new InstantCommand(() -> System.out.println("Get Hoot Logs from TunerX"))));
-                }
+                // if (m_turretSysID.isPresent()) {
+                // // Driver Back + A
+                // joystick.b().onTrue(m_turretSysID.sysIdAll().get()
+                // .andThen(new InstantCommand(
+                // () -> System.out.println("Get Hoot Logs from TunerX"))));
+                // }
         }
 
         /**

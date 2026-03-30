@@ -11,11 +11,22 @@ import frc.robot.subsystems.intake.Intake;
 public class RunIntake extends Command {
   /** Creates a new RunIntake. */
   private Intake m_intake;
-  private double speed;;
+  private double speed;
+  private double deploySpeed;
 
   public RunIntake(Intake intake, double speed) {
     m_intake = intake;
     this.speed = speed;
+    this.deploySpeed = 0.15; // default deploy speed
+    addRequirements(m_intake);
+    // Use addRequirements() here to declare subsystem dependencies.
+  }
+
+  // overloaded constructor to support faster deploy speed
+  public RunIntake(Intake intake, double speed, double deploySpeed) {
+    m_intake = intake;
+    this.speed = speed;
+    this.deploySpeed = deploySpeed;
     addRequirements(m_intake);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -29,7 +40,7 @@ public class RunIntake extends Command {
   @Override
   public void execute() {
     m_intake.setIntakeSpeed(speed);
-    m_intake.deployIntake(0.15);
+    m_intake.deployIntake(deploySpeed);
   }
 
   // Called once the command ends or is interrupted.
