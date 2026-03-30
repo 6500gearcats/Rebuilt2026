@@ -33,7 +33,7 @@ public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private PositionVoltage m_request;
-  private final DigitalInput m_switch = new DigitalInput(4);
+  private final DigitalInput m_switch = new DigitalInput(3);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private final RobotStateMachine robotStateMachine;
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
@@ -67,12 +67,19 @@ public class Turret extends SubsystemBase {
 
     // This one is good
     var slot2Configs = talonFXConfigs.Slot2;
-    slot2Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    slot2Configs.kV = 13; // A velocity target of 1 rps results in 0.12 V output
-    slot2Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
-    slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V output
+    slot2Configs.kS = 0.20757; // Add 0.25 V output to overcome static friction
+    slot2Configs.kV = 0.1034; // A velocity target of 1 rps results in 0.12 V output
+    slot2Configs.kA = 0.0075573; // An acceleration of 1 rps/s requires 0.01 V output
+    slot2Configs.kP = 7.4749; // A position error of 2.5 rotations results in 12 V output
     slot2Configs.kI = 0; // no output for integrated error
-    slot2Configs.kD = 1; // A velocity error of 1 rps results in 0.1 V output
+    slot2Configs.kD = 0.36566; // A velocity error of 1 rps results in 0.1 V output
+
+    // slot2Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
+    // slot2Configs.kV = 13; // A velocity target of 1 rps results in 0.12 V output
+    // slot2Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
+    // slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V output
+    // slot2Configs.kI = 0; // no output for integrated error
+    // slot2Configs.kD = 1; // A velocity error of 1 rps results in 0.1 V output
 
     m_motor.getConfigurator().apply(talonFXConfigs);
 
