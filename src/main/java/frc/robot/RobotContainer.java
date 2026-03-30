@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -13,70 +12,42 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.derive;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.StandardOpenOption;
 import java.util.Optional;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
-import javax.crypto.ShortBufferException;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.photonvision.simulation.SimCameraProperties;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
-import frc.robot.commands.BurstFire;
 import frc.robot.commands.ClimbPole;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.HomeIntake;
 import frc.robot.commands.MoveTurret;
-import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.SetTurretAngle;
-import frc.robot.commands.ShootFuel;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.commands.ShootingSequenceUTS;
 import frc.robot.generated.TunerConstants2;
@@ -93,7 +64,6 @@ import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.utility.RangeFinder;
-import frc.robot.utility.ShooterValuesSenable;
 import frc.robot.utility.SysIDUtil;
 
 /**
@@ -335,12 +305,11 @@ public class RobotContainer {
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
 
-                // if (m_turretSysID.isPresent()) {
-                // // Driver Back + A
-                // joystick.b().onTrue(m_turretSysID.sysIdAll().get()
-                // .andThen(new InstantCommand(() -> System.out
-                // .println("Get Hoot Logs from TunerX"))));
-                // }
+                if (m_turretSysID.isPresent()) {
+                // Driver Back + A
+                joystick.b().onTrue(m_turretSysID.sysIdAll().get()
+                        .andThen(new InstantCommand(() -> System.out.println("Get Hoot Logs from TunerX"))));
+                }
         }
 
         /**

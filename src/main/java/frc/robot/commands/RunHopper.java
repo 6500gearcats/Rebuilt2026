@@ -35,7 +35,7 @@ public class RunHopper extends Command {
     if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) { return; }
     if (counter > 3) {
       
-      m_hopper.startAllMotors(-0.9, 1);
+      m_hopper.startAllMotors(-1, 1);
     }
     counter++;
   }

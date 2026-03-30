@@ -72,7 +72,7 @@ public class AlignTurretToHub extends Command {
         newError = 110 * (Math.abs(newError) / newError);
       }
     }
-    if (Math.abs(newError) > 0.005) {
+    if (Math.abs(newError) > 0.1) {
 
       m_turret.setPosition(newError);
     }

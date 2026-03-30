@@ -140,7 +140,7 @@ public final class RobotStateMachine {
         posePublisher.set(pose);
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation())
-                .rotateBy(new Rotation2d(Math.toRadians(m_Turret.getConvertedTurretPosition())));
+                .plus(new Transform2d(0, 0, new Rotation2d(Math.toRadians(m_Turret.getConvertedTurretPosition()))));
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
         newPostedValue();
