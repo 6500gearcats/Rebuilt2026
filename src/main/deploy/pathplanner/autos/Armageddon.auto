@@ -36,7 +36,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
               {
@@ -67,13 +67,13 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel5s"
+                  "name": "ShootFuel3s"
                 }
               },
               {
