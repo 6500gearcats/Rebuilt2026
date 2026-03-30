@@ -37,7 +37,7 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Deploy Pos", getDeployCurrent());
+    SmartDashboard.putNumber("Deploy Pos", getDeployPos());
   }
 
   public void setIntakeSpeed(double speed) {

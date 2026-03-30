@@ -50,6 +50,7 @@ import frc.robot.commands.RunIntake;
 import frc.robot.commands.SetTurretAngle;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.commands.ShootingSequenceUTS;
+import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants2;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -72,8 +73,8 @@ import frc.robot.utility.SysIDUtil;
 public class RobotContainer {
         @SuppressWarnings("unused")
         private double speedModify = 1;
-        private double MaxSpeed = TunerConstants2.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
-                                                                                       // speed
+        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+                                                                                      // speed
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
                                                                                           // max angular velocity
@@ -92,7 +93,7 @@ public class RobotContainer {
         private final CommandXboxController joystick2 = new CommandXboxController(1);
         private final XboxController m_gunner;
 
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
         private LedCANdle m_candle = new LedCANdle();
 
@@ -290,8 +291,10 @@ public class RobotContainer {
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
-                joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-                joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
+                new JoystickButton(m_gunner, XboxController.Button.kStart.value).onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+                
+                new JoystickButton(m_gunner, XboxController.Button.kBack.value)
+                                .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 joystick.x().onTrue(new HomeIntake(m_intake));
@@ -355,7 +358,7 @@ public class RobotContainer {
                                 drivetrain.seedFieldCentric();
                                 // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
 
-                                // GCD
+                                // GCD][\]
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);

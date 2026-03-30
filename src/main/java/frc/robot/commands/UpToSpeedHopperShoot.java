@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
 import frc.robot.RobotStateMachine.FieldZone;
@@ -37,6 +38,8 @@ public class UpToSpeedHopperShoot extends Command {
     }
     m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
         stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+    // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+
     if (m_Flywheel.isUpToSpeed()) {
       m_Hopper.startAllMotors(-1, 1);
     }
@@ -47,7 +50,7 @@ public class UpToSpeedHopperShoot extends Command {
   @Override
   public void end(boolean interrupted) {
     m_Hopper.stopAllMotors();
-    m_Flywheel.setSpeed(60);
+    m_Flywheel.setSpeed(0);
   }
 
   // Returns true when the command should end.
