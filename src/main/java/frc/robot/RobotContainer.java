@@ -161,6 +161,8 @@ public class RobotContainer {
                 m_flywheel = robotStateMachine.getFlywheel();
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
+                NamedCommands.registerCommand("AlignTurretFromRightTrench",
+                                new RunCommand(() -> m_turret.setPosition(104), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));

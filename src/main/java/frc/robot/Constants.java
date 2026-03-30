@@ -238,6 +238,7 @@ public final class Constants {
 
   public static class IntakeConstants {
     public static final double kDEPLOYSTALLCURRENT = 80;
+    public static final double kDeployMaxPos = 100;
   }
 
   public static class ClimberConstants {
