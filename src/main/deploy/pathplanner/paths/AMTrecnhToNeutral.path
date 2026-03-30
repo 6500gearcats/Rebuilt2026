@@ -3,12 +3,12 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.581,
+        "x": 3.458,
         "y": 0.637
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.5809999999999995,
+        "x": 4.458000000000001,
         "y": 0.6369999999999997
       },
       "isLocked": false,
@@ -48,12 +48,12 @@
     },
     {
       "anchor": {
-        "x": 7.723989149305556,
-        "y": 3.5672625144675925
+        "x": 7.779,
+        "y": 3.593
       },
       "prevControl": {
-        "x": 7.723989149305556,
-        "y": 1.9910487473700942
+        "x": 7.779,
+        "y": 2.0167862329025015
       },
       "nextControl": null,
       "isLocked": false,
@@ -72,7 +72,19 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "IntakeFuel",
+      "waypointRelativePos": 1.6023353943850265,
+      "endWaypointRelativePos": 3.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "IntakeFuel"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

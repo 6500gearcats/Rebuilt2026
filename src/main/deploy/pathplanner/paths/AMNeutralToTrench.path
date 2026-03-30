@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.876,
-        "y": 3.54
+        "x": 7.779,
+        "y": 3.593
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.48740700408108,
-        "y": 0.4913188443649821
+        "x": 6.641546585648149,
+        "y": 0.46381872106481525
       },
       "isLocked": false,
       "linkedName": null
@@ -35,8 +35,13 @@
     {
       "name": "AlignTurretFromRightTrench",
       "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
+      "endWaypointRelativePos": 1.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "AlignTurretFromRightTrench"
+        }
+      }
     }
   ],
   "globalConstraints": {

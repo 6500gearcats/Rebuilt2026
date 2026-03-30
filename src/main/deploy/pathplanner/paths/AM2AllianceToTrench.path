@@ -3,52 +3,35 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.421,
-        "y": 0.63
+        "x": 1.964,
+        "y": 2.438
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.420999999999999,
-        "y": 0.6299999999999997
+        "x": 2.18162377954112,
+        "y": 0.6298645710173061
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.114890842013889,
-        "y": 2.5440006510416664
+        "x": 3.458,
+        "y": 0.637
       },
       "prevControl": {
-        "x": 6.198281828703704,
-        "y": 0.6146573350694451
+        "x": 2.5576162236805167,
+        "y": 0.637
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.2579677152317881,
-      "rotationDegrees": 0.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "IntakeFuel",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": 1.0,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "IntakeFuel"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -59,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": 106.751
+    "rotation": 0.030270088660823535
   },
   "reversed": false,
   "folder": "Armageddon",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 0.0
+    "velocity": 4.0,
+    "rotation": 106.751
   },
   "useDefaultConstraints": true
 }
