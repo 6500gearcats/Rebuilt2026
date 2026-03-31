@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.turret.Turret;
@@ -138,9 +139,21 @@ public final class RobotStateMachine {
         refreshPoseFromVision();
         currentZone = checkZone();
         posePublisher.set(pose);
-        turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
-                .rotateAround(pose.getTranslation(), pose.getRotation())
-                .plus(new Transform2d(0, 0, new Rotation2d(Math.toRadians(m_Turret.getConvertedTurretPosition()))));
+
+        // 1. Get the turret's base position on the field
+        Pose2d turretBase = pose.transformBy(TurretConstants.ROBOT_TO_TURRET_BASE);
+
+        // 2. Combine the robot's heading and turret's relative rotation
+        Rotation2d finalRotation = turretBase.getRotation().plus(
+                Rotation2d.fromDegrees(m_Turret.getConvertedTurretPosition()));
+
+        // 3. Create the final pose using the base translation and the summed rotation
+        turretPose = new Pose2d(turretBase.getTranslation(), finalRotation);
+
+        // turretPose = pose.transformBy(TurretConstants.ROBOT_TO_TURRET_BASE)
+        // .plus(new Transform2d(0, 0,
+        // Rotation2d.fromDegrees(m_Turret.getConvertedTurretPosition())));
+
         turretPosePublisher.set(turretPose);
         SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
         newPostedValue();
@@ -214,17 +227,25 @@ public final class RobotStateMachine {
 
         double tof = getTOF(distance);// RangeFinder.getTOF(distance);
 
-        Pose2d nextPose = getTurretPose();
+        // Pose2d nextPose = getTurretPose();
+
+        double currX = getTurretPose().getX();
+        double currY = getTurretPose().getY();
 
         for (int i = 0; i < 20; i++) {
             shotVelocity = RangeFinder.getShotVelocity(distance);
             tof = getTOF(distance);// RangeFinder.getTOF(distance);
 
-            nextPose = new Pose2d(
-                    getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
-                    getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
-                    new Rotation2d());
-            distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+            double predX = currX + (speeds.vxMetersPerSecond * tof);
+            double predY = currY + (speeds.vyMetersPerSecond * tof);
+            distance = Math.sqrt((predX * predX) + (predY * predY));
+
+            // nextPose = new Pose2d(
+            // getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
+            // getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
+            // new Rotation2d());
+
+            // distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         }
 
         Optional<Pose2d> bestPose = getBestPoseTarget();

@@ -11,7 +11,9 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -234,6 +236,9 @@ public final class Constants {
   public static class TurretConstants {
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
+    public static final Transform2d ROBOT_TO_TURRET_BASE = new Transform2d(
+        new Translation2d(-0.1524, 0.0635),
+        new Rotation2d());
   }
 
   public static class IntakeConstants {
