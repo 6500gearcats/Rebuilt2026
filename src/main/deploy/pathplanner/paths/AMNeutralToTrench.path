@@ -1,0 +1,66 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.779,
+        "y": 3.593
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.000794126157408,
+        "y": 0.7023786168981481
+      },
+      "isLocked": false,
+      "linkedName": "Neutral"
+    },
+    {
+      "anchor": {
+        "x": 4.122627025462964,
+        "y": 0.654482928240741
+      },
+      "prevControl": {
+        "x": 6.321039134837964,
+        "y": 0.5919210069444449
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Trench"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "AlignTurretFromRightTrench",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "AlignTurretFromRightTrench"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": true
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "Armageddon",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 91.10911320901279
+  },
+  "useDefaultConstraints": true
+}

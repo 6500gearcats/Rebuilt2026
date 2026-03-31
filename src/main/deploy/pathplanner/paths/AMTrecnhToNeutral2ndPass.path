@@ -1,0 +1,85 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.122627025462964,
+        "y": 0.654482928240741
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.873837745949075,
+        "y": 0.550621455439815
+      },
+      "isLocked": false,
+      "linkedName": "Trench"
+    },
+    {
+      "anchor": {
+        "x": 6.114890842013889,
+        "y": 2.5440006510416664
+      },
+      "prevControl": {
+        "x": 6.198281828703704,
+        "y": 0.6146573350694451
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Neutral2nd"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.2579677152317881,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.5269573028074868,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 1.6,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "IntakeFuel",
+      "waypointRelativePos": 0.47948696524064166,
+      "endWaypointRelativePos": 1.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "IntakeFuel"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": true
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 106.751
+  },
+  "reversed": false,
+  "folder": "Armageddon",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
