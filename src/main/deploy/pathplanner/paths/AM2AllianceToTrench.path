@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.18162377954112,
-        "y": 0.6298645710173061
+        "x": 2.252500366532081,
+        "y": 0.7053063911795636
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "AlianceShoot"
     },
     {
       "anchor": {
-        "x": 3.458,
+        "x": 3.544598234953704,
         "y": 0.637
       },
       "prevControl": {
-        "x": 2.5576162236805167,
-        "y": 0.637
+        "x": 2.711672526041667,
+        "y": 0.6378178530092599
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "StartTrench"
     }
   ],
   "rotationTargets": [],
@@ -38,17 +38,17 @@
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": false
+    "unlimited": true
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": 0.030270088660823535
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": "Armageddon",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": 106.751
+    "rotation": -157.28690739731707
   },
   "useDefaultConstraints": true
 }

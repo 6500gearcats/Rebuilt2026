@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.115,
-        "y": 2.544
+        "x": 6.114890842013889,
+        "y": 2.5440006510416664
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.323920138888889,
-        "y": 2.4707136863425934
+        "x": 4.323810980902778,
+        "y": 2.4707143373842597
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Neutral2nd"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "AlianceShoot"
     }
   ],
   "rotationTargets": [
@@ -43,7 +43,7 @@
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": false
+    "unlimited": true
   },
   "goalEndState": {
     "velocity": 0.0,

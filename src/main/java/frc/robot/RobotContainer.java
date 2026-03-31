@@ -133,7 +133,7 @@ public class RobotContainer {
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
                 NamedCommands.registerCommand("AlignTurretFromRightTrench",
-                                new RunCommand(() -> m_turret.setPosition(-95), m_turret));
+                                new InstantCommand(() -> m_turret.setPosition(-100), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
@@ -291,8 +291,9 @@ public class RobotContainer {
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
-                new JoystickButton(m_gunner, XboxController.Button.kStart.value).onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-                
+                new JoystickButton(m_gunner, XboxController.Button.kStart.value)
+                                .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+
                 new JoystickButton(m_gunner, XboxController.Button.kBack.value)
                                 .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
