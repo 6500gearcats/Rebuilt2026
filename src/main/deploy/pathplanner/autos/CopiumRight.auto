@@ -1,0 +1,101 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "COP1_GrabFuel"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeFuel"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "COP2-GoHome"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "COP3_ShootAndReset"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ShootFuel"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "COP4_AltGrabFuel"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeFuel"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "COP5-AltGoHome"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "COP3_ShootAndReset"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ShootFuel"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
