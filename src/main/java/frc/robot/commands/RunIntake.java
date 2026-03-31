@@ -13,8 +13,6 @@ public class RunIntake extends Command {
   private Intake m_intake;
   private double speed;
   private double deploySpeed;
-  private double speed;
-  private double deploySpeed;
 
   // Default constructor with deploy speed of 0.15
   public RunIntake(Intake intake, double speed) {
