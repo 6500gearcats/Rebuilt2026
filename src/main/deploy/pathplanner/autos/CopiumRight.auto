@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OPR1_GrabFuel"
+                  "pathName": "COP1_GrabFuel"
                 }
               },
               {
@@ -26,7 +26,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "OPR2-GoHome"
+            "pathName": "COP2-GoHome"
           }
         },
         {
@@ -36,7 +36,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OPR3_ShootAndReset"
+                  "pathName": "COP3_ShootAndReset"
                 }
               },
               {
@@ -55,7 +55,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OPR4_AltGrabFuel"
+                  "pathName": "COP4_AltGrabFuel"
                 }
               },
               {
@@ -70,7 +70,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "OPR5-AltGoHome"
+            "pathName": "COP5-AltGoHome"
           }
         },
         {
@@ -80,7 +80,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OPR3_ShootAndReset"
+                  "pathName": "COP3_ShootAndReset"
                 }
               },
               {

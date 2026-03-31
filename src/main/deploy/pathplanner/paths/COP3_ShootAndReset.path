@@ -66,7 +66,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "OPRoboticsRight",
+  "folder": "CopiumRight",
   "idealStartingState": {
     "velocity": 0.1,
     "rotation": 145.0

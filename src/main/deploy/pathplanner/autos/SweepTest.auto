@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "OPR1_GrabFuel"
+                  "pathName": "COP1_GrabFuel"
                 }
               },
               {
