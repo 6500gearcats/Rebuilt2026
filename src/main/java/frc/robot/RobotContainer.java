@@ -9,6 +9,9 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -19,7 +22,13 @@ import edu.wpi.first.math.geometry.Translation3d;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import org.json.simple.parser.ParseException;
 import org.photonvision.simulation.SimCameraProperties;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -132,6 +141,7 @@ public class RobotContainer {
                 m_flywheel = robotStateMachine.getFlywheel();
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
+
                 NamedCommands.registerCommand("AlignTurretFromRightTrench",
                                 new InstantCommand(() -> m_turret.setPosition(-100), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
@@ -140,7 +150,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
                                 new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
-                                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake));
+                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
@@ -176,7 +186,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("BopBop",
                                 new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
-                NamedCommands.registerCommand("BopBopStayUp", 
+                NamedCommands.registerCommand("BopBopStayUp",
                                 new RunCommand(() -> m_intake.deployIntake(-0.35)).withTimeout(0.45));
                 NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
                 NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));
@@ -187,6 +197,9 @@ public class RobotContainer {
                 autoChooser = AutoBuilder.buildAutoChooser("testAuto");
 
                 SmartDashboard.putData("Auto Chooser", autoChooser);
+
+                SmartDashboard.putBoolean("Mirror Auto", false);
+
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
@@ -328,7 +341,28 @@ public class RobotContainer {
          * @return selected command from the auto chooser
          */
         public Command getAutonomousCommand() {
-                return autoChooser.getSelected();
+                Command auto = autoChooser.getSelected();
+                String name = autoChooser.getSelected().getName();
+                System.out.println();
+                System.out.println();
+                System.out.println(name);
+                System.out.println();
+                System.out.println();
+                boolean mirrorAuto = SmartDashboard.getBoolean("Mirror Auto", false);
+                if (mirrorAuto) {
+                        try {
+                                List<PathPlannerPath> paths = PathPlannerAuto.getPathGroupFromAutoFile(name);
+                                ArrayList<PathPlannerPath> mirroredPaths = new ArrayList<PathPlannerPath>();
+                                for (PathPlannerPath path : paths) {
+                                        mirroredPaths.add(path.mirrorPath());
+                                }
+
+                        } catch (IOException | ParseException e) {
+                                e.printStackTrace();
+                        }
+                }
+
+                return auto;
         }
 
         /**
