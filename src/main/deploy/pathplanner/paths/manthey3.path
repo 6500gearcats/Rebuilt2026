@@ -20,15 +20,20 @@
         "y": 7.328
       },
       "prevControl": {
-        "x": 3.3710000000000004,
-        "y": 7.328
+        "x": 3.308819277108434,
+        "y": 7.597433734939759
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5099212598425196,
+      "rotationDegrees": 65.03768132917999
+    }
+  ],
   "constraintZones": [
     {
       "name": "shooting",
@@ -37,7 +42,7 @@
       "constraints": {
         "maxVelocity": 0.7,
         "maxAcceleration": 3.0,
-        "maxAngularVelocity": 540.0,
+        "maxAngularVelocity": 260.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
         "unlimited": false
