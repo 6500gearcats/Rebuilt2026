@@ -3,44 +3,52 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.122627025462964,
-        "y": 0.654482928240741
+        "x": 3.0039657631954344,
+        "y": 0.71623395149786
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.873837745949075,
-        "y": 0.550621455439815
+        "x": 7.092582025677602,
+        "y": 0.4703994293865924
       },
       "isLocked": false,
       "linkedName": "Trench"
     },
     {
       "anchor": {
-        "x": 6.114890842013889,
-        "y": 2.5440006510416664
+        "x": 6.115,
+        "y": 2.544
       },
       "prevControl": {
-        "x": 6.198281828703704,
-        "y": 0.6146573350694451
+        "x": 6.510342368045648,
+        "y": 0.5350927246790307
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Neutral2nd"
+      "linkedName": "Neutral2"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.2579677152317881,
-      "rotationDegrees": 0.0
+      "waypointRelativePos": 0.09796081567373177,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 0.2898840463814464,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 0.5185925629748112,
+      "rotationDegrees": 90.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.5269573028074868,
+      "minWaypointRelativePos": 0.2593060661764708,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.6,
+        "maxVelocity": 1.0,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -53,7 +61,7 @@
   "eventMarkers": [
     {
       "name": "IntakeFuel",
-      "waypointRelativePos": 0.47948696524064166,
+      "waypointRelativePos": 0,
       "endWaypointRelativePos": 1.0,
       "command": {
         "type": "named",
@@ -69,17 +77,17 @@
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": true
+    "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
+    "velocity": 1.0,
     "rotation": 106.751
   },
   "reversed": false,
   "folder": "Armageddon",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -119.99999999999999
   },
   "useDefaultConstraints": true
 }

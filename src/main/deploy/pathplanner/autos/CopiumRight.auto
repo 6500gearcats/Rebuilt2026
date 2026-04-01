@@ -15,9 +15,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IntakeFuel"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IntakeFuel"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -44,6 +57,25 @@
                 "data": {
                   "name": "ShootFuel"
                 }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 2.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "HomeIntake"
+                      }
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -59,9 +91,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "IntakeFuel"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "IntakeFuel"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -80,7 +125,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "COP3_ShootAndReset"
+                  "pathName": "COP6_ShootAndReset"
                 }
               },
               {
@@ -88,8 +133,33 @@
                 "data": {
                   "name": "ShootFuel"
                 }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 2.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "HomeIntake"
+                      }
+                    }
+                  ]
+                }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFuel5s"
           }
         }
       ]

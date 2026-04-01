@@ -72,10 +72,11 @@ public class AlignTurretToHub extends Command {
         newError = 110 * (Math.abs(newError) / newError);
       }
     }
-    if (Math.abs(newError) > 0.003) {
-
+    if (Math.abs(newError) > 0.005) {
+      SmartDashboard.putBoolean("Aligned", false);
       m_turret.setPosition(newError);
     }
+    SmartDashboard.putBoolean("Aligned", true);
 
     SmartDashboard.putNumber("tunring_pos_setpoint", newError);
   }

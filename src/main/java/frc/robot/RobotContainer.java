@@ -133,7 +133,7 @@ public class RobotContainer {
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
                 NamedCommands.registerCommand("AlignTurretFromRightTrench",
-                                new InstantCommand(() -> m_turret.setPosition(-100), m_turret));
+                                new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.4));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
@@ -156,6 +156,8 @@ public class RobotContainer {
                 NamedCommands.registerCommand("ManualShootFuel3s",
                                 new ShootingSequenceUTS(hopper, m_flywheel)
                                                 .withTimeout(3.0));
+                NamedCommands.registerCommand("ManualShootFuel",
+                                new ShootingSequenceUTS(hopper, m_flywheel));                  
                 NamedCommands.registerCommand("TrenchStartAngle",
                                 new SetTurretAngle(m_turret, -90).withTimeout(1));
                 NamedCommands.registerCommand("NewShootFuel5s",
@@ -302,7 +304,8 @@ public class RobotContainer {
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 joystick.x().onTrue(new HomeIntake(m_intake));
-
+                joystick.pov(0).onTrue( new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
+                
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
                 new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
                 new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5));

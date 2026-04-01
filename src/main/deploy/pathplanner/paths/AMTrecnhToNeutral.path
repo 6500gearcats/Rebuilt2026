@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.544598234953704,
+        "x": 3.458,
         "y": 0.637
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.544598234953706,
+        "x": 4.458000000000001,
         "y": 0.6369999999999997
       },
       "isLocked": false,
-      "linkedName": "StartTrench"
+      "linkedName": null
     },
     {
       "anchor": {
@@ -57,7 +57,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Neutral"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
@@ -88,35 +88,24 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "AlignTurret",
-      "waypointRelativePos": 1.0123245320855618,
-      "endWaypointRelativePos": 2.15,
+      "name": "Intake",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 0.8618233618233548,
       "command": {
         "type": "named",
         "data": {
-          "name": "AlignTurret"
+          "name": "Intake"
         }
       }
     },
     {
       "name": "IntakeFuel",
-      "waypointRelativePos": 1.6023353943850265,
+      "waypointRelativePos": 0.9415954415954481,
       "endWaypointRelativePos": 3.0,
       "command": {
         "type": "named",
         "data": {
           "name": "IntakeFuel"
-        }
-      }
-    },
-    {
-      "name": "NewShootFuel5s",
-      "waypointRelativePos": 2.16,
-      "endWaypointRelativePos": 3.0,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "NewShootFuel5s"
         }
       }
     }
@@ -127,7 +116,7 @@
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": true
+    "unlimited": false
   },
   "goalEndState": {
     "velocity": 0.0,

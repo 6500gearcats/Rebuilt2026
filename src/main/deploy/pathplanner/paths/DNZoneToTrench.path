@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.159,
-        "y": 2.599
+        "x": 2.8228245363766047,
+        "y": 2.6182168330955777
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8507155635062613,
-        "y": 0.6357781753130587
+        "x": 2.514540099882866,
+        "y": 0.6549950084086362
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "DNAlliance"
     },
     {
       "anchor": {

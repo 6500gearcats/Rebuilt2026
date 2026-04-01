@@ -32,16 +32,16 @@
     },
     {
       "anchor": {
-        "x": 3.159,
-        "y": 2.5990518783542043
+        "x": 2.8228245363766047,
+        "y": 2.6182168330955777
       },
       "prevControl": {
-        "x": 4.278552772808586,
-        "y": 2.745080500894454
+        "x": 3.9423773091851904,
+        "y": 2.7642454556358276
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "DNAlliance"
     }
   ],
   "rotationTargets": [
@@ -59,7 +59,7 @@
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": false
+    "unlimited": true
   },
   "goalEndState": {
     "velocity": 0,

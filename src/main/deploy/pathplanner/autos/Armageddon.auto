@@ -11,7 +11,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 0.5
+                  "waitTime": 1.0
                 }
               },
               {
@@ -42,7 +42,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel5s"
+                  "name": "NewShootFuel10s"
                 }
               },
               {
