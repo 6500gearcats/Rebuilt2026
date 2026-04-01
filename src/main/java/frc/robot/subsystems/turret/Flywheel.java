@@ -109,10 +109,10 @@ public class Flywheel extends SubsystemBase {
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
-      // if (robotStateMachine.underTrench()) {
-      //   speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
-      //   reqSpeed = speedValue;
-      // }
+      if (robotStateMachine.underTrench()) {
+        speedValue = 69 + (2 * speedMultiplier);
+        reqSpeed = speedValue;
+      }
 
       m_motor.setControl(m_request.withVelocity(speedValue));
     }

@@ -140,7 +140,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
                                 new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
-                                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake));
+                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake).andThen(new RunCommand(() -> m_intake.deployIntake(-0.3), m_intake).withTimeout(0.2)));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
@@ -305,7 +305,7 @@ public class RobotContainer {
 
                 joystick.x().onTrue(new HomeIntake(m_intake));
                 joystick.pov(0).onTrue( new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
-                
+
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
                 new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
                 new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5));

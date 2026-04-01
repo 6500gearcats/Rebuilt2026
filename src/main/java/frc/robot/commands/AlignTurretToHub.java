@@ -62,7 +62,9 @@ public class AlignTurretToHub extends Command {
     double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
     newError = (Math.abs(newError) - 180) * Math.signum(newError); // (newError / Math.abs(newError)); Signum handles
                                                                    // divide by zero
-
+  if (m_StateMachine.ductTapeCorrection) {
+      newError -= 5;
+    }
     if (newError > 0) {
       if (Math.abs(newError) > 110) {
         newError = 110 * (Math.abs(newError) / newError);

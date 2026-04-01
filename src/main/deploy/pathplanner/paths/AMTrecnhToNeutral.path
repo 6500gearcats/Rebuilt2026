@@ -3,29 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.458,
+        "x": 4.389700704225353,
         "y": 0.637
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.458000000000001,
-        "y": 0.6369999999999997
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 5.773519241898149,
-        "y": 0.637
-      },
-      "prevControl": {
-        "x": 4.903758728684196,
-        "y": 0.6808307775418299
-      },
-      "nextControl": {
-        "x": 7.577415219907408,
-        "y": 0.5460943287037037
+        "x": 7.822887323943663,
+        "y": 0.5379401408450712
       },
       "isLocked": false,
       "linkedName": null
@@ -33,48 +17,32 @@
     {
       "anchor": {
         "x": 7.723989149305556,
-        "y": 1.3141312210648153
+        "y": 2.9331866197183105
       },
       "prevControl": {
-        "x": 7.723989149305556,
-        "y": 1.0641312210648153
-      },
-      "nextControl": {
-        "x": 7.723989149305556,
-        "y": 1.7701016400044927
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 7.779,
-        "y": 3.593
-      },
-      "prevControl": {
-        "x": 7.779,
-        "y": 2.0167862329025015
+        "x": 7.711109154929579,
+        "y": 1.4002288732394368
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Neutral"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1,
-      "rotationDegrees": 0.0
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 49.30323831247019
     },
     {
-      "waypointRelativePos": 2,
+      "waypointRelativePos": 0.75,
       "rotationDegrees": 90.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.6132708054812837,
-      "maxWaypointRelativePos": 3.0,
+      "minWaypointRelativePos": 0.65,
+      "maxWaypointRelativePos": 1.0,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 3.0,
@@ -88,19 +56,19 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Intake",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": 0.8618233618233548,
+      "name": "IntakeFuel",
+      "waypointRelativePos": 0.041366906474820775,
+      "endWaypointRelativePos": 0.5605095541401275,
       "command": {
         "type": "named",
         "data": {
-          "name": "Intake"
+          "name": "IntakeFuel"
         }
       }
     },
     {
       "name": "IntakeFuel",
-      "waypointRelativePos": 0.9415954415954481,
+      "waypointRelativePos": 0.7,
       "endWaypointRelativePos": 3.0,
       "command": {
         "type": "named",

@@ -27,7 +27,8 @@ public class HomeIntake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_Intake.deployIntake(-0.1);
+    m_Intake.deployIntake(-0.2);
+    m_Intake.setIntakeSpeed(-0.2);
 
   }
 
@@ -40,6 +41,6 @@ public class HomeIntake extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(m_Intake.getDeployPos()) <= 1;
+    return Math.abs(m_Intake.getDeployPos()) <= 2;
   }
 }

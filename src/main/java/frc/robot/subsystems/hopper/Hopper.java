@@ -37,6 +37,7 @@ public class Hopper extends SubsystemBase {
    * @param kickerSpeed speed for the kicker motor
    */
   public void startAllMotors(double hopperSpeed, double kickerSpeed) {
+    //! When you add other hopper motor make sure to set the same speed for it because it spins with the other motor
     m_hopperMotor.set(hopperSpeed);
     m_kickerMotor.set(kickerSpeed);
   }

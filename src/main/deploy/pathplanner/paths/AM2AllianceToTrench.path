@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.964,
-        "y": 2.438
+        "x": 1.8347711267605642,
+        "y": 2.549947183098592
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.252500366532081,
-        "y": 0.7053063911795636
+        "x": 2.1232714932926453,
+        "y": 0.8172535742781553
       },
       "isLocked": false,
-      "linkedName": "AlianceShoot"
+      "linkedName": "AMAlliance"
     },
     {
       "anchor": {
