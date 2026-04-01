@@ -145,6 +145,9 @@ public class Turret extends SubsystemBase {
    * @param deg desired position in degress
    */
   public void setPosition(double deg) {
+    if (robotStateMachine.ductTapeCorrection) {
+      deg -= 5;
+    }
     SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }
