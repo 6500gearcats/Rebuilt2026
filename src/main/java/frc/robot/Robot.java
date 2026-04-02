@@ -11,6 +11,7 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,7 +21,7 @@ import frc.robot.RobotStateMachine.RobotState;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private Timer m_gcTimer = new Timer();
-  private Timer stateTimer = new Timer();
+  private Timer autoTimer = new Timer();
   private final RobotContainer m_robotContainer;
   private final RobotStateMachine m_RobotStateMachine;
 
@@ -35,6 +36,7 @@ public class Robot extends TimedRobot {
     // DataLogManager.start();
     DataLogManager.start();
     addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
+    SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
@@ -74,14 +76,20 @@ public class Robot extends TimedRobot {
     }
     // SignalLogger.start();
     m_RobotStateMachine.setState(RobotState.ACTIVE);
+
+    autoTimer.reset();
+    autoTimer.start();
+    SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
   public void autonomousPeriodic() {
+    SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
   public void autonomousExit() {
+    autoTimer.stop();
     // SignalLogger.stop();
   }
 
