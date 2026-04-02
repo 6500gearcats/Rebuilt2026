@@ -148,18 +148,22 @@ public class Vision extends SubsystemBase {
     if (isReplay) {
       return;
     }
-    Pose2d lastPose = getEstimatedPose();
+
     estimator.update(
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
     for (VisionIO visionIO : m_visionOdometryCams) {
       visionIO.getVisionEst().ifPresent(est -> {
 
-        // if (lastPose.minus(est.getPose()).getTranslation().getNorm() < 4) {
+        estimator.sampleAt(est.getTimestamp()).ifPresentOrElse((poseAtTimestamp) -> {
 
-        estimator.addVisionMeasurement(est.getPose(), est.getTimestamp());
+          if (poseAtTimestamp.getTranslation().getSquaredDistance(est.getPose().getTranslation()) < 1) {
+            estimator.addVisionMeasurement(est.getPose(), est.getTimestamp());
+          }
 
-        // }
+        }, () -> {
+          estimator.addVisionMeasurement(est.getPose(), est.getTimestamp());
+        });
 
       });
       if (visionIO.getName().contains("gcc")) {
