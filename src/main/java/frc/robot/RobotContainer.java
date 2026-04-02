@@ -134,8 +134,12 @@ public class RobotContainer {
                 m_gunner = robotStateMachine.getGunner();
                 NamedCommands.registerCommand("AlignTurretFromRightTrench",
                                 new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
+                NamedCommands.registerCommand("TurretDeadOn",
+                                new InstantCommand(() -> m_turret.setPosition(0), m_turret));
+                NamedCommands.registerCommand("AlignTurretFromLeftTrench",
+                                new InstantCommand(() -> m_turret.setPosition(101), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
-                NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.4));
+                NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.25));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
@@ -269,14 +273,9 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                // Reset the field-centric heading on left bumper press.
+                // Reset the field-centric heading on start button press
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
-                // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
-                // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
-
-                // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
                 new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
                                 .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.2)));
@@ -284,6 +283,7 @@ public class RobotContainer {
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
+
                 joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
@@ -307,8 +307,7 @@ public class RobotContainer {
                 joystick.pov(0).onTrue( new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
                 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
-                new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
-                new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5));
+
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
