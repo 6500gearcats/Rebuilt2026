@@ -5,31 +5,18 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.subsystems.intake.Intake;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RunIntake extends Command {
-  /** Creates a new RunIntake. */
-  private Intake m_intake;
-  private double speed;
-  private double deploySpeed;
+public class HomeIntake extends Command {
+  /** Creates a new HomeIntake. */
+  Intake m_Intake;
 
-  // Default constructor with deploy speed of 0.15
-  public RunIntake(Intake intake, double speed) {
-    m_intake = intake;
-    this.speed = speed;
-    this.deploySpeed = 0.15;
-    addRequirements(m_intake);
+  public HomeIntake(Intake intake) {
     // Use addRequirements() here to declare subsystem dependencies.
-  }
-
-  // Overloaded constructor for deploying the intake faster
-  public RunIntake(Intake intake, double speed, double deploySpeed) {
-    m_intake = intake;
-    this.speed = speed;
-    this.deploySpeed = deploySpeed;
-    addRequirements(m_intake);
-    // Use addRequirements() here to declare subsystem dependencies.
+    m_Intake = intake;
+    addRequirements(intake);
   }
 
   // Called when the command is initially scheduled.
@@ -40,20 +27,19 @@ public class RunIntake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_intake.setIntakeSpeed(speed);
-    m_intake.deployIntake(deploySpeed);
+    m_Intake.deployIntake(-0.1);
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_intake.setIntakeSpeed(0);
-    m_intake.deployIntake(0);
+    m_Intake.deployIntake(0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return Math.abs(m_Intake.getDeployPos()) <= 1;
   }
 }

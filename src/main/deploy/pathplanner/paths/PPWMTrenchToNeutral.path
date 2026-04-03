@@ -1,0 +1,105 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.4160373263888895,
+        "y": 7.409874565972222
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.688982071697399,
+        "y": 7.387904012169365
+      },
+      "isLocked": false,
+      "linkedName": "WMStart"
+    },
+    {
+      "anchor": {
+        "x": 7.7535138888888895,
+        "y": 6.884137369791667
+      },
+      "prevControl": {
+        "x": 7.664643176447116,
+        "y": 7.356887797232802
+      },
+      "nextControl": {
+        "x": 7.822102119619313,
+        "y": 6.519280213768716
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.7535138888888895,
+        "y": 4.451954933449074
+      },
+      "prevControl": {
+        "x": 7.700608540277948,
+        "y": 5.427969511674539
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "WMNeutral"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.3729477097130247,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.0,
+      "rotationDegrees": -90.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.8170746991978608,
+      "maxWaypointRelativePos": 2.0,
+      "constraints": {
+        "maxVelocity": 1.2,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "IntakeFuel",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": 2.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "IntakeFuel"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": true
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": "PPWeirdmageddon",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}

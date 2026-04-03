@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.ClimbPole;
@@ -45,11 +46,13 @@ import frc.robot.commands.ClimbPole;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.commands.CoolSnurbo;
+import frc.robot.commands.HomeIntake;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.SetTurretAngle;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.commands.ShootingSequenceUTS;
+import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants2;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -71,6 +74,9 @@ import frc.robot.utility.SysIDUtil;
  */
 public class RobotContainer {
         @SuppressWarnings("unused")
+
+        private boolean testing = true;
+
         private double speedModify = 1;
         private double MaxSpeed = TunerConstants2.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                        // speed
@@ -120,6 +126,8 @@ public class RobotContainer {
         PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
 
+        private final Telemetry logger = new Telemetry(MaxSpeed);
+
         SlewRateLimiter filterXLimiter = new SlewRateLimiter(20);
         SlewRateLimiter filterYLimiter = new SlewRateLimiter(20);
         SlewRateLimiter filterRotLimiter = new SlewRateLimiter(20);
@@ -131,11 +139,20 @@ public class RobotContainer {
                 m_flywheel = robotStateMachine.getFlywheel();
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
+                NamedCommands.registerCommand("AlignTurretFromRightTrench",
+                                new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
+                NamedCommands.registerCommand("TurretDeadOn",
+                                new InstantCommand(() -> m_turret.setPosition(0), m_turret));
+                NamedCommands.registerCommand("AlignTurretFromLeftTrench",
+                                new InstantCommand(() -> m_turret.setPosition(101), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
+                NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.25));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
                                 new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
+                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake)
+                                .andThen(() -> m_intake.deployIntake(0.4), m_intake).withTimeout(0.1));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
@@ -151,6 +168,8 @@ public class RobotContainer {
                 NamedCommands.registerCommand("ManualShootFuel3s",
                                 new ShootingSequenceUTS(hopper, m_flywheel)
                                                 .withTimeout(3.0));
+                NamedCommands.registerCommand("ManualShootFuel",
+                                new ShootingSequenceUTS(hopper, m_flywheel));
                 NamedCommands.registerCommand("TrenchStartAngle",
                                 new SetTurretAngle(m_turret, -90).withTimeout(1));
                 NamedCommands.registerCommand("NewShootFuel5s",
@@ -171,6 +190,8 @@ public class RobotContainer {
                 NamedCommands.registerCommand("BopBop",
                                 new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
+                NamedCommands.registerCommand("BopBopStayUp",
+                                new RunCommand(() -> m_intake.deployIntake(-0.35)).withTimeout(0.45));
                 NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
                 NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));
                 NamedCommands.registerCommand("ClimbDown2s", new ClimbPole(m_climber, -0.5).withTimeout(2));
@@ -205,8 +226,6 @@ public class RobotContainer {
                                                 m_ll,
                                                 m_ll2);
                                 m_turret.goToZero();
-                                m_turretSysID = new SysIDUtil(m_turret);
-                                m_flywheelSysID = new SysIDUtil(m_flywheel);
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -226,14 +245,19 @@ public class RobotContainer {
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 camSim);
-                                m_flywheelSysID = new SysIDUtil(m_flywheel);
-
                                 break;
                         default:
                                 m_vision = new Vision();
                                 break;
                 }
+                if (testing) {
+                        testBindings();
+                        m_turretSysID = new SysIDUtil(m_turret);
+                        m_flywheelSysID = new SysIDUtil(m_flywheel);
+                }
+
                 configureBindings();
+
                 robotStateMachine.bindVision(m_vision);
                 robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();
@@ -260,7 +284,7 @@ public class RobotContainer {
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                // Reset the field-centric heading on left bumper press.
+                // Reset the field-centric heading on start button press
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
                 // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
@@ -278,6 +302,7 @@ public class RobotContainer {
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
+
                 joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
@@ -290,13 +315,17 @@ public class RobotContainer {
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
-                joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-                joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
+                new JoystickButton(m_gunner, XboxController.Button.kStart.value)
+                                .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+
+                new JoystickButton(m_gunner, XboxController.Button.kBack.value)
+                                .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
+                joystick.x().onTrue(new HomeIntake(m_intake));
+
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
-                new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
-                new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5));
+
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
@@ -304,13 +333,41 @@ public class RobotContainer {
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+        }
+
+        public void testBindings() {
+                //@formatter:off
+                drivetrain.registerTelemetry(logger::telemeterize);
+                
+                // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+                // joystick.b().whileTrue(drivetrain.applyRequest(() ->
+                //                                         point.withModuleDirection(
+                //                                                 new Rotation2d(-joystick.getLeftY(),
+                //                                                                  -joystick.getLeftX()))));
+                //@formatter:on
+
+                joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+                joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+                joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+                joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
                 if (m_turretSysID.isPresent()) {
-                        // Driver Back + A
-                        joystick.b().onTrue(m_turretSysID.sysIdAll().get()
-                                        .andThen(new InstantCommand(
-                                                        () -> System.out.println("Get Hoot Logs from TunerX"))));
+                        // Driver Back + x
+                        joystick2.back().and(joystick2.x())
+                                        .onTrue(m_turretSysID.sysIdAll().get().andThen(
+                                                        new InstantCommand(() -> System.out
+                                                                        .println("Get Hoot Logs from TunerX"))));
                 }
+                if (m_flywheelSysID.isPresent()) {
+                        // Driver Back + x
+                        joystick2.back().and(joystick2.y())
+                                        .onTrue(m_flywheelSysID.sysIdAll().get().andThen(
+                                                        new InstantCommand(() -> System.out
+                                                                        .println("Get Hoot Logs from TunerX"))));
+                }
+
+                joystick.pov(0).onTrue(new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
+
         }
 
         /**
@@ -353,7 +410,7 @@ public class RobotContainer {
                                 drivetrain.seedFieldCentric();
                                 // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
 
-                                // GCD
+                                // GCD][\]
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);

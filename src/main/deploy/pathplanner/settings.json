@@ -3,13 +3,18 @@
   "robotLength": 0.86,
   "holonomicMode": true,
   "pathFolders": [
+    "Armageddon",
     "Artemis2",
+    "CopiumRight",
+    "DeadNuts",
     "FinalHope",
     "LeftProjectHailMary",
-    "WakeCenter",
+    "Weirdmageddon",
     "RightProjectHailMary",
+    "WakeCenter",
     "WakeLeft",
-    "WakeRight"
+    "WakeRight",
+    "PPWeirdmageddon"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,

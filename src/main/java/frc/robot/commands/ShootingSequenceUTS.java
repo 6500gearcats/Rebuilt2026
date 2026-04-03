@@ -28,7 +28,6 @@ public class ShootingSequenceUTS extends ParallelCommandGroup {
   public ShootingSequenceUTS(Hopper hopper, Flywheel flywheel) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new UpToSpeedHopperShoot(hopper, flywheel),
-        new ShootFuel(flywheel), new CoolSnurbo(flywheel));
+    addCommands(new UpToSpeedHopperShoot(hopper, flywheel), new CoolSnurbo(flywheel));
   }
 }

@@ -12,7 +12,9 @@ import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
   /** Creates a new climber. */
-  TalonFX m_motor = new TalonFX(Constants.ClimberConstants.kClimberMotorID);
+  // TalonFX m_motor = new TalonFX(Constants.ClimberConstants.kClimberMotorID);
+  // DigitalInput m_limitSwitch = new
+  // DigitalInput(Constants.ClimberConstants.kClimberLimitSwitchID);
 
   public Climber() {
 
@@ -30,11 +32,15 @@ public class Climber extends SubsystemBase {
     // speed = 0;
     // }
     // }
-    m_motor.set(speed);
+    // m_motor.set(speed);
   }
 
-  public double getMotorPosition() {
-    return m_motor.getPosition().getValueAsDouble();
-  }
+  // public boolean getLimitSwitchStatus() {
+  // return m_limitSwitch.get();
+  // }
+
+  // public double getMotorPosition() {
+  // return m_motor.getPosition().getValueAsDouble();
+  // }
 
 }

@@ -11,6 +11,7 @@ import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,20 +21,22 @@ import frc.robot.RobotStateMachine.RobotState;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private Timer m_gcTimer = new Timer();
-  private Timer stateTimer = new Timer();
+  private Timer autoTimer = new Timer();
   private final RobotContainer m_robotContainer;
   private final RobotStateMachine m_RobotStateMachine;
 
   public Robot() {
-    SignalLogger.setPath("media/sda1/ctre-logs/");
+    // SignalLogger.setPath("media/sda1/ctre-logs/");
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);
     if (m_gcTimer.advanceIfElapsed(5)) {
       System.gc();
     }
+    // DataLogManager.start();
     DataLogManager.start();
     addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
+    SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
@@ -43,8 +46,10 @@ public class Robot extends TimedRobot {
     if (m_gcTimer.advanceIfElapsed(0.1)) {
       System.gc();
     }
-    SignalLogger.writeStruct("odometry", Pose2d.struct, m_RobotStateMachine.getPose());
-    SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(), "seconds");
+    // SignalLogger.writeStruct("odometry", Pose2d.struct,
+    // m_RobotStateMachine.getPose());
+    // SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(),
+    // "seconds");
   }
 
   @Override
@@ -69,17 +74,23 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
-    SignalLogger.start();
+    // SignalLogger.start();
     m_RobotStateMachine.setState(RobotState.ACTIVE);
+
+    autoTimer.reset();
+    autoTimer.start();
+    SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
   public void autonomousPeriodic() {
+    SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
   public void autonomousExit() {
-    SignalLogger.stop();
+    autoTimer.stop();
+    // SignalLogger.stop();
   }
 
   @Override
@@ -129,7 +140,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {
-    SignalLogger.stop();
+    // SignalLogger.stop();
 
   }
 

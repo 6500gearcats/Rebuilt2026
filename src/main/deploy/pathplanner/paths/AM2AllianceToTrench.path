@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.964,
+        "y": 2.438
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.252500366532081,
+        "y": 0.7053063911795636
+      },
+      "isLocked": false,
+      "linkedName": "AlianceShoot"
+    },
+    {
+      "anchor": {
+        "x": 3.544598234953704,
+        "y": 0.637
+      },
+      "prevControl": {
+        "x": 2.711672526041667,
+        "y": 0.6378178530092599
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "StartTrench"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": true
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "Armageddon",
+  "idealStartingState": {
+    "velocity": 4.0,
+    "rotation": -157.28690739731707
+  },
+  "useDefaultConstraints": true
+}
