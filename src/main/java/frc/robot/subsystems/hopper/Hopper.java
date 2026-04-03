@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -21,6 +22,7 @@ import frc.robot.Constants;
 public class Hopper extends SubsystemBase {
   /** Creates a new Hopper. */
   TalonFX m_hopperMotor = new TalonFX(Constants.MotorConstants.kIndexerMotorID);
+  TalonFX m_hopperMotor2 = new TalonFX(Constants.ClimberConstants.kHopperMotorID2);
   TalonFX m_kickerMotor = new TalonFX(Constants.MotorConstants.kKickerMotorID);
 
   public Hopper() {
@@ -28,6 +30,7 @@ public class Hopper extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("Hopper Current", m_hopperMotor.getSupplyCurrent().getValueAsDouble());
   }
 
   /**
@@ -38,15 +41,18 @@ public class Hopper extends SubsystemBase {
    */
   public void startAllMotors(double hopperSpeed, double kickerSpeed) {
     m_hopperMotor.set(hopperSpeed);
+    m_hopperMotor2.set(hopperSpeed);
     m_kickerMotor.set(kickerSpeed);
   }
 
   public void stopAllMotors() {
     m_hopperMotor.set(0);
+    m_hopperMotor2.set(0);
     m_kickerMotor.set(0);
   }
 
   public void setHopperSpeed(double speed) {
+    m_hopperMotor2.set(speed);
     m_hopperMotor.set(speed);
   }
 

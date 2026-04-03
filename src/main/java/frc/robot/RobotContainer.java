@@ -43,6 +43,7 @@ import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.ClimbPole;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.MoveTurret;
 import frc.robot.commands.RunIntake;
@@ -265,6 +266,9 @@ public class RobotContainer {
                 // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
                 // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
 
+                joystick.pov(0).onTrue(new InstantCommand(() -> hopper.setHopperSpeed(-0.5)))
+                                .onFalse(new InstantCommand(() -> hopper.stopAllMotors()));
+
                 // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
                 new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
@@ -302,9 +306,10 @@ public class RobotContainer {
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
 
                 if (m_turretSysID.isPresent()) {
-                // Driver Back + A
-                joystick.b().onTrue(m_turretSysID.sysIdAll().get()
-                        .andThen(new InstantCommand(() -> System.out.println("Get Hoot Logs from TunerX"))));
+                        // Driver Back + A
+                        joystick.b().onTrue(m_turretSysID.sysIdAll().get()
+                                        .andThen(new InstantCommand(
+                                                        () -> System.out.println("Get Hoot Logs from TunerX"))));
                 }
         }
 
