@@ -26,13 +26,14 @@ public class Robot extends TimedRobot {
   private final RobotStateMachine m_RobotStateMachine;
 
   public Robot() {
-    // SignalLogger.setPath("media/sda1/ctre-logs/");
+    SignalLogger.setPath("media/sda1/ctre-logs");
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);
     if (m_gcTimer.advanceIfElapsed(5)) {
       System.gc();
     }
+    SignalLogger.start();
     // DataLogManager.start();
     DataLogManager.start();
     addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
