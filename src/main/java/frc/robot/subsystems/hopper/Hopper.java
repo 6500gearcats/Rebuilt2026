@@ -4,9 +4,13 @@
 
 package frc.robot.subsystems.hopper;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.ControlRequest;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -21,11 +25,13 @@ import frc.robot.Constants;
  */
 public class Hopper extends SubsystemBase {
   /** Creates a new Hopper. */
+
   TalonFX m_hopperMotor = new TalonFX(Constants.MotorConstants.kIndexerMotorID);
   TalonFX m_hopperMotor2 = new TalonFX(Constants.ClimberConstants.kHopperMotorID2);
   TalonFX m_kickerMotor = new TalonFX(Constants.MotorConstants.kKickerMotorID);
 
   public Hopper() {
+    m_hopperMotor.setControl(new Follower(Constants.ClimberConstants.kHopperMotorID2, MotorAlignmentValue.Aligned));
   }
 
   @Override
@@ -40,20 +46,17 @@ public class Hopper extends SubsystemBase {
    * @param kickerSpeed speed for the kicker motor
    */
   public void startAllMotors(double hopperSpeed, double kickerSpeed) {
-    m_hopperMotor.set(hopperSpeed);
     m_hopperMotor2.set(hopperSpeed);
     m_kickerMotor.set(kickerSpeed);
   }
 
   public void stopAllMotors() {
-    m_hopperMotor.set(0);
     m_hopperMotor2.set(0);
     m_kickerMotor.set(0);
   }
 
   public void setHopperSpeed(double speed) {
     m_hopperMotor2.set(speed);
-    m_hopperMotor.set(speed);
   }
 
   public void setKickerMotorSpeed(double speed) {
