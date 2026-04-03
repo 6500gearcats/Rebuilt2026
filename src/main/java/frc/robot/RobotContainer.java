@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.ClimbPole;
@@ -72,6 +73,9 @@ import frc.robot.utility.SysIDUtil;
  */
 public class RobotContainer {
         @SuppressWarnings("unused")
+
+        private boolean testing = true;
+
         private double speedModify = 1;
         private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                       // speed
@@ -120,6 +124,8 @@ public class RobotContainer {
         // Vision
         PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
+
+        private final Telemetry logger = new Telemetry(MaxSpeed);
 
         SlewRateLimiter filterXLimiter = new SlewRateLimiter(20);
         SlewRateLimiter filterYLimiter = new SlewRateLimiter(20);
@@ -219,8 +225,6 @@ public class RobotContainer {
                                                 m_ll,
                                                 m_ll2);
                                 m_turret.goToZero();
-                                m_turretSysID = new SysIDUtil(m_turret);
-                                m_flywheelSysID = new SysIDUtil(m_flywheel);
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -240,14 +244,19 @@ public class RobotContainer {
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 camSim);
-                                m_flywheelSysID = new SysIDUtil(m_flywheel);
-
                                 break;
                         default:
                                 m_vision = new Vision();
                                 break;
                 }
+                if (testing) {
+                        testBindings();
+                        m_turretSysID = new SysIDUtil(m_turret);
+                        m_flywheelSysID = new SysIDUtil(m_flywheel);
+                }
+
                 configureBindings();
+
                 robotStateMachine.bindVision(m_vision);
                 robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();
@@ -305,7 +314,6 @@ public class RobotContainer {
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 joystick.x().onTrue(new HomeIntake(m_intake));
-                joystick.pov(0).onTrue(new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
@@ -316,13 +324,41 @@ public class RobotContainer {
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+        }
 
-                // if (m_turretSysID.isPresent()) {
-                // // Driver Back + A
-                // joystick.b().onTrue(m_turretSysID.sysIdAll().get()
-                // .andThen(new InstantCommand(
-                // () -> System.out.println("Get Hoot Logs from TunerX"))));
-                // }
+        public void testBindings() {
+                //@formatter:off
+                drivetrain.registerTelemetry(logger::telemeterize);
+                
+                // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+                // joystick.b().whileTrue(drivetrain.applyRequest(() ->
+                //                                         point.withModuleDirection(
+                //                                                 new Rotation2d(-joystick.getLeftY(),
+                //                                                                  -joystick.getLeftX()))));
+                //@formatter:on
+
+                joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+                joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+                joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+                joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+                if (m_turretSysID.isPresent()) {
+                        // Driver Back + x
+                        joystick2.back().and(joystick2.x())
+                                        .onTrue(m_turretSysID.sysIdAll().get().andThen(
+                                                        new InstantCommand(() -> System.out
+                                                                        .println("Get Hoot Logs from TunerX"))));
+                }
+                if (m_flywheelSysID.isPresent()) {
+                        // Driver Back + x
+                        joystick2.back().and(joystick2.y())
+                                        .onTrue(m_flywheelSysID.sysIdAll().get().andThen(
+                                                        new InstantCommand(() -> System.out
+                                                                        .println("Get Hoot Logs from TunerX"))));
+                }
+
+                joystick.pov(0).onTrue(new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
+
         }
 
         /**
