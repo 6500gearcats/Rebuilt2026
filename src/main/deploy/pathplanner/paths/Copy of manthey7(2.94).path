@@ -31,7 +31,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.09892762382075475,
-      "rotationDegrees": -0.9832231629554107
+      "rotationDegrees": 179.80983358922694
     },
     {
       "waypointRelativePos": 0.3749383223684211,
@@ -71,7 +71,7 @@
   "folder": "CopiumLeft",
   "idealStartingState": {
     "velocity": 1.0,
-    "rotation": 0.0
+    "rotation": -179.18289195179744
   },
   "useDefaultConstraints": true
 }
