@@ -1,0 +1,89 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.368345827588849,
+        "y": 7.400872060738358
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.47129691329657,
+        "y": 7.415943818933824
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.509007017846201,
+        "y": 7.1299582567401965
+      },
+      "prevControl": {
+        "x": 8.20480100145527,
+        "y": 7.361114525888481
+      },
+      "nextControl": {
+        "x": 8.903527815391643,
+        "y": 6.8301747194389
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.748139983532475,
+        "y": 4.593
+      },
+      "prevControl": {
+        "x": 8.775596612668505,
+        "y": 6.302406068091299
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.6750614937388186,
+      "rotationDegrees": -90.18931776603549
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.9438802083333326,
+      "maxWaypointRelativePos": 2.0,
+      "constraints": {
+        "maxVelocity": 1.8,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -91.29923837447087
+  },
+  "reversed": false,
+  "folder": "hungry robot",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
