@@ -289,8 +289,8 @@ public class RobotContainer {
                 new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
                                 .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.2)));
-                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                // new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                // new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
                 // joystick.rightBumper().onTrue(new RunHopper(hopper));
 
@@ -306,8 +306,8 @@ public class RobotContainer {
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
-                new JoystickButton(m_gunner, XboxController.Button.kStart.value)
-                                .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+                // new JoystickButton(m_gunner, XboxController.Button.kStart.value)
+                //                 .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
 
                 new JoystickButton(m_gunner, XboxController.Button.kBack.value)
                                 .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
@@ -342,6 +342,14 @@ public class RobotContainer {
                 joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
+
+
+                joystick2.start().and(joystick2.pov(0)).whileTrue(drivetrain.sysIdDynamicRot(Direction.kForward));
+                joystick2.start().and(joystick2.pov(90)).whileTrue(drivetrain.sysIdDynamicRot(Direction.kReverse));
+                joystick2.start().and(joystick2.pov(180)).whileTrue(drivetrain.sysIdQuasistaticRot(Direction.kForward));
+                joystick2.start().and(joystick2.pov(270)).whileTrue(drivetrain.sysIdQuasistaticRot(Direction.kReverse));
+                
+
                 if (m_turretSysID.isPresent()) {
                         // Driver Back + x
                         joystick2.back().and(joystick2.x())
@@ -351,8 +359,7 @@ public class RobotContainer {
                 }
                 if (m_flywheelSysID.isPresent()) {
                         // Driver Back + x
-                        joystick2.back().and(joystick2.y())
-                                        .onTrue(m_flywheelSysID.sysIdAll().get().andThen(
+                        joystick2.y().onTrue(m_flywheelSysID.sysIdAll().get().andThen(
                                                         new InstantCommand(() -> System.out
                                                                         .println("Get Hoot Logs from TunerX"))));
                 }
