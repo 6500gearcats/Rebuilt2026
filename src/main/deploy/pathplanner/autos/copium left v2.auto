@@ -113,7 +113,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.0
+                  "waitTime": 3.0
                 }
               },
               {
@@ -151,7 +151,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Copy of manthey7.1.1"
+                  "pathName": "Copy of manthey7.1.2"
                 }
               },
               {
@@ -162,44 +162,6 @@
                       "type": "named",
                       "data": {
                         "name": "IntakeFuel"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Copy of manthey8.1"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "ShootFuel5s"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 2.0
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "HomeIntake"
                       }
                     }
                   ]
