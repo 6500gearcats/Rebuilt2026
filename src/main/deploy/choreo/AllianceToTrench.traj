@@ -14,8 +14,8 @@
  },
  "params":{
   "waypoints":[
-    {"x":{"exp":"Alliance.x", "val":2.7353405952453613}, "y":{"exp":"Alliance.y", "val":5.496349334716797}, "heading":{"exp":"Alliance.heading", "val":2.450255724820331}, "intervals":26, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"3.2017745971679688 m", "val":3.2017745971679688}, "y":{"exp":"7.150658130645752 m", "val":7.150658130645752}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":24, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
+    {"x":{"exp":"Alliance.x", "val":2.7353405952453613}, "y":{"exp":"Alliance.y", "val":5.496349334716797}, "heading":{"exp":"Alliance.heading", "val":2.450255724820331}, "intervals":19, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"3.2017745971679688 m", "val":3.2017745971679688}, "y":{"exp":"7.150658130645752 m", "val":7.150658130645752}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":18, "split":false, "fixTranslation":true, "fixHeading":false, "overrideIntervals":false},
     {"x":{"exp":"TrenchShot.x", "val":4.528420448303223}, "y":{"exp":"TrenchShot.y", "val":7.386879920959473}, "heading":{"exp":"TrenchShot.heading", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
