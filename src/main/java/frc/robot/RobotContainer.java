@@ -289,10 +289,11 @@ public class RobotContainer {
                 new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
                                 .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.2)));
-                // new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                // new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
-                // joystick.rightBumper().onTrue(new RunHopper(hopper));
+                // joystick.rightBumper().onTrue(ne
+                
 
                 joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
@@ -306,8 +307,8 @@ public class RobotContainer {
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
-                // new JoystickButton(m_gunner, XboxController.Button.kStart.value)
-                //                 .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+                new JoystickButton(m_gunner, XboxController.Button.kStart.value)
+                                .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
 
                 new JoystickButton(m_gunner, XboxController.Button.kBack.value)
                                 .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
@@ -341,7 +342,6 @@ public class RobotContainer {
                 joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
                 joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
 
 
                 joystick2.start().and(joystick2.pov(0)).whileTrue(drivetrain.sysIdDynamicRot(Direction.kForward));

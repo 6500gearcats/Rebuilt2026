@@ -79,14 +79,14 @@ public class Flywheel extends SubsystemBase {
     // rotationMultiplier = 0;
     // }
 
-    if (robotStateMachine.isActive() /*
-                                      * && robotStateMachine.checkZone() ==
-                                      * FieldZone.ALLIANCE
-                                      */) {
-      setSpeed(RangeFinder.getShotVelocity(
-          robotStateMachine.getTurretPose().getTranslation()
-              .getDistance(robotStateMachine.getHubPose().getTranslation())));
-    }
+    // if (robotStateMachine.isActive() /*
+    //                                   * && robotStateMachine.checkZone() ==
+    //                                   * FieldZone.ALLIANCE
+    //                                   */) {
+    //   setSpeed(RangeFinder.getShotVelocity(
+    //       robotStateMachine.getTurretPose().getTranslation()
+    //           .getDistance(robotStateMachine.getHubPose().getTranslation())));
+    // }
 
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);

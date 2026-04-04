@@ -38,7 +38,7 @@ public class Hopper extends SubsystemBase {
    */
   public void startAllMotors(double hopperSpeed, double kickerSpeed) {
     m_hopperMotor.set(hopperSpeed);
-    m_kickerMotor.set(kickerSpeed);
+    m_kickerMotor.set(-kickerSpeed);
   }
 
   public void stopAllMotors() {
@@ -51,6 +51,6 @@ public class Hopper extends SubsystemBase {
   }
 
   public void setKickerMotorSpeed(double speed) {
-    m_kickerMotor.set(speed);
+    m_kickerMotor.set(-speed);
   }
 }
