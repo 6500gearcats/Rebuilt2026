@@ -3,72 +3,81 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.396,
-        "y": 3.2
+        "x": 7.768,
+        "y": 4.474
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.601069032916565,
-        "y": 3.0570080710715994
+        "x": 7.712177016314339,
+        "y": 3.922066770067402
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.2756776034236803,
-        "y": 2.4888302425106996
+        "x": 5.237516542632005,
+        "y": 5.438863188644936
       },
       "prevControl": {
-        "x": 3.2327876568280303,
-        "y": 2.7351236701148935
+        "x": 6.212596519733299,
+        "y": 5.4041970719962285
       },
       "nextControl": {
-        "x": 3.3185675500193303,
-        "y": 2.2425368149065057
+        "x": 4.750758849356878,
+        "y": 5.456168434748844
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.953980028530669,
-        "y": 2.3335663338088444
+        "x": 3.8874087419181045,
+        "y": 5.499452535695043
       },
       "prevControl": {
-        "x": 5.815304979474364,
-        "y": 2.541578907393307
+        "x": 4.504144918507544,
+        "y": 5.434052692281789
       },
       "nextControl": {
-        "x": 6.092655077586974,
-        "y": 2.1255537602243813
+        "x": 3.4651519650566227,
+        "y": 5.54422942431481
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.364293865905848,
-        "y": 1.013823109843081
+        "x": 3.1403691995554963,
+        "y": 6.042542303677263
       },
       "prevControl": {
-        "x": 6.364293865905848,
-        "y": 1.0138231098430812
+        "x": 3.1367040594692894,
+        "y": 5.615820733432113
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.702467105263157,
+      "rotationDegrees": -110.77748353859147
+    },
+    {
+      "waypointRelativePos": 1.285238486842105,
+      "rotationDegrees": -123.34204115009375
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 2.2390891840607186,
+      "minWaypointRelativePos": 0.9053944120287248,
       "maxWaypointRelativePos": 3.0,
       "constraints": {
-        "maxVelocity": 2.0,
-        "maxAcceleration": 3.0,
+        "maxVelocity": 3.0,
+        "maxAcceleration": 3.5,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
@@ -87,14 +96,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 57.87500155961249
+    "velocity": 2.0,
+    "rotation": 176.44359202928226
   },
   "reversed": false,
-  "folder": "RightProjectHailMary",
+  "folder": "copiumLeft",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 1.0,
+    "rotation": -88.14470519771288
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

@@ -56,10 +56,10 @@
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": -88.32208787035374
+    "rotation": -88.32208787035376
   },
   "reversed": false,
-  "folder": "CopiumLeft",
+  "folder": "copiumLeft",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
