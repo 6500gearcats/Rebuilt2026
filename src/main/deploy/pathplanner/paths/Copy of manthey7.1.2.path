@@ -67,7 +67,7 @@
     },
     {
       "waypointRelativePos": 1.4,
-      "rotationDegrees": -90.71745287341521
+      "rotationDegrees": -90.71745287341523
     },
     {
       "waypointRelativePos": 2.3,
@@ -80,7 +80,7 @@
       "minWaypointRelativePos": 1.0,
       "maxWaypointRelativePos": 3.0,
       "constraints": {
-        "maxVelocity": 2.0,
+        "maxVelocity": 1.3,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -106,7 +106,7 @@
   "reversed": false,
   "folder": "copiumLeft",
   "idealStartingState": {
-    "velocity": 1.0,
+    "velocity": 0.0,
     "rotation": -179.18289195179744
   },
   "useDefaultConstraints": false
