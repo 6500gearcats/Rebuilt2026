@@ -26,7 +26,7 @@ public class RangeFinder {
     m_shootMap.put(3.5, 69.0);
     m_shootMap.put(4.0, 75.0);
     m_shootMap.put(4.2, 81.0);
-    m_shootMap.put(5.2, 100.0);
+    m_shootMap.put(5.2, 120.0);
 
     // ! Fake values
     m_TOFMap.put(1.8, 0.85);

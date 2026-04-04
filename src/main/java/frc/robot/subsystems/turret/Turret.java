@@ -77,7 +77,8 @@ public class Turret extends SubsystemBase {
     // slot2Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
     // slot2Configs.kV = 13; // A velocity target of 1 rps results in 0.12 V output
     // slot2Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
-    // slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V output
+    // slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V
+    // output
     // slot2Configs.kI = 0; // no output for integrated error
     // slot2Configs.kD = 1; // A velocity error of 1 rps results in 0.1 V output
 
@@ -155,6 +156,9 @@ public class Turret extends SubsystemBase {
    * @param deg desired position in degress
    */
   public void setPosition(double deg) {
+    if (robotStateMachine.ductTapeCorrection) {
+      deg -= 5;
+    }
     SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }

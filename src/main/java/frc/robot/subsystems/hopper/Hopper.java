@@ -32,6 +32,7 @@ public class Hopper extends SubsystemBase {
 
   public Hopper() {
     m_hopperMotor.setControl(new Follower(Constants.ClimberConstants.kHopperMotorID2, MotorAlignmentValue.Aligned));
+    SmartDashboard.putNumber("Hopper speed", 0);
   }
 
   @Override
