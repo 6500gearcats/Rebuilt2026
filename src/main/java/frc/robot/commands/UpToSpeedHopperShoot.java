@@ -37,9 +37,9 @@ public class UpToSpeedHopperShoot extends Command {
       return;
     }
     if(SmartDashboard.getBoolean("Aligned", true)) {
-      // m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
-      //   stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
-      m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+      m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+        stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+     // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
 
       //if (m_Flywheel.isUpToSpeed()) {
         m_Hopper.startAllMotors(-1, 1);
