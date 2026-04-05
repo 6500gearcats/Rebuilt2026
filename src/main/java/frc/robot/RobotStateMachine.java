@@ -40,6 +40,8 @@ public final class RobotStateMachine {
     public double shooterSpeed;
     public double reqShooterSpeed;
 
+    public boolean ductTapeCorrection = false;
+
     private boolean switching = false;
     private boolean switchingRed = false;
     private boolean switchingGreen = false;
@@ -133,6 +135,7 @@ public final class RobotStateMachine {
         shooterSpeed = m_Flywheel.getSpeed();
         SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
         SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
+        SmartDashboard.putBoolean("ductTapeCorrections", ductTapeCorrection);
         gameData = DriverStation.getGameSpecificMessage();
         alliance = getAlliance();
         checkAlliance();
@@ -189,15 +192,13 @@ public final class RobotStateMachine {
     }
 
     private void checkAlliance() {
-        double allianceMulti = 1;
         if (getAlliance() == Alliance.Red) {
             Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
         } else {
             Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
-            allianceMulti = -1;
         }
         HubPose = Tag_POSE2D.toPose2d().transformBy(
-                new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0.13 * allianceMulti, Meter),
+                new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter), Distance.ofBaseUnits(0, Meter),
                         new Rotation2d()));
     }
 
@@ -778,14 +779,19 @@ public final class RobotStateMachine {
         double xPose = pose.getX();
         double yPose = pose.getY();
         if (xPose > 3.7 && xPose < 5.3 && yPose > 6.5 && yPose < 8.3) {
+            ductTapeCorrection = true;
             return true;
         } else if (xPose > 3.7 && xPose < 5.3 && yPose < 1.8 && yPose > 0) {
+            ductTapeCorrection = false;
             return true;
         } else if (xPose > 10.9 && xPose < 12.8 && yPose > 6.5 && yPose < 8.3) {
+            ductTapeCorrection = true;
             return true;
         } else if (xPose > 10.9 && xPose < 12.8 && yPose < 1.8 && yPose > 0) {
+            ductTapeCorrection = false;
             return true;
         } else {
+            ductTapeCorrection = false;
             return false;
         }
     }

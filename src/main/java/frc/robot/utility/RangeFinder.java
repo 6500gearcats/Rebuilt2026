@@ -34,7 +34,7 @@ public class RangeFinder {
     m_rotMap.put(45.0, 5.0);
     m_rotMap.put(90.0, 7.0);
 
-    // ! Fake Values
+    // ! Fake values
     m_TOFMap.put(1.8, 0.85);
     m_TOFMap.put(2.5, 0.92);
     m_TOFMap.put(3.0, 0.97);

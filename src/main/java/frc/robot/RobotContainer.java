@@ -44,6 +44,7 @@ import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.ClimbPole;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.HomeIntake;
 import frc.robot.commands.MoveTurret;
@@ -77,8 +78,8 @@ public class RobotContainer {
         private boolean testing = true;
 
         private double speedModify = 1;
-        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
-                                                                                      // speed
+        private double MaxSpeed = TunerConstants2.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+                                                                                       // speed
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
                                                                                           // max angular velocity
@@ -97,7 +98,7 @@ public class RobotContainer {
         private final CommandXboxController joystick2 = new CommandXboxController(1);
         private final XboxController m_gunner;
 
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants2.createDrivetrain();
 
         private LedCANdle m_candle = new LedCANdle();
 
@@ -286,14 +287,21 @@ public class RobotContainer {
                 // Reset the field-centric heading on start button press
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
+                // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
+                // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
+
+                joystick.pov(0).onTrue(new InstantCommand(() -> hopper.setHopperSpeed(-0.5)))
+                                .onFalse(new InstantCommand(() -> hopper.stopAllMotors()));
+
+                // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
                 new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
                                 .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.2)));
-                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                // new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
+                // new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
-                // joystick.rightBumper().onTrue(ne
-                
+                // joystick.rightBumper().onTrue(new RunHopper(hopper));
 
                 joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
@@ -307,8 +315,8 @@ public class RobotContainer {
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
-                new JoystickButton(m_gunner, XboxController.Button.kStart.value)
-                                .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+                // new JoystickButton(m_gunner, XboxController.Button.kStart.value)
+                //                 .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
 
                 new JoystickButton(m_gunner, XboxController.Button.kBack.value)
                                 .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
@@ -342,6 +350,7 @@ public class RobotContainer {
                 joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
                 joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
                 joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
 
 
                 joystick2.start().and(joystick2.pov(0)).whileTrue(drivetrain.sysIdDynamicRot(Direction.kForward));

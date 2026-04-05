@@ -4,11 +4,22 @@
 
 package frc.robot.subsystems.turret;
 
+import java.util.function.DoubleSupplier;
+
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.config.LimitSwitchConfig;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -22,7 +33,7 @@ public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private PositionVoltage m_request;
-  private final DigitalInput m_switch = new DigitalInput(4);
+  private final DigitalInput m_switch = new DigitalInput(3);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private final RobotStateMachine robotStateMachine;
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
@@ -66,7 +77,8 @@ public class Turret extends SubsystemBase {
     // slot2Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
     // slot2Configs.kV = 13; // A velocity target of 1 rps results in 0.12 V output
     // slot2Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
-    // slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V output
+    // slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V
+    // output
     // slot2Configs.kI = 0; // no output for integrated error
     // slot2Configs.kD = 1; // A velocity error of 1 rps results in 0.1 V output
 
@@ -77,7 +89,6 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("switch on or off", m_switch.get());
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
@@ -145,6 +156,9 @@ public class Turret extends SubsystemBase {
    * @param deg desired position in degress
    */
   public void setPosition(double deg) {
+    if (robotStateMachine.ductTapeCorrection) {
+      deg -= 5;
+    }
     SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.092582025677602,
-        "y": 0.4703994293865924
+        "x": 6.92437945791726,
+        "y": 0.6127246790299581
       },
       "isLocked": false,
       "linkedName": "Trench"
@@ -30,16 +30,16 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.09796081567373177,
-      "rotationDegrees": 180.0
+      "waypointRelativePos": 0.08955962394854043,
+      "rotationDegrees": -0.7351200407942746
     },
     {
-      "waypointRelativePos": 0.2898840463814464,
-      "rotationDegrees": 180.0
+      "waypointRelativePos": 0.364670954972786,
+      "rotationDegrees": -1.6675895407542192
     },
     {
-      "waypointRelativePos": 0.5185925629748112,
-      "rotationDegrees": 90.0
+      "waypointRelativePos": 0.5823849579416107,
+      "rotationDegrees": 81.93120766742898
     }
   ],
   "constraintZones": [
@@ -58,19 +58,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "IntakeFuel",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": 1.0,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "IntakeFuel"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,

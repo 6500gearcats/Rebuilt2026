@@ -246,7 +246,7 @@ public final class Constants {
   }
 
   public static class ClimberConstants {
-    public static final int kClimberMotorID = 25;
+    public static final int kHopperMotorID2 = 25;
     public static final int kClimberLimitSwitchID = 4;
   }
 }

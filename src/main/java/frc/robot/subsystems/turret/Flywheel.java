@@ -52,22 +52,13 @@ public class Flywheel extends SubsystemBase {
     this.robotStateMachine = robotStateMachine;
     talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6));
 
-    // // set slot 0 gains
-    // var slot0Configs = talonFXConfigs.Slot0;
-    // slot0Configs.kS = 0.3087; // Add 0.25 V output to overcome static friction
-    // slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V output
-    // slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V output
-    // slot0Configs.kP = 0.026467; // A position error of 2.5 rotations results in 12 V output
-    // slot0Configs.kI = 0; // no output for integrated error
-    // slot0Configs.kD = 0;
-
     // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.3087; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0Configs.kP = 0.3; // A position error of 2.5 rotations results in 12 V output
-    slot0Configs.kI = 0; //no output for integrated error
+    slot0Configs.kS = 0.31134; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 0.075575; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 0.0064695; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = 0.030814; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0;
 
     m_motor.getConfigurator().apply(talonFXConfigs);
@@ -82,20 +73,20 @@ public class Flywheel extends SubsystemBase {
     } else {
       speedModifier = 1;
     }
-    if (!robotStateMachine.isFacingHub()) {
-      rotationMultiplier = 2;
-    } else {
-      rotationMultiplier = 0;
-    }
-
-    // if (robotStateMachine.isActive() /*
-    //                                   * && robotStateMachine.checkZone() ==
-    //                                   * FieldZone.ALLIANCE
-    //                                   */) {
-    //   setSpeed(RangeFinder.getShotVelocity(
-    //       robotStateMachine.getTurretPose().getTranslation()
-    //           .getDistance(robotStateMachine.getHubPose().getTranslation())));
+    // if (!robotStateMachine.isFacingHub()) {
+    // rotationMultiplier = 2;
+    // } else {
+    // rotationMultiplier = 0;
     // }
+
+    if (robotStateMachine.isActive() /*
+                                      * && robotStateMachine.checkZone() ==
+                                      * FieldZone.ALLIANCE
+                                      */) {
+      setSpeed(RangeFinder.getShotVelocity(
+          robotStateMachine.getTurretPose().getTranslation()
+              .getDistance(robotStateMachine.getHubPose().getTranslation())));
+    }
 
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
@@ -119,10 +110,10 @@ public class Flywheel extends SubsystemBase {
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
-      // if (robotStateMachine.underTrench()) {
-      // speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
-      // reqSpeed = speedValue;
-      // }
+      if (robotStateMachine.underTrench()) {
+        speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
+        reqSpeed = speedValue;
+      }
 
       m_motor.setControl(m_request.withVelocity(speedValue));
     }
@@ -140,7 +131,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public boolean isUpToSpeed() {
-    return Math.abs(reqSpeed - getSpeed()) < 5;
+    return Math.abs(reqSpeed - getSpeed()) < 3;
   }
 
   public void stopMotor() {
