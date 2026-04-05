@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.323920138888889,
-        "y": 2.4707136863425934
+        "x": 5.706012781722877,
+        "y": 2.542439417581098
       },
       "isLocked": false,
       "linkedName": "Neutral2"
@@ -20,20 +20,15 @@
         "y": 2.438
       },
       "prevControl": {
-        "x": 3.8255020254629626,
-        "y": 2.4643754340277786
+        "x": 2.8932317440592357,
+        "y": 2.4646649822941056
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.7503966611479029,
-      "rotationDegrees": 106.751
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -53,7 +48,7 @@
   "folder": "Armageddon",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": 106.751
+    "rotation": -150.22130159956066
   },
   "useDefaultConstraints": true
 }

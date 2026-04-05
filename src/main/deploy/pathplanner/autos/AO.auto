@@ -65,7 +65,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "ShootFuel"
+                        "name": "ShootFuel3s"
                       }
                     },
                     {
@@ -148,7 +148,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "ShootFuel"
+                        "name": "ShootFuel3s"
                       }
                     },
                     {
@@ -218,6 +218,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "test",
+  "folder": null,
   "choreoAuto": true
 }

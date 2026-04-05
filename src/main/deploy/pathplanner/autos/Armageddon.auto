@@ -9,9 +9,15 @@
           "data": {
             "commands": [
               {
+                "type": "path",
+                "data": {
+                  "pathName": "Copy of AMTrecnhToNeutral (4.91)"
+                }
+              },
+              {
                 "type": "wait",
                 "data": {
-                  "waitTime": 1.0
+                  "waitTime": 0.1
                 }
               },
               {
@@ -21,12 +27,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AMTrecnhToNeutral"
           }
         },
         {
@@ -57,7 +57,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AMTrecnhToNeutral2ndPass"
+            "pathName": "AMTrecnhToNeutral2ndPass (4.29)"
           }
         },
         {
@@ -83,12 +83,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AM2AllianceToTrench"
           }
         }
       ]
