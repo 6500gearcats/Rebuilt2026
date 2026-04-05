@@ -156,12 +156,6 @@
               }
             ]
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AllianceToTrench"
-          }
         }
       ]
     }
