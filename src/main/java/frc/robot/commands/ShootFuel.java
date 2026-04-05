@@ -53,10 +53,10 @@ public class ShootFuel extends Command {
     if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
       return;
     }
-    // m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
-    //     stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+    m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+        stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
 
-    m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+    //m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
   }
 
   // Called once the command ends or is interrupted.
