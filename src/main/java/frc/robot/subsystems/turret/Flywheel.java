@@ -78,7 +78,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     if (snurboEnable) {
-      speedModifier = 0.4;//0.15;
+      speedModifier = 0.4;// 0.15;
     } else {
       speedModifier = 1;
     }
@@ -114,13 +114,14 @@ public class Flywheel extends SubsystemBase {
 
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);
-    double speedValue = speed + (2 * speedMultiplier) + rotationMultiplier;
+    double speedValue = speed + (2 * speedMultiplier)
+        + RangeFinder.getRotAdder(robotStateMachine.getTurretPose().getRotation().getDegrees());
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
       // if (robotStateMachine.underTrench()) {
-      //   speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
-      //   reqSpeed = speedValue;
+      // speedValue = 70 + (2 * speedMultiplier) + rotationMultiplier;
+      // reqSpeed = speedValue;
       // }
 
       m_motor.setControl(m_request.withVelocity(speedValue));

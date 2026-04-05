@@ -12,6 +12,7 @@ import frc.robot.RobotStateMachine;
 public class RangeFinder {
   private static InterpolatingDoubleTreeMap m_shootMap = new InterpolatingDoubleTreeMap();
   private static InterpolatingDoubleTreeMap m_TOFMap = new InterpolatingDoubleTreeMap();
+  private static InterpolatingDoubleTreeMap m_rotMap = new InterpolatingDoubleTreeMap();
 
   static {
     m_shootMap.put(1.6, 44.0);
@@ -28,6 +29,11 @@ public class RangeFinder {
     m_shootMap.put(4.7, 80.0);
     m_shootMap.put(5.3, 91.0);
 
+    m_rotMap.put(-90.0, 7.0);
+    m_rotMap.put(-45.0, 5.0);
+    m_rotMap.put(45.0, 5.0);
+    m_rotMap.put(90.0, 7.0);
+
     // ! Fake Values
     m_TOFMap.put(1.8, 0.85);
     m_TOFMap.put(2.5, 0.92);
@@ -43,5 +49,12 @@ public class RangeFinder {
 
   public static double getTOF(double distance) {
     return m_TOFMap.get(distance);
+  }
+
+  public static double getRotAdder(double deg) {
+    if (Math.abs(deg) > 90) {
+      deg = 90 * (Math.abs(deg) / deg);
+    }
+    return m_rotMap.get(deg);
   }
 }
