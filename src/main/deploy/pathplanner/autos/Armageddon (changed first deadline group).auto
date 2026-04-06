@@ -9,9 +9,9 @@
           "data": {
             "commands": [
               {
-                "type": "wait",
+                "type": "path",
                 "data": {
-                  "waitTime": 1.0
+                  "pathName": "AMTrecnhToNeutral"
                 }
               },
               {
@@ -21,12 +21,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AMTrecnhToNeutral"
           }
         },
         {
@@ -89,6 +83,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "autos that need testing",
   "choreoAuto": false
 }

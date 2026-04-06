@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4233103785021557,
-        "y": 0.758173870218211
+        "x": 4.382284055223653,
+        "y": 0.6339045266544121
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.924615773168103,
-        "y": 0.5246357253502163
+        "x": 6.8835894498896,
+        "y": 0.40036638178641737
       },
       "isLocked": false,
       "linkedName": "Trench"
@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 6.08885986328125,
-        "y": 0.4605721309267241
+        "y": 0.46057213092672367
       },
       "nextControl": null,
       "isLocked": false,
@@ -81,7 +81,7 @@
   },
   "goalEndState": {
     "velocity": 1.0,
-    "rotation": -150.22130159956066
+    "rotation": 138.1844875351768
   },
   "reversed": false,
   "folder": "Armageddon",
