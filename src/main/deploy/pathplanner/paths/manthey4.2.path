@@ -3,52 +3,44 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.382284055223653,
-        "y": 0.6339045266544121
+        "x": 4.371,
+        "y": 7.328
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.632971957337622,
-        "y": 0.5025409294577208
+        "x": 6.571999421296296,
+        "y": 7.7276263744212965
       },
       "isLocked": false,
-      "linkedName": "Trench"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.115,
-        "y": 2.544
+        "x": 6.536,
+        "y": 4.652
       },
       "prevControl": {
-        "x": 6.510342368045648,
-        "y": 0.5350927246790307
+        "x": 6.450029441550927,
+        "y": 6.122989583333333
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Neutral2"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.08955962394854043,
-      "rotationDegrees": -0.7351200407942746
-    },
-    {
-      "waypointRelativePos": 0.364670954972786,
-      "rotationDegrees": -1.6675895407542192
-    },
-    {
-      "waypointRelativePos": 0.5823849579416107,
-      "rotationDegrees": 81.93120766742898
+      "waypointRelativePos": 0.3749383223684211,
+      "rotationDegrees": -53.00221431354957
     }
   ],
   "constraintZones": [
     {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.2593060661764708,
+      "name": "intake",
+      "minWaypointRelativePos": 0.3512899709302326,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.0,
+        "maxVelocity": 2.0,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -60,22 +52,22 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 3.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
-    "unlimited": false
+    "unlimited": true
   },
   "goalEndState": {
-    "velocity": 1.0,
-    "rotation": 138.1844875351768
+    "velocity": 0,
+    "rotation": -88.52945078683157
   },
   "reversed": false,
-  "folder": "Armageddon",
+  "folder": "copiumLeft",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -1.4320961841646607
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

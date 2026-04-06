@@ -9,15 +9,9 @@
           "data": {
             "commands": [
               {
-                "type": "wait",
+                "type": "path",
                 "data": {
-                  "waitTime": 1.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeLong"
+                  "pathName": "AO1"
                 }
               }
             ]
@@ -26,13 +20,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AMTrecnhToNeutral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Copy of AMNeutralToTrench"
+            "pathName": "AO2"
           }
         },
         {
@@ -40,15 +28,22 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "NewShootFuel10s"
+                  "pathName": "AO3"
                 }
-              },
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "HomeIntake"
+                  "pathName": "AO4"
                 }
               }
             ]
@@ -57,13 +52,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Copy of AMTrecnhToNeutral2ndPass"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AM2NeutralToAlliance"
+            "pathName": "AO5"
           }
         },
         {
@@ -71,18 +60,31 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "ShootFuel3s"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "HomeIntake"
+                  "pathName": "AO6"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "AO7"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "AO8"
           }
         }
       ]
@@ -90,5 +92,5 @@
   },
   "resetOdom": true,
   "folder": null,
-  "choreoAuto": false
+  "choreoAuto": true
 }
