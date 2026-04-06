@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.0039657631954344,
-        "y": 0.71623395149786
+        "x": 3.4233103785021557,
+        "y": 0.758173870218211
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.092582025677602,
-        "y": 0.4703994293865924
+        "x": 5.924615773168103,
+        "y": 0.5246357253502163
       },
       "isLocked": false,
       "linkedName": "Trench"
@@ -20,8 +20,8 @@
         "y": 2.544
       },
       "prevControl": {
-        "x": 6.510342368045648,
-        "y": 0.5350927246790307
+        "x": 6.08885986328125,
+        "y": 0.4605721309267241
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,15 +31,15 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.09796081567373177,
-      "rotationDegrees": 180.0
+      "rotationDegrees": 176.9721853483967
     },
     {
       "waypointRelativePos": 0.2898840463814464,
-      "rotationDegrees": 180.0
+      "rotationDegrees": 177.85384583070055
     },
     {
       "waypointRelativePos": 0.5185925629748112,
-      "rotationDegrees": 90.0
+      "rotationDegrees": -36.979459787825405
     }
   ],
   "constraintZones": [
@@ -72,8 +72,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 3.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -81,7 +81,7 @@
   },
   "goalEndState": {
     "velocity": 1.0,
-    "rotation": 106.751
+    "rotation": -150.22130159956066
   },
   "reversed": false,
   "folder": "Armageddon",

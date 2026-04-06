@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.36,
-        "y": 0.61
+        "x": 3.328,
+        "y": 7.315
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.324867469879519,
-        "y": 0.4616385542168677
+        "x": 8.872075616244613,
+        "y": 7.795166478650323
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.8,
-        "y": 4.0
+        "x": 8.23,
+        "y": 4.523
       },
       "prevControl": {
-        "x": 6.281156626506024,
-        "y": 0.8659638554216871
+        "x": 8.215137434334592,
+        "y": 6.135239805024246
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,18 +30,18 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.3,
-      "rotationDegrees": -179.15769896654817
+      "waypointRelativePos": 0.19102545204402513,
+      "rotationDegrees": 179.80983358922694
     },
     {
-      "waypointRelativePos": 0.65,
-      "rotationDegrees": 100.0
+      "waypointRelativePos": 0.42336748231132076,
+      "rotationDegrees": -64.06124626070712
     }
   ],
   "constraintZones": [
     {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.5823741007194253,
+      "name": "intake",
+      "minWaypointRelativePos": 0.5124340776481149,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
         "maxVelocity": 2.0,
@@ -57,21 +57,21 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
-    "maxAcceleration": 3.5,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
-    "rotation": 100.0
+    "velocity": 0,
+    "rotation": -88.52945078683157
   },
   "reversed": false,
-  "folder": "CopiumRight",
+  "folder": "copiumLeft",
   "idealStartingState": {
-    "velocity": 3.0,
-    "rotation": 180.0
+    "velocity": 0.0,
+    "rotation": -179.18289195179744
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
