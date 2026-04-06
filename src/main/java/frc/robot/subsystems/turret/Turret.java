@@ -123,7 +123,7 @@ public class Turret extends SubsystemBase {
   }
 
   public void zeroMotorPosition() {
-    m_motor.setPosition(0);
+    m_motor.setPosition(-1); // Limit switch is slightly inaccurate after zeroing the first time, affects all alignment, this offsets it
   }
 
   /**
@@ -145,6 +145,9 @@ public class Turret extends SubsystemBase {
    * @param deg desired position in degress
    */
   public void setPosition(double deg) {
+    if (robotStateMachine.ductTapeCorrection) {
+      deg -= 5;
+    }
     SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }

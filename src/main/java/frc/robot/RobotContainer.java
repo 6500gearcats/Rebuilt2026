@@ -163,7 +163,7 @@ public class RobotContainer {
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
                 NamedCommands.registerCommand("NewShootFuel3s",
                                 new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(3.0));
+                                                .withTimeout(3.2));
                 NamedCommands.registerCommand("ManualShootFuel3s",
                                 new ShootingSequenceUTS(hopper, m_flywheel)
                                                 .withTimeout(3.0));

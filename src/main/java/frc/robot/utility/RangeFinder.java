@@ -31,6 +31,7 @@ public class RangeFinder {
 
     m_rotMap.put(-90.0, 7.0);
     m_rotMap.put(-45.0, 5.0);
+    m_rotMap.put(0.0, 0.0);
     m_rotMap.put(45.0, 5.0);
     m_rotMap.put(90.0, 7.0);
 

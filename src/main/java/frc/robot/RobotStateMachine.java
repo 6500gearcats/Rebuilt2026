@@ -192,16 +192,16 @@ public final class RobotStateMachine {
     }
 
     private void checkAlliance() {
-        double allianceMulti = 1;
+        // double allianceMulti = 1;
         if (getAlliance() == Alliance.Red) {
             Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
         } else {
             Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
-            allianceMulti = -1;
+            //allianceMulti = -1;
         }
         HubPose = Tag_POSE2D.toPose2d().transformBy(
                 new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter),
-                        Distance.ofBaseUnits(0.13 * allianceMulti, Meter),
+                        Distance.ofBaseUnits(0, Meter),
                         new Rotation2d()));
     }
 
