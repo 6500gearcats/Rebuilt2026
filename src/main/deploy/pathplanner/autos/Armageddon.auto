@@ -13,18 +13,6 @@
                 "data": {
                   "pathName": "Copy of AMTrecnhToNeutral (4.91)"
                 }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 0.1
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeLong"
-                }
               }
             ]
           }
@@ -33,25 +21,6 @@
           "type": "path",
           "data": {
             "pathName": "AMNeutralToTrench"
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "NewShootFuel10s"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "HomeIntake"
-                }
-              }
-            ]
           }
         },
         {
@@ -64,25 +33,6 @@
           "type": "path",
           "data": {
             "pathName": "AM2NeutralToAlliance"
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "ShootFuel3s"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "HomeIntake"
-                }
-              }
-            ]
           }
         }
       ]
