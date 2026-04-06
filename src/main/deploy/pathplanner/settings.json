@@ -9,16 +9,21 @@
     "DeadNuts",
     "FinalHope",
     "LeftProjectHailMary",
-    "Weirdmageddon",
+    "PPWeirdmageddon",
     "RightProjectHailMary",
     "WakeCenter",
     "WakeLeft",
     "WakeRight",
-    "PPWeirdmageddon"
+    "Weirdmageddon",
+    "copiumLeft",
+    "hungry robot"
   ],
-  "autoFolders": [],
-  "defaultMaxVel": 3.0,
-  "defaultMaxAccel": 3.0,
+  "autoFolders": [
+    "finished autos",
+    "autos that need testing"
+  ],
+  "defaultMaxVel": 4.0,
+  "defaultMaxAccel": 3.5,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,

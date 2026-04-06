@@ -161,6 +161,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "autos that need testing",
   "choreoAuto": true
 }
