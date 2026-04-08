@@ -148,6 +148,7 @@ public class RobotContainer {
                                 new InstantCommand(() -> m_turret.setPosition(101), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.25));
+                NamedCommands.registerCommand("DeployIntakeFast0.5s", new RunIntake(m_intake, 0, 0.25).withTimeout(0.5));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
@@ -292,7 +293,7 @@ public class RobotContainer {
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.2)));
 
                 new Trigger(() -> toggleIntake).onTrue(new RunIntake(m_intake, -1));
-                new Trigger(() -> toggleIntake).onFalse(new RunIntake(m_intake, 0));
+                new Trigger(() -> toggleIntake).onFalse(new RunIntake(m_intake, 0, 0));
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 

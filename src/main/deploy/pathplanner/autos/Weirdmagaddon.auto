@@ -19,22 +19,9 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "deadline",
+                      "type": "named",
                       "data": {
-                        "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 0.5
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "DeployIntakeFast"
-                            }
-                          }
-                        ]
+                        "name": "DeployIntakeFast0.5s"
                       }
                     },
                     {
@@ -102,6 +89,12 @@
                 "data": {
                   "commands": [
                     {
+                      "type": "named",
+                      "data": {
+                        "name": "DeployIntakeFast0.5s"
+                      }
+                    },
+                    {
                       "type": "wait",
                       "data": {
                         "waitTime": 0.1
@@ -136,6 +129,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.7
           }
         },
         {

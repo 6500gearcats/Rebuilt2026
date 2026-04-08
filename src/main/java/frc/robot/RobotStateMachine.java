@@ -362,8 +362,8 @@ public final class RobotStateMachine {
         return pose.getTranslation().getDistance(HubPose.getTranslation());
     }
 
-    public BooleanSupplier isFarEnough() {
-        return () -> distToTag() > 4.2;
+    public boolean isFarEnough() {
+        return distToTag() > 3.3;
     }
 
     public boolean isUpToSpeed() {

@@ -39,12 +39,15 @@ public class UpToSpeedHopperShoot extends Command {
       m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
           stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
       // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
-
-      if (m_Flywheel.isUpToSpeed()) {
-      m_Hopper.startAllMotors(-1, 1);
+      if (stateMachine.isFarEnough()) {
+        if (m_Flywheel.isUpToSpeed()) {
+          m_Hopper.startAllMotors(-1, 1);
+        }
+      } else {
+        m_Hopper.startAllMotors(-1, 1);
       }
 
-      //m_Hopper.startAllMotors(-1, 1);
+      // m_Hopper.startAllMotors(-1, 1);
     }
 
   }
