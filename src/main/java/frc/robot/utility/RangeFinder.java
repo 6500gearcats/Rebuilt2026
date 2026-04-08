@@ -31,7 +31,7 @@ public class RangeFinder {
 
     m_rotMap.put(-90.0, 7.0);
     m_rotMap.put(-45.0, 5.0);
-    m_rotMap.put(0.0, 0.0);
+    // m_rotMap.put(0.0, 0.0);
     m_rotMap.put(45.0, 5.0);
     m_rotMap.put(90.0, 7.0);
 
@@ -53,9 +53,11 @@ public class RangeFinder {
   }
 
   public static double getRotAdder(double deg) {
-    if (Math.abs(deg) > 90) {
-      deg = 90 * (Math.abs(deg) / deg);
-    }
-    return m_rotMap.get(deg);
+    // if (Math.abs(deg) > 90) {
+    // deg = 90 * (Math.abs(deg) / deg);
+    // }
+    // return m_rotMap.get(deg);
+
+    return (0.000725312 * (deg * deg) + 2.82988);
   }
 }

@@ -55,9 +55,12 @@ public class Flywheel extends SubsystemBase {
     // // set slot 0 gains
     // var slot0Configs = talonFXConfigs.Slot0;
     // slot0Configs.kS = 0.3087; // Add 0.25 V output to overcome static friction
-    // slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V output
-    // slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V output
-    // slot0Configs.kP = 0.026467; // A position error of 2.5 rotations results in 12 V output
+    // slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V
+    // output
+    // slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V
+    // output
+    // slot0Configs.kP = 0.026467; // A position error of 2.5 rotations results in
+    // 12 V output
     // slot0Configs.kI = 0; // no output for integrated error
     // slot0Configs.kD = 0;
 
@@ -67,7 +70,7 @@ public class Flywheel extends SubsystemBase {
     slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V output
     slot0Configs.kP = 0.3; // A position error of 2.5 rotations results in 12 V output
-    slot0Configs.kI = 0; //no output for integrated error
+    slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0.00005;
 
     m_motor.getConfigurator().apply(talonFXConfigs);
@@ -105,7 +108,10 @@ public class Flywheel extends SubsystemBase {
     SmartDashboard.putNumber("reqSpeed", reqSpeed);
     SmartDashboard.putNumber("actSpeed", getSpeed());
     SmartDashboard.putBoolean("isUnderTrench", robotStateMachine.underTrench());
-    SmartDashboard.putNumber("rot adder", RangeFinder.getRotAdder(robotStateMachine.getTurretPose().getRotation().getDegrees()));
+    SmartDashboard.putNumber("rot new testing", robotStateMachine.getConvertedTurretPosition());
+    SmartDashboard.putNumber("rot adder",
+        RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition()));
+    SmartDashboard.putNumber("rot old testing", robotStateMachine.getTurretPose().getRotation().getDegrees());
 
     // This method will be called once per scheduler run
   }
@@ -114,19 +120,18 @@ public class Flywheel extends SubsystemBase {
     reqSpeed = speed + (2 * speedMultiplier) + rotationMultiplier;
     double trenchCorr = 0;
     if (robotStateMachine.ductTapeCorrection) {
-      trenchCorr = 4
-      ;
+      trenchCorr = 4;
     }
     // set velocity to rps, add 0.5 V to overcome gravity
     SmartDashboard.putNumber("flywheel initial speed", speed);
     double speedValue = speed + (2 * speedMultiplier)
-        + RangeFinder.getRotAdder(robotStateMachine.getTurretPose().getRotation().getDegrees());
+        + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
     if (speedValue > 0) {
       SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
       if (robotStateMachine.underTrench()) {
-      speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
-      reqSpeed = speedValue;
+        speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
+        reqSpeed = speedValue;
       }
       m_motor.setControl(m_request.withVelocity(speedValue));
     }

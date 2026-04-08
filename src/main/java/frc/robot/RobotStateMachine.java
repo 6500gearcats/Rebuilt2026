@@ -112,6 +112,10 @@ public final class RobotStateMachine {
         return m_gunner;
     }
 
+    public double getConvertedTurretPosition() {
+        return m_Turret.getConvertedTurretPosition();
+    }
+
     // 1.926m, Y: 1.524m Blue Allience Target Right
     // 14.7 m , 2.29 m Red alliance right
 
@@ -197,7 +201,7 @@ public final class RobotStateMachine {
             Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
         } else {
             Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
-            //allianceMulti = -1;
+            // allianceMulti = -1;
         }
         HubPose = Tag_POSE2D.toPose2d().transformBy(
                 new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter),
