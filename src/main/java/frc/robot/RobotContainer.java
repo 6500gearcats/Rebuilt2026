@@ -152,8 +152,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
                                 new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
-                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake)
-                                .andThen(() -> m_intake.deployIntake(0.4), m_intake).withTimeout(0.1));
+                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake));
                 NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
                 NamedCommands.registerCommand("ShootFuel3s",
                                 new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
@@ -181,7 +180,7 @@ public class RobotContainer {
                                                 .withTimeout(10.0));
                 NamedCommands.registerCommand("NewShootFuel4s",
                                 new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(4.0));
+                                                .withTimeout(4.2));
                 NamedCommands.registerCommand("NewShootFuel8s",
                                 new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
                                                 .withTimeout(8.0));
