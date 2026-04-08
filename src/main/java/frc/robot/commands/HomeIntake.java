@@ -28,7 +28,7 @@ public class HomeIntake extends Command {
   @Override
   public void execute() {
     System.out.println("Homing Intake");
-    m_Intake.deployIntake(-0.2);
+    m_Intake.deployIntake(-0.15);
 
   }
 

@@ -148,7 +148,8 @@ public class RobotContainer {
                                 new InstantCommand(() -> m_turret.setPosition(101), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.25));
-                NamedCommands.registerCommand("DeployIntakeFast0.5s", new RunIntake(m_intake, 0, 0.25).withTimeout(0.5));
+                NamedCommands.registerCommand("DeployIntakeFast0.5s",
+                                new RunIntake(m_intake, 0, 0.25).withTimeout(0.5));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
@@ -288,7 +289,7 @@ public class RobotContainer {
                 // Reset the field-centric heading on start button press
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
-                new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
+                joystick2.rightBumper()
                                 .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.2)));
 
@@ -318,7 +319,7 @@ public class RobotContainer {
                                 .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
-                joystick.x().onTrue(new HomeIntake(m_intake));
+                joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
