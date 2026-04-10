@@ -47,6 +47,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.HomeIntake;
 import frc.robot.commands.MoveTurret;
+import frc.robot.commands.RunHopper;
+import frc.robot.commands.RunHopperBack;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.SetTurretAngle;
 import frc.robot.commands.ShootingSequence;
@@ -74,7 +76,7 @@ import frc.robot.utility.SysIDUtil;
 public class RobotContainer {
         @SuppressWarnings("unused")
 
-        private boolean testing = true;
+        private boolean testing = false;
 
         private double speedModify = 1;
         private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
@@ -320,6 +322,7 @@ public class RobotContainer {
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
+                joystick2.b().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
