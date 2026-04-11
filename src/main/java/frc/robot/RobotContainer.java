@@ -418,7 +418,7 @@ public class RobotContainer {
                                 drivetrain.seedFieldCentric();
                                 // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
 
-                                // GCD][\]
+                                // GCD
                                 LimelightHelpers.SetRobotOrientation("limelight-gcd",
                                                 drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
                                                 0);
