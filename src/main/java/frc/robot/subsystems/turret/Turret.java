@@ -66,7 +66,8 @@ public class Turret extends SubsystemBase {
     // slot2Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
     // slot2Configs.kV = 13; // A velocity target of 1 rps results in 0.12 V output
     // slot2Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
-    // slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V output
+    // slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V
+    // output
     // slot2Configs.kI = 0; // no output for integrated error
     // slot2Configs.kD = 1; // A velocity error of 1 rps results in 0.1 V output
 
@@ -123,7 +124,8 @@ public class Turret extends SubsystemBase {
   }
 
   public void zeroMotorPosition() {
-    m_motor.setPosition(-1); // Limit switch is slightly inaccurate after zeroing the first time, affects all alignment, this offsets it
+    m_motor.setPosition(-1); // Limit switch is slightly inaccurate after zeroing the first time, affects all
+                             // alignment, this offsets it
   }
 
   /**
@@ -137,6 +139,10 @@ public class Turret extends SubsystemBase {
 
   public double unconvertPosition(double pos) {
     return ((-1 * pos) + 110) / 4;
+  }
+
+  public double getAngularVelocity() {
+    return Math.toRadians(m_motor.getVelocity().getValueAsDouble() * 4);
   }
 
   /**
