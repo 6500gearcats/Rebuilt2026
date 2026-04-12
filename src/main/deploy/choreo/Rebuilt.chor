@@ -1,11 +1,11 @@
 {
- "name":"Spaceman",
+ "name":"Rebuilt",
  "version":2,
  "type":"Swerve",
  "variables":{
   "expressions":{},
   "poses":{
-   "Alliance":{
+   "SMAlliance":{
     "x":{
      "exp":"2.7353405952453613 m",
      "val":2.7353405952453613
@@ -19,7 +19,7 @@
      "val":-2.450255724820331
     }
    },
-   "Neutral":{
+   "SMNeutral":{
     "x":{
      "exp":"7.824718952178955 m",
      "val":7.824718952178955
@@ -33,7 +33,7 @@
      "val":1.5707963267948966
     }
    },
-   "Neutral2":{
+   "SMNeutral2":{
     "x":{
      "exp":"6.8867106437683105 m",
      "val":6.8867106437683105
@@ -47,7 +47,7 @@
      "val":1.5707963267948966
     }
    },
-   "TrenchShot":{
+   "SMTrenchShot":{
     "x":{
      "exp":"4.375050640106201 m",
      "val":4.375050640106201
