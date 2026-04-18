@@ -5,8 +5,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.turret.Flywheel;
-
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class CoolSnurbo extends Command {
   /** Creates a new CoolSnurbo. */
@@ -20,18 +20,19 @@ public class CoolSnurbo extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    RobotContainer.setMaxModifer(0.4);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_flywheel.snurboEnable = true;
+   // m_flywheel.snurboEnable = true;
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_flywheel.snurboEnable = false;
+    RobotContainer.setMaxModifer(1);
   }
 
   // Returns true when the command should end.

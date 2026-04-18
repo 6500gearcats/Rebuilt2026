@@ -19,6 +19,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import java.time.Instant;
 import java.util.Optional;
 import org.photonvision.simulation.SimCameraProperties;
 
@@ -68,6 +70,7 @@ import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.utility.RangeFinder;
+import frc.robot.utility.ShooterValuesSenable;
 import frc.robot.utility.SysIDUtil;
 
 /**
@@ -79,7 +82,7 @@ public class RobotContainer {
         private boolean testing = false;
 
         private double speedModify = 1;
-        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+        private static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                       // speed
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
@@ -297,12 +300,17 @@ public class RobotContainer {
 
                 new Trigger(() -> toggleIntake).onTrue(new RunIntake(m_intake, -1));
                 new Trigger(() -> toggleIntake).onFalse(new RunIntake(m_intake, 0, 0));
+
+
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
-                // joystick.rightBumper().onTrue(ne
 
-                joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
+                //joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
+                joystick.rightBumper().onTrue(new InstantCommand(() -> setMaxModifer(2))).onFalse(new InstantCommand(() -> setMaxModifer(1)));
+                joystick.leftBumper().onTrue(new InstantCommand(() -> setMaxModifer(0.1))).onFalse(new InstantCommand(() -> setMaxModifer(1)));
+
+                
                 joystick.leftBumper().onTrue(new InstantCommand(() -> reverseBoolean()));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
@@ -387,6 +395,8 @@ public class RobotContainer {
                 toggleIntake = !toggleIntake;
         }
 
+
+
         /**
          * Sets the initial robot and camera orientation for the primary Limelight.
          */
@@ -444,5 +454,9 @@ public class RobotContainer {
 
         public void disableExitCode() {
                 m_vision.resetLimelightThrottle();
+        }
+
+        public static void setMaxModifer(double mod) {
+                MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * mod;
         }
 }
