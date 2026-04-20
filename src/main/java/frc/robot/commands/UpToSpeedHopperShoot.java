@@ -35,20 +35,23 @@ public class UpToSpeedHopperShoot extends Command {
     if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
       return;
     }
-    if (SmartDashboard.getBoolean("Aligned", true)) {
+    // if (SmartDashboard.getBoolean("Aligned", true)) {
+    /*
       m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
           stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
-      // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+        */
+      m_Flywheel.setSpeed(70); //38 for outreach
+      /* 
       if (stateMachine.isFarEnough()) {
         if (m_Flywheel.isUpToSpeed()) {
           m_Hopper.startAllMotors(-1, 1);
         }
       } else {
         m_Hopper.startAllMotors(-1, 1);
-      }
-
+      } */
+      m_Hopper.startAllMotors(-0.4, 0.5); // .3 for kickerspeed
       // m_Hopper.startAllMotors(-1, 1);
-    }
+    // }
 
   }
 

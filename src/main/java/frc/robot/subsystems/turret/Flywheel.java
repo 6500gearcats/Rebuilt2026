@@ -34,12 +34,12 @@ import frc.robot.RobotStateMachine.FieldZone;
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
   TalonFX m_motor = new TalonFX(Constants.MotorConstants.kShooterMotorRightID);
-  VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
+  VelocityVoltage m_request = new VelocityVoltage(1).withSlot(0);
   public boolean snurboEnable = false;
-  public double speedModifier = 1;
+  public double speedModifier = 2;
   public boolean waitForSpeed = false;
-  private double speedMultiplier = 0;
-  public double rotationMultiplier = 0;
+  private double speedMultiplier = 1;
+  public double rotationMultiplier = 1;
   private double reqSpeed;
   TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
   private RobotStateMachine robotStateMachine;
@@ -81,23 +81,23 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     if (snurboEnable) {
-      speedModifier = 0.4;// 0.15;
+      speedModifier = .4;// 0.15;
     } else {
       speedModifier = 1;
     }
     if (!robotStateMachine.isFacingHub()) {
-      rotationMultiplier = 2;
+      rotationMultiplier = 1;
     } else {
-      rotationMultiplier = 0;
+      rotationMultiplier = 1;
     }
 
     if (robotStateMachine.isActive() /*
                                       * && robotStateMachine.checkZone() ==
                                       * FieldZone.ALLIANCE
                                       */) {
-      setSpeed(RangeFinder.getShotVelocity(
-          robotStateMachine.getTurretPose().getTranslation()
-              .getDistance(robotStateMachine.getHubPose().getTranslation())));
+      // setSpeed(RangeFinder.getShotVelocity(
+      //     robotStateMachine.getTurretPose().getTranslation()
+      //         .getDistance(robotStateMachine.getHubPose().getTranslation())));
     }
 
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());

@@ -278,9 +278,9 @@ public class RobotContainer {
         //robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate * m_flywheel.speedModifier))); // Drive counterclockwise with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * (MaxSpeed * .15) * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * (MaxSpeed * .15) * m_flywheel.speedModifier) // Drive left with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * (MaxAngularRate * .15) * m_flywheel.speedModifier))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
@@ -297,8 +297,8 @@ public class RobotContainer {
 
                 new Trigger(() -> toggleIntake).onTrue(new RunIntake(m_intake, -1));
                 new Trigger(() -> toggleIntake).onFalse(new RunIntake(m_intake, 0, 0));
-                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.1));
+                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.1));
 
                 // joystick.rightBumper().onTrue(ne
 
