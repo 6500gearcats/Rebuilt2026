@@ -237,10 +237,10 @@ public final class RobotStateMachine {
 
         double tof = getTOF(distance);// RangeFinder.getTOF(distance);
 
-        // Pose2d nextPose = getTurretPose();
+        Pose2d nextPose = getTurretPose();
 
         double currX = getTurretPose().getX();
-        double currY = getTurretPose().getY();
+        double currY = g etTurretPose().getY();
 
         for (int i = 0; i < 20; i++) {
             shotVelocity = RangeFinder.getShotVelocity(distance);
@@ -250,12 +250,12 @@ public final class RobotStateMachine {
             double predY = currY + (speeds.vyMetersPerSecond * tof);
             distance = Math.sqrt((predX * predX) + (predY * predY));
 
-            // nextPose = new Pose2d(
-            // getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
-            // getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
-            // new Rotation2d());
+            nextPose = new Pose2d(
+                    getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
+                    getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
+                    new Rotation2d());
 
-            // distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+            distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         }
 
         Optional<Pose2d> bestPose = getBestPoseTarget();
