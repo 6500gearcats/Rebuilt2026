@@ -6,9 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.FollowPathCommand;
+
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -103,9 +101,6 @@ public class RobotContainer {
         private LedCANdle m_candle = new LedCANdle();
 
         private final Hopper hopper = new Hopper();
-
-        private final SendableChooser<Command> autoChooser;
-
         private final Flywheel m_flywheel;
 
         private boolean toggleIntake = false;
@@ -141,70 +136,9 @@ public class RobotContainer {
                 m_flywheel = robotStateMachine.getFlywheel();
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
-                NamedCommands.registerCommand("AlignTurretFromRightTrench",
-                                new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
-                NamedCommands.registerCommand("TurretDeadOn",
-                                new InstantCommand(() -> m_turret.setPosition(0), m_turret));
-                NamedCommands.registerCommand("AlignTurretFromLeftTrench",
-                                new InstantCommand(() -> m_turret.setPosition(101), m_turret));
-                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
-                NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.25));
-                NamedCommands.registerCommand("DeployIntakeFast0.5s",
-                                new RunIntake(m_intake, 0, 0.25).withTimeout(0.5));
-                NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
-                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
-                NamedCommands.registerCommand("IntakeLong",
-                                new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
-                NamedCommands.registerCommand("HomeIntake", new HomeIntake(m_intake));
-                NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
-                NamedCommands.registerCommand("ShootFuel3s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
-                NamedCommands.registerCommand("ShootFuel10s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(10.0));
-                NamedCommands.registerCommand("ShootFuel7s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7.0));
-                NamedCommands.registerCommand("ShootFuel5s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
-                NamedCommands.registerCommand("NewShootFuel3s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(3.2));
-                NamedCommands.registerCommand("ManualShootFuel3s",
-                                new ShootingSequenceUTS(hopper, m_flywheel)
-                                                .withTimeout(3.0));
-                NamedCommands.registerCommand("ManualShootFuel",
-                                new ShootingSequenceUTS(hopper, m_flywheel));
-                NamedCommands.registerCommand("TrenchStartAngle",
-                                new SetTurretAngle(m_turret, -90).withTimeout(1));
-                NamedCommands.registerCommand("NewShootFuel5s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(5.0));
-                NamedCommands.registerCommand("NewShootFuel10s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(10.0));
-                NamedCommands.registerCommand("NewShootFuel4s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(4.2));
-                NamedCommands.registerCommand("NewShootFuel8s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(8.0));
-                NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
-                NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
-                NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
-                NamedCommands.registerCommand("BopBop",
-                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
-                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
-                NamedCommands.registerCommand("BopBopStayUp",
-                                new RunCommand(() -> m_intake.deployIntake(-0.35)).withTimeout(0.45));
-                NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
-                NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));
-                NamedCommands.registerCommand("ClimbDown2s", new ClimbPole(m_climber, -0.5).withTimeout(2));
+
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
-
-                autoChooser = AutoBuilder.buildAutoChooser("testAuto");
-
-                SmartDashboard.putData("Auto Chooser", autoChooser);
-                CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", false,
@@ -277,9 +211,9 @@ public class RobotContainer {
         //robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate * m_flywheel.speedModifier))); // Drive counterclockwise with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier * 0.15) // Drive forward with negative Y (forward)
+                                .withVelocityY(MathUtil.applyDeadband(-joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier * 0.15) // Drive left with negative X (left)
+                                .withRotationalRate(MathUtil.applyDeadband(-joystick.getRightX(), 0.1) * MaxAngularRate * m_flywheel.speedModifier * 0.15))); // Drive counterclockwise with negative X (left)
         // @formatter:on
                 // Idle while the robot is disabled. This ensures the configured
                 // neutral mode is applied to the drive motors while disabled.
@@ -307,8 +241,7 @@ public class RobotContainer {
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
-                                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret,
-                                                                robotStateMachine)))
+                                                new ShootingSequenceUTS(hopper, m_flywheel))) // removed " m_turret,robotStateMachine))) " to ensure it turret doesn't allign
                                 .onFalse(new InstantCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
@@ -337,7 +270,7 @@ public class RobotContainer {
         public void testBindings() {
                 //@formatter:off
                 drivetrain.registerTelemetry(logger::telemeterize);
-                
+
                 // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
                 // joystick.b().whileTrue(drivetrain.applyRequest(() ->
                 //                                         point.withModuleDirection(
@@ -373,14 +306,6 @@ public class RobotContainer {
 
         }
 
-        /**
-         * Returns the currently selected autonomous command.
-         *
-         * @return selected command from the auto chooser
-         */
-        public Command getAutonomousCommand() {
-                return autoChooser.getSelected();
-        }
 
         private void reverseBoolean() {
                 toggleIntake = !toggleIntake;

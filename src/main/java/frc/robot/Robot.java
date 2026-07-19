@@ -69,29 +69,16 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_robotContainer.setRobotOrientation();
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
-    }
-    // SignalLogger.start();
-    m_RobotStateMachine.setState(RobotState.ACTIVE);
-
-    autoTimer.reset();
-    autoTimer.start();
-    SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
   public void autonomousPeriodic() {
-    SmartDashboard.putNumber("AutoTime", autoTimer.get());
+
   }
 
   @Override
   public void autonomousExit() {
-    autoTimer.stop();
-    // SignalLogger.stop();
   }
 
   @Override
