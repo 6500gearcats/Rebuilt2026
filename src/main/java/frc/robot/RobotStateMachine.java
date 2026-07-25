@@ -240,7 +240,7 @@ public final class RobotStateMachine {
         Pose2d nextPose = getTurretPose();
 
         double currX = getTurretPose().getX();
-        double currY = g etTurretPose().getY();
+        double currY = getTurretPose().getY();
 
         for (int i = 0; i < 20; i++) {
             shotVelocity = RangeFinder.getShotVelocity(distance);

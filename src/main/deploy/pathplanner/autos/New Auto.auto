@@ -11,16 +11,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "ShootFuel"
-                }
-              }
-            ]
+            "pathName": "New New Path"
           }
         }
       ]
