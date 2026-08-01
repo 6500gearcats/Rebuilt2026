@@ -208,41 +208,41 @@ public class RobotContainer {
                 switch (RobotConstants.currentMode) {
                         case REAL:
                                 PhotonVisionIO backCamWhite = new PhotonVisionIO(
-                                                "Back_Cam_White",
+                                                "White_Cam_1",
                                                 true,
-                                                new Translation3d(-0.3048, 0.2413, 0.597535),
-                                                new Rotation3d(0.0, 0.0, Math.PI));
-
-                                PhotonVisionIO backCamTeal = new PhotonVisionIO(
-                                                "Back_Cam_Teal",
-                                                true,
-                                                new Translation3d(-0.3048, 0.0, 0.62865),
-                                                new Rotation3d(0.0, 0.0, Math.PI));
+                                                new Translation3d(-0.3025, 0.2525, 0.33),
+                                                new Rotation3d(0.0, 0.0, -Math.PI/2));
 
                                 PhotonVisionIO frontCamWhite = new PhotonVisionIO(
-                                                "Front_Cam_White",
+                                                "White_Cam_2",
                                                 true,
-                                                new Translation3d(0.3048, 0.2286, 0.622935),
-                                                new Rotation3d());
+                                                new Translation3d(-0.3675, 0.1775, 0.33),
+                                                new Rotation3d(0.0,0.0,Math.PI));
+
+                                PhotonVisionIO backCamTeal = new PhotonVisionIO(
+                                                "Teal_Cam_3",
+                                                true,
+                                                new Translation3d(-0.3675, -0.0425, 0.33),
+                                                new Rotation3d(0.0, 0.0, Math.PI));
 
                                 PhotonVisionIO frontCamTeal = new PhotonVisionIO(
-                                                "Front_Cam_Teal",
+                                                "Teal_Cam_4",
                                                 true,
-                                                new Translation3d(0.3048, -0.1524, 0.622935),
-                                                new Rotation3d());
-                                LimelightIO m_ll = new LimelightIO(
-                                                "limelight-gcd",
-                                                true,
-                                                drivetrain.rotationSupplier(),
-                                                drivetrain.getAngularVel(),
-                                                false);
+                                                new Translation3d(-0.3025, -0.1275, 0.33),
+                                                new Rotation3d(0.0, 0.0, Math.PI/2));
+                                // LimelightIO m_ll = new LimelightIO(
+                                // "limelight-gcd",
+                                // true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // false);
 
-                                LimelightIO m_ll2 = new LimelightIO(
-                                                "limelight-gcc",
-                                                true,
-                                                drivetrain.rotationSupplier(),
-                                                drivetrain.getAngularVel(),
-                                                false);
+                                // LimelightIO m_ll2 = new LimelightIO(
+                                // "limelight-gcc",
+                                // true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // false);
 
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
@@ -251,9 +251,10 @@ public class RobotContainer {
                                                 backCamWhite,
                                                 backCamTeal,
                                                 frontCamWhite,
-                                                frontCamTeal,
-                                                m_ll,
-                                                m_ll2);
+                                                frontCamTeal
+                                // m_ll,
+                                // m_ll2
+                                );
                                 m_turret.goToZero();
                                 break;
                         case SIM:
