@@ -207,25 +207,51 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", false,
-                                                new Translation3d(0.254, 0.254, 0.2032),
-                                                new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
-                                PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", false,
-                                                new Translation3d(0.254, 0.254, 0.2032),
-                                                new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
-                                LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
-                                                drivetrain.getAngularVel(),
-                                                false);
-                                LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
+                                PhotonVisionIO backCamWhite = new PhotonVisionIO(
+                                                "Back_Cam_White",
+                                                true,
+                                                new Translation3d(-0.3048, 0.2413, 0.597535),
+                                                new Rotation3d(0.0, 0.0, Math.PI));
+
+                                PhotonVisionIO backCamTeal = new PhotonVisionIO(
+                                                "Back_Cam_Teal",
+                                                true,
+                                                new Translation3d(-0.3048, 0.0, 0.62865),
+                                                new Rotation3d(0.0, 0.0, Math.PI));
+
+                                PhotonVisionIO frontCamWhite = new PhotonVisionIO(
+                                                "Front_Cam_White",
+                                                true,
+                                                new Translation3d(0.3048, 0.2286, 0.622935),
+                                                new Rotation3d());
+
+                                PhotonVisionIO frontCamTeal = new PhotonVisionIO(
+                                                "Front_Cam_Teal",
+                                                true,
+                                                new Translation3d(0.3048, -0.1524, 0.622935),
+                                                new Rotation3d());
+                                LimelightIO m_ll = new LimelightIO(
+                                                "limelight-gcd",
+                                                true,
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.getAngularVel(),
                                                 false);
+
+                                LimelightIO m_ll2 = new LimelightIO(
+                                                "limelight-gcc",
+                                                true,
+                                                drivetrain.rotationSupplier(),
+                                                drivetrain.getAngularVel(),
+                                                false);
+
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
-                                                m_photonVisionIO,
-                                                m_photonVisionIO2,
+                                                backCamWhite,
+                                                backCamTeal,
+                                                frontCamWhite,
+                                                frontCamTeal,
                                                 m_ll,
                                                 m_ll2);
                                 m_turret.goToZero();
