@@ -217,7 +217,11 @@ public class RobotContainer {
                                                 "White_Cam_2",
                                                 true,
                                                 new Translation3d(-0.3675, 0.1775, 0.33),
+<<<<<<< HEAD
                                                 new Rotation3d(0.0,-Math.PI / 6,Math.PI));
+=======
+                                                new Rotation3d(0.0,Math.toRadians(-30),Math.PI));
+>>>>>>> 0eda24d4e3c41899093ae372b87dd29e4e194f0c
 
                                 PhotonVisionIO backCamTeal = new PhotonVisionIO(
                                                 "Teal_Cam_3",
