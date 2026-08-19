@@ -5,6 +5,7 @@ import static frc.robot.Constants.VisionConstants.kTagLayout;
 import java.util.List;
 import java.util.Optional;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonUtils;
@@ -14,12 +15,15 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.subsystems.vision.VisionIO;
@@ -36,6 +40,8 @@ public class PhotonVisionIO implements VisionIO {
     private boolean forPoseEstimation = true;
 
     private final PhotonPoseEstimator estimator;
+
+    public Field2d m_field = new Field2d();
 
     private double lastEstTimestamp = 0;
     public boolean isNewResult = false;
@@ -287,6 +293,10 @@ public class PhotonVisionIO implements VisionIO {
         if (visionEst.isEmpty()) {
             return Optional.empty();
         }
+
+        m_field.setRobotPose(visionEst.get().estimatedPose.toPose2d());
+        SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
+
         return Optional.of(new VisionEstimate(visionEst.get()));
     }
 }
