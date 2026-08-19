@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision.photonvision;
 
 import static frc.robot.Constants.VisionConstants.kTagLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -236,31 +237,34 @@ public class PhotonVisionIO implements VisionIO {
      *
      * @param estimatedPose The estimated pose to guess standard deviations for.
      */
-    public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
+    public Matrix<N3, N1> getEstimationStdDevs(
+            Pose2d estimatedPose,
+            List<PhotonTrackedTarget> targets) {
         var estStdDevs = VisionConstants.kSingleTagStdDevs;
-        var targets = getLatestResult().getTargets();
         int numTags = 0;
-        double avgDist = 0;
+        double avgDist = 0.0;
+
         for (var tgt : targets) {
             var tagPose = kTagLayout.getTagPose(tgt.getFiducialId());
-            if (tagPose.isEmpty())
-                continue;
-            numTags++;
-            avgDist += tagPose.get().toPose2d().getTranslation().getDistance(estimatedPose.getTranslation());
-        }
-        if (numTags == 0)
-            return estStdDevs;
-        avgDist /= numTags;
-        // Decrease std devs if multiple targets are visible
-        if (numTags > 1)
-            estStdDevs = VisionConstants.kMultiTagStdDevs;
-        // Increase std devs based on (average) distance
-        if (numTags == 1 && avgDist > 4)
-            estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        else
-            estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+            if (tagPose.isEmpty()) continue;
 
-        return estStdDevs;
+            numTags++;
+            avgDist += tagPose.get().toPose2d()
+                    .getTranslation()
+                    .getDistance(estimatedPose.getTranslation());
+        }
+
+        if (numTags == 0) return estStdDevs;
+
+        avgDist /= numTags;
+        if (numTags > 1) {
+            estStdDevs = VisionConstants.kMultiTagStdDevs;
+        } else if (avgDist > 4.0) {
+            return VecBuilder.fill(
+                    Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        }
+
+        return estStdDevs.times(1.0 + avgDist * avgDist / 30.0);
     }
 
     /**
@@ -287,6 +291,25 @@ public class PhotonVisionIO implements VisionIO {
         if (visionEst.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(new VisionEstimate(visionEst.get()));
+        return Optional.of(new VisionEstimate(visionEst.get(), null));
     }
+
+    @Override
+    public List<VisionEstimate> getVisionEstimates() {
+        List<VisionEstimate> estimates = new ArrayList<>();
+
+        // Call exactly once per robot loop: this drains PhotonVision's FIFO.
+        for (PhotonPipelineResult result : m_camera.getAllUnreadResults()) {
+            estimator.update(result).ifPresent(estimate -> {
+                Matrix<N3, N1> stdDevs =
+                        getEstimationStdDevs(
+                                estimate.estimatedPose.toPose2d(),
+                                estimate.targetsUsed);
+                estimates.add(new VisionEstimate(estimate, stdDevs));
+            });
+        }
+
+        return estimates;
+    }
+    
 }
