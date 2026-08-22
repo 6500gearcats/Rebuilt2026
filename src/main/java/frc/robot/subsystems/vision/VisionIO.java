@@ -1,6 +1,8 @@
 package frc.robot.subsystems.vision;
 
 import java.util.Optional;
+import java.util.List;
+
 
 /**
  * IO abstraction for vision sources (PhotonVision, Limelight, or simulation).
@@ -70,4 +72,8 @@ public interface VisionIO {
      * @return optional pose estimate
      */
     public Optional<VisionEstimate> getVisionEst();
+    
+    default List<VisionEstimate> getVisionEstimates() {
+        return getVisionEst().stream().toList();
+    }
 }
