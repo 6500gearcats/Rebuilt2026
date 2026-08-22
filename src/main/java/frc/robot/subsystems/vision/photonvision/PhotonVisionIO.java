@@ -43,6 +43,9 @@ import frc.robot.subsystems.vision.VisionIO;
 public class PhotonVisionIO implements VisionIO {
     private static final String COLLECTION_ROOT = "Vision/DataCollection/";
     private static final DateTimeFormatter FILE_STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+    private static final double MAX_SINGLE_TAG_AMBIGUITY = 0.20;
+    private static final double MAX_SINGLE_TAG_DISTANCE_METERS = 4.0;
+    private static final double MAX_POSE_Z_METERS = 1.00;
 
     private final PhotonCamera m_camera;
     public Translation3d robotToCameraTrl;
@@ -75,10 +78,7 @@ public class PhotonVisionIO implements VisionIO {
         this.robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
         m_camera = new PhotonCamera(cameraName);
         trialLogger.publishDashboardDefaults();
-        estimator = new PhotonPoseEstimator(
-                kTagLayout,
-                PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                robotToCamera);
+        estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
 
         m_visionCam = new VisionCamera(cameraName,m_camera,estimator);
     }
@@ -288,6 +288,46 @@ public class PhotonVisionIO implements VisionIO {
     }
 
     /**
+     * Rejects estimates that are not trustworthy enough to enter pose fusion.
+     * Ambiguity is evaluated only for single-tag estimates; multi-tag estimates
+     * are screened using geometry and the number of tags used.
+     */
+    private boolean shouldRejectEstimate(EstimatedRobotPose estimate) {
+        if (estimate.targetsUsed.isEmpty()) {
+            return true;
+        }
+
+        Pose3d pose = estimate.estimatedPose;
+        if (!Double.isFinite(pose.getX())
+                || !Double.isFinite(pose.getY())
+                || !Double.isFinite(pose.getZ())
+                || Math.abs(pose.getZ()) > MAX_POSE_Z_METERS) {
+            return true;
+        }
+
+        if (estimate.targetsUsed.size() == 1) {
+            PhotonTrackedTarget target = estimate.targetsUsed.get(0);
+            double ambiguity = target.getPoseAmbiguity();
+            double distance = target.getBestCameraToTarget()
+                    .getTranslation()
+                    .getNorm();
+
+            if (!Double.isFinite(ambiguity)
+                    || ambiguity < 0.0
+                    || ambiguity > MAX_SINGLE_TAG_AMBIGUITY) {
+                return true;
+            }
+
+            if (!Double.isFinite(distance)
+                    || distance > MAX_SINGLE_TAG_DISTANCE_METERS) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * The latest estimated robot pose on the field from vision data. This may be
      * empty. This should
      * only be called once per loop.
@@ -297,25 +337,42 @@ public class PhotonVisionIO implements VisionIO {
      *         used for estimation.
      */
     public Optional<VisionEstimate> getVisionEst() {
-        PhotonPipelineResult result = getLatestResult();
-        var visionEst = estimator.update(result);
-        double latestTimestamp = result.getTimestampSeconds();
-        boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
-        if (newResult) {
-            lastEstTimestamp = latestTimestamp;
-            isNewResult = true;
-        } else {
-            isNewResult = false;
+        Optional<VisionEstimate> latestEstimate = Optional.empty();
+
+        // Drain PhotonVision's FIFO and keep the newest valid estimate.
+        for (PhotonPipelineResult result : m_camera.getAllUnreadResults()) {
+            Optional<EstimatedRobotPose> estimatedPose =
+                    estimator.estimateCoprocMultiTagPose(result);
+            m_visionCam.latestResult = Optional.of(result);
+            m_visionCam.latestPose = estimatedPose;
+            trialLogger.log(m_visionCam, result, estimatedPose);
+
+            double latestTimestamp = result.getTimestampSeconds();
+            isNewResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
+            if (isNewResult) {
+                lastEstTimestamp = latestTimestamp;
+            }
+
+            if (estimatedPose.isPresent()) {
+                EstimatedRobotPose estimate = estimatedPose.get();
+                if (shouldRejectEstimate(estimate)) {
+                    continue;
+                }
+
+                Matrix<N3, N1> stdDevs =
+                        getEstimationStdDevs(
+                                estimate.estimatedPose.toPose2d(),
+                                estimate.targetsUsed);
+                latestEstimate = Optional.of(new VisionEstimate(estimate, stdDevs));
+            }
         }
 
-        if (visionEst.isEmpty()) {
-            return Optional.empty();
-        }
+        latestEstimate.ifPresent(est -> {
+            m_field.setRobotPose(est.getPose());
+            SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
+        });
 
-        m_field.setRobotPose(visionEst.get().estimatedPose.toPose2d());
-        SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
-
-        return Optional.of(new VisionEstimate(visionEst.get(), null));
+        return latestEstimate;
     }
 
     @Override
@@ -324,12 +381,17 @@ public class PhotonVisionIO implements VisionIO {
 
         // Call exactly once per robot loop: this drains PhotonVision's FIFO.
         for (PhotonPipelineResult result : m_camera.getAllUnreadResults()) {
-            Optional<EstimatedRobotPose> estimatedPose = estimator.update(result);
+            Optional<EstimatedRobotPose> estimatedPose =
+                    estimator.estimateCoprocMultiTagPose(result);
             m_visionCam.latestResult = Optional.of(result);
             m_visionCam.latestPose = estimatedPose;
             trialLogger.log(m_visionCam, result, estimatedPose);
 
             estimatedPose.ifPresent(estimate -> {
+                if (shouldRejectEstimate(estimate)) {
+                    return;
+                }
+
                 Matrix<N3, N1> stdDevs =
                         getEstimationStdDevs(
                                 estimate.estimatedPose.toPose2d(),
@@ -447,15 +509,15 @@ public class PhotonVisionIO implements VisionIO {
             }
 
         PhotonTrackedTarget bestTarget = result.hasTargets() ? result.getBestTarget() : null;
-            Pose2d pose2d = estimatedPose.map(pose -> pose.estimatedPose.toPose2d()).orElse(null);
+        Pose2d pose2d = estimatedPose.map(pose -> pose.estimatedPose.toPose2d()).orElse(null);
 
-            double expectedX = SmartDashboard.getNumber(COLLECTION_ROOT + "Expected X (m)", 0.0);
-            double expectedY = SmartDashboard.getNumber(COLLECTION_ROOT + "Expected Y (m)", 0.0);
-            double expectedHeadingDeg = SmartDashboard.getNumber(COLLECTION_ROOT + "Expected Heading (deg)", 0.0);
-            double estimatedX = pose2d != null ? pose2d.getX() : Double.NaN;
-            double estimatedY = pose2d != null ? pose2d.getY() : Double.NaN;
-            double estimatedZ = estimatedPose.map(pose -> pose.estimatedPose.getZ()).orElse(Double.NaN);
-            double estimatedHeadingDeg = pose2d != null ? pose2d.getRotation().getDegrees() : Double.NaN;
+        double expectedX = SmartDashboard.getNumber(COLLECTION_ROOT + "Expected X (m)", 0.0);
+        double expectedY = SmartDashboard.getNumber(COLLECTION_ROOT + "Expected Y (m)", 0.0);
+        double expectedHeadingDeg = SmartDashboard.getNumber(COLLECTION_ROOT + "Expected Heading (deg)", 0.0);
+        double estimatedX = pose2d != null ? pose2d.getX() : Double.NaN;
+        double estimatedY = pose2d != null ? pose2d.getY() : Double.NaN;
+        double estimatedZ = estimatedPose.map(pose -> pose.estimatedPose.getZ()).orElse(Double.NaN);
+        double estimatedHeadingDeg = pose2d != null ? pose2d.getRotation().getDegrees() : Double.NaN;
 
             List<PhotonTrackedTarget> targetsForDistance = estimatedPose.map(pose -> pose.targetsUsed).orElse(result.getTargets());
             List<Double> distances = targetsForDistance.stream()
