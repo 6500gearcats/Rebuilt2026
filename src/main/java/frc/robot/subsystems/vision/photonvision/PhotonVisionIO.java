@@ -383,12 +383,14 @@ public class PhotonVisionIO implements VisionIO {
                     estimator.estimateCoprocMultiTagPose(result);
             m_visionCam.latestResult = Optional.of(result);
             m_visionCam.latestPose = estimatedPose;
-            trialLogger.log(m_visionCam, result, estimatedPose);
+            //trialLogger.log(m_visionCam, result, estimatedPose);
 
             estimatedPose.ifPresent(estimate -> {
                 if (shouldRejectEstimate(estimate)) {
+                    SmartDashboard.putBoolean("CamPoseRejected" + m_camera.getName(),true);
                     return;
                 }
+                SmartDashboard.putBoolean("CamPoseRejected" + m_camera.getName(),false);
 
                 Matrix<N3, N1> stdDevs =
                         getEstimationStdDevs(
