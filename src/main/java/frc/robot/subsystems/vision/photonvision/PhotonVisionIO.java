@@ -77,6 +77,7 @@ public class PhotonVisionIO implements VisionIO {
         this.robotToCameraRot = robotToCameraRot;
         this.robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
         m_camera = new PhotonCamera(cameraName);
+        SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
         trialLogger.publishDashboardDefaults();
         estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
 
@@ -367,10 +368,7 @@ public class PhotonVisionIO implements VisionIO {
             }
         }
 
-        latestEstimate.ifPresent(est -> {
-            m_field.setRobotPose(est.getPose());
-            SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
-        });
+        latestEstimate.ifPresent(est -> publishCameraPose(est.getPose()));
 
         return latestEstimate;
     }
@@ -401,8 +399,18 @@ public class PhotonVisionIO implements VisionIO {
             });
         }
 
+        if (!estimates.isEmpty()) {
+            publishCameraPose(estimates.get(estimates.size() - 1).getPose());
+        }
+
         return estimates;
     }
+
+    private void publishCameraPose(Pose2d pose) {
+        m_field.setRobotPose(pose);
+        SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
+    }
+
     private static final class VisionCamera {
         private final String name;
         private final PhotonCamera camera;
