@@ -329,6 +329,20 @@ public class PhotonVisionIO implements VisionIO {
     }
 
     /**
+     * Prefer the coprocessor multi-tag solution, but allow a single-tag
+     * lowest-ambiguity solution when no multi-tag result is available.
+     */
+    private Optional<EstimatedRobotPose> estimatePose(PhotonPipelineResult result) {
+        Optional<EstimatedRobotPose> multiTagEstimate =
+                estimator.estimateCoprocMultiTagPose(result);
+        if (multiTagEstimate.isPresent()) {
+            return multiTagEstimate;
+        }
+
+        return estimator.estimateLowestAmbiguityPose(result);
+    }
+
+    /**
      * The latest estimated robot pose on the field from vision data. This may be
      * empty. This should
      * only be called once per loop.
@@ -343,10 +357,10 @@ public class PhotonVisionIO implements VisionIO {
         // Drain PhotonVision's FIFO and keep the newest valid estimate.
         for (PhotonPipelineResult result : m_camera.getAllUnreadResults()) {
             Optional<EstimatedRobotPose> estimatedPose =
-                    estimator.estimateCoprocMultiTagPose(result);
+                    estimatePose(result);
             m_visionCam.latestResult = Optional.of(result);
             m_visionCam.latestPose = estimatedPose;
-            trialLogger.log(m_visionCam, result, estimatedPose);
+//             trialLogger.log(m_visionCam, result, estimatedPose);
 
             double latestTimestamp = result.getTimestampSeconds();
             isNewResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
@@ -380,7 +394,7 @@ public class PhotonVisionIO implements VisionIO {
         // Call exactly once per robot loop: this drains PhotonVision's FIFO.
         for (PhotonPipelineResult result : m_camera.getAllUnreadResults()) {
             Optional<EstimatedRobotPose> estimatedPose =
-                    estimator.estimateCoprocMultiTagPose(result);
+                    estimatePose(result);
             m_visionCam.latestResult = Optional.of(result);
             m_visionCam.latestPose = estimatedPose;
             //trialLogger.log(m_visionCam, result, estimatedPose);
