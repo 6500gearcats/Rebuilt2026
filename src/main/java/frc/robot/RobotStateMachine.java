@@ -265,10 +265,11 @@ public final class RobotStateMachine {
 
         Pose2d best = bestPose.get();
         targetPose = new Pose2d(
-                best.getX() + (-speeds.vxMetersPerSecond * getTOF(distance)),
+                best.getX() + ((-speeds.vxMetersPerSecond ) * getTOF(distance)),
                 best.getY() + (-speeds.vyMetersPerSecond * getTOF(distance)),
                 new Rotation2d());
         targetPosePublisher.set(targetPose);
+        SmartDashboard.putNumber("distance", distance);
 
         // @formatter:off
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
