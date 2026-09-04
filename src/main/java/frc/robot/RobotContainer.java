@@ -54,7 +54,6 @@ import frc.robot.commands.SetTurretAngle;
 import frc.robot.commands.ShootingSequence;
 import frc.robot.commands.ShootingSequenceUTS;
 import frc.robot.generated.TunerConstants;
-import frc.robot.generated.TunerConstants2;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
@@ -202,33 +201,60 @@ public class RobotContainer {
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
-                autoChooser = AutoBuilder.buildAutoChooser("testAuto");
+                autoChooser = AutoBuilder.buildAutoChooser("ShootOnTheMove");
 
                 SmartDashboard.putData("Auto Chooser", autoChooser);
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", false,
-                                                new Translation3d(0.254, 0.254, 0.2032),
-                                                new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
-                                PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", false,
-                                                new Translation3d(0.254, 0.254, 0.2032),
-                                                new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
-                                LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
-                                                drivetrain.getAngularVel(),
-                                                false);
-                                LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
-                                                drivetrain.rotationSupplier(),
-                                                drivetrain.getAngularVel(),
-                                                false);
+                                PhotonVisionIO backCamWhite = new PhotonVisionIO(
+                                                "White_Cam_1",
+                                                true,
+                                                new Translation3d(-0.3112, 0.2477, 0.3734),
+                                                new Rotation3d(0.0, 0.0, Math.PI / 2));
+
+                                PhotonVisionIO frontCamWhite = new PhotonVisionIO(
+                                                "White_Cam_2",
+                                                true,
+                                                new Translation3d(-0.3683, 0.1715, 0.3734),
+                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI));
+
+                                PhotonVisionIO backCamTeal = new PhotonVisionIO(
+                                                "Teal_Cam_3",
+                                                true,
+                                                new Translation3d(-0.3683, -0.0445, 0.3734),
+                                                new Rotation3d(0.0, 0.0, Math.PI));
+
+                                PhotonVisionIO frontCamTeal = new PhotonVisionIO(
+                                                "Teal_Cam_4",
+                                                true,
+                                                new Translation3d(-0.3112, -0.1207, 0.3734),
+                                                new Rotation3d(0.0, 0.0, -Math.PI / 2));
+                                // LimelightIO m_ll = new LimelightIO(
+                                // "limelight-gcd",
+                                // true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // false);
+
+                                // LimelightIO m_ll2 = new LimelightIO(
+                                // "limelight-gcc",
+                                // true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // false);
+
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
-                                                m_photonVisionIO,
-                                                m_photonVisionIO2,
-                                                m_ll,
-                                                m_ll2);
+                                                backCamWhite,
+                                                backCamTeal,
+                                                frontCamWhite,
+                                                frontCamTeal
+                                // m_ll,
+                                // m_ll2
+                                );
                                 m_turret.goToZero();
                                 break;
                         case SIM:

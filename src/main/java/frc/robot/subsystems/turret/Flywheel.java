@@ -20,6 +20,9 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -81,7 +84,7 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     if (snurboEnable) {
-      speedModifier = 0.4;// 0.15;
+      speedModifier = 0.15;
     } else {
       speedModifier = 1;
     }
@@ -95,9 +98,17 @@ public class Flywheel extends SubsystemBase {
                                       * && robotStateMachine.checkZone() ==
                                       * FieldZone.ALLIANCE
                                       */) {
+      double distance = robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation());
+      ChassisSpeeds speeds = robotStateMachine.getFieldSpeeds();
+      Pose2d best = robotStateMachine.getHubPose();
+      Pose2d targetPose = new Pose2d(
+        best.getX() + ((-speeds.vxMetersPerSecond ) * robotStateMachine.getTOF(distance)),
+        best.getY() + (-speeds.vyMetersPerSecond * robotStateMachine.getTOF(distance)),
+      new Rotation2d());
+
       setSpeed(RangeFinder.getShotVelocity(
           robotStateMachine.getTurretPose().getTranslation()
-              .getDistance(robotStateMachine.getHubPose().getTranslation())));
+              .getDistance(targetPose.getTranslation())));
     }
 
     SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());

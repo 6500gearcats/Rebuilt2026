@@ -237,7 +237,7 @@ public final class RobotStateMachine {
 
         double tof = getTOF(distance);// RangeFinder.getTOF(distance);
 
-        // Pose2d nextPose = getTurretPose();
+        Pose2d nextPose = getTurretPose();
 
         double currX = getTurretPose().getX();
         double currY = getTurretPose().getY();
@@ -250,12 +250,12 @@ public final class RobotStateMachine {
             double predY = currY + (speeds.vyMetersPerSecond * tof);
             distance = Math.sqrt((predX * predX) + (predY * predY));
 
-            // nextPose = new Pose2d(
-            // getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
-            // getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
-            // new Rotation2d());
+            nextPose = new Pose2d(
+                    getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
+                    getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
+                    new Rotation2d());
 
-            // distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
+            distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
         }
 
         Optional<Pose2d> bestPose = getBestPoseTarget();
@@ -265,10 +265,11 @@ public final class RobotStateMachine {
 
         Pose2d best = bestPose.get();
         targetPose = new Pose2d(
-                best.getX() + (-speeds.vxMetersPerSecond * getTOF(distance)),
+                best.getX() + ((-speeds.vxMetersPerSecond ) * getTOF(distance)),
                 best.getY() + (-speeds.vyMetersPerSecond * getTOF(distance)),
                 new Rotation2d());
         targetPosePublisher.set(targetPose);
+        SmartDashboard.putNumber("distance", distance);
 
         // @formatter:off
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -321,6 +321,6 @@ public class PhotonVisionSimIO implements VisionIO {
         if (visionEst.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(new VisionEstimate(visionEst.get()));
+        return Optional.of(new VisionEstimate(visionEst.get(), null));
     }
 }
