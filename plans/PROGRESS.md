@@ -1,6 +1,6 @@
 ﻿# Rebuilt2026 Refactor — Implementation Progress
 
-**Branch:** `IntegrateHackCode`  
+**Branch:** `leto`  
 **Plan file:** `Rebuilt2026_MasterPlan.md`  
 **Last updated:** 2026-09-05
 
@@ -61,13 +61,15 @@
 
 ---
 
-## Stage 3 — Shoot-on-the-Move Accuracy Fixes
+## Stage 3 — Pre-Integration Cleanup
 
-| ID | Description | Status |
-|----|-------------|--------|
-| — | Validate SOTM target pose prediction against field layout | ⬜ |
-| — | Tune TOF physics constants (launch angle, delta-height) | ⬜ |
-| — | Add feed position logic for neutral zone zones | ⬜ |
+| ID | Description | File | Status | Commit |
+|----|-------------|------|--------|--------|
+| — | Remove dead `RangeFinder rangeFinder` field + import from `RobotContainer.java` | `RobotContainer.java` | ✅ | stage-3 |
+| — | Remove dead `RangeFinder` import from `UpToSpeedHopperShoot.java` | `UpToSpeedHopperShoot.java` | ✅ | stage-3 |
+| — | Delete `Climber.java`, `ClimbPole.java` | Multiple | ✅ | stage-3 |
+| — | Remove all climber bindings, fields, and `NamedCommands` from `RobotContainer.java` | `RobotContainer.java` | ✅ | stage-3 |
+| — | Delete `ClimberConstants` from `Constants.java` | `Constants.java` | ✅ | stage-3 |
 
 ---
 
@@ -121,15 +123,14 @@
 |----|-------------|--------|
 | 8-1 | Tune Turret Slot0/Slot2 PID on assembled robot | ⬜ |
 | 8-2 | Measure and set `kS` TODO in Flywheel/Turret | ⬜ |
-| 8-3 | Resolve DIO pin 4 conflict (turret limit switch vs climber limit switch) | ⬜ |
-| 8-4 | Add intake deploy soft limit | ⬜ |
-| 8-5 | Enable/configure climber motor (currently commented out) | ⬜ |
-| 8-6 | Verify PhotonVision camera names match physical layout | ⬜ |
+| 8-3 | Add intake deploy soft limit | ⬜ |
+| 8-4 | Verify PhotonVision camera names match physical layout | ⬜ |
 
 ---
 
 ## Notes
 
-- **DIO pin 4 conflict**: Both `Turret` (line 36) and `ClimberConstants.kClimberLimitSwitchID` reference DIO 4. Needs physical resolution before Stage 8.
+- **DIO pin 4**: Previously conflicted between turret limit switch and climber — resolved by climber removal in Stage 3. Turret now has exclusive use of DIO 4.
 - **SPARK MAX swerve**: Drive/steer motors (IDs 1-8) are REV SPARK MAX — TalonFX telemetry APIs do NOT apply to swerve motors.
 - **Constants.AutoConstants.config**: This field is unused in the codebase — PathPlanner config is loaded directly in `CommandSwerveDrivetrain.configureAutoBuilder()`.
+

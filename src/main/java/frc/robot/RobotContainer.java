@@ -45,7 +45,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.BurstFire;
-import frc.robot.commands.ClimbPole;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -59,7 +58,6 @@ import frc.robot.commands.ShootingSequence;
 import frc.robot.commands.ShootingSequenceUTS;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants2;
-import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
@@ -69,7 +67,6 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
-import frc.robot.utility.RangeFinder;
 import frc.robot.utility.ShooterValuesSenable;
 import frc.robot.utility.SysIDUtil;
 
@@ -113,9 +110,7 @@ public class RobotContainer {
 
         private final Intake m_intake = new Intake();
 
-        private final Climber m_climber = new Climber();
 
-        private final RangeFinder rangeFinder = new RangeFinder();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
         private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
@@ -173,14 +168,10 @@ public class RobotContainer {
                                                 .withTimeout(8.0));
                 NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
                 NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
-                NamedCommands.registerCommand("Climb", new ClimbPole(m_climber, 0.1)); // TODO: set auto speed
                 NamedCommands.registerCommand("BopBop",
                                 new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
                 NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
-                NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));
-                NamedCommands.registerCommand("ClimbDown2s", new ClimbPole(m_climber, -0.5).withTimeout(2));
-
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
                 autoChooser = AutoBuilder.buildAutoChooser("testAuto");
@@ -289,8 +280,6 @@ public class RobotContainer {
                                 .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
-                new JoystickButton(m_gunner, XboxController.Button.kY.value).whileTrue(new ClimbPole(m_climber, 0.5));
-                new JoystickButton(m_gunner, XboxController.Button.kA.value).whileTrue(new ClimbPole(m_climber, -0.5));
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
