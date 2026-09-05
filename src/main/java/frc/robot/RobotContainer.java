@@ -201,7 +201,7 @@ public class RobotContainer {
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
-                autoChooser = AutoBuilder.buildAutoChooser("ShootOnTheMove");
+                autoChooser = AutoBuilder.buildAutoChooser("SOMLeft");
 
                 SmartDashboard.putData("Auto Chooser", autoChooser);
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
@@ -217,7 +217,7 @@ public class RobotContainer {
                                                 "White_Cam_2",
                                                 true,
                                                 new Translation3d(-0.3683, 0.1715, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI));
+                                                new Rotation3d(0.0, 0.0, Math.PI));
 
                                 PhotonVisionIO backCamTeal = new PhotonVisionIO(
                                                 "Teal_Cam_3",
