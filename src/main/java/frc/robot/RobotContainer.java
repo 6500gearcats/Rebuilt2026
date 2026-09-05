@@ -42,7 +42,6 @@ import frc.robot.commands.ShootWhenReady;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -102,16 +101,11 @@ public class RobotContainer {
         private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
                         .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
                         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-        private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-        private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-
         private final CommandXboxController joystick;
         private final CommandXboxController joystick2 = new CommandXboxController(1);
         private final XboxController m_gunner;
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
-        private LedCANdle m_candle = new LedCANdle();
 
         private final Hopper hopper = new Hopper();
 

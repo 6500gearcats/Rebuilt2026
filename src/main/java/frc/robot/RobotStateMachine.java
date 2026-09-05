@@ -2,7 +2,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meter;
 
-import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -102,8 +101,6 @@ public final class RobotStateMachine {
 
     public static Pose2d HubPose;
 
-    private Pose2d targetPose = new Pose2d();
-
     private Pose2d pose = new Pose2d();
     private FieldZone currentZone = FieldZone.ALLIANCE;
 
@@ -119,11 +116,6 @@ public final class RobotStateMachine {
     private final StructPublisher<Pose2d> turretPosePublisher = NetworkTableInstance.getDefault()
             .getTable("StateMachine")
             .getStructTopic("TurretPose", Pose2d.struct)
-            .publish();
-
-    private final StructPublisher<Pose2d> targetPosePublisher = NetworkTableInstance.getDefault()
-            .getTable("StateMachine")
-            .getStructTopic("TargetPose", Pose2d.struct)
             .publish();
 
     private final CommandXboxController joystick = new CommandXboxController(0);
@@ -307,10 +299,6 @@ public final class RobotStateMachine {
         return turretPose;
     }
 
-    public Pose2d getTargetPose() {
-        return targetPose;
-    }
-
     public ChassisSpeeds getFieldSpeeds() {
         if (drivetrain == null) {
             return null;
@@ -344,8 +332,8 @@ public final class RobotStateMachine {
     }
 
     public boolean isFacingHub() {
-        double dx = targetPose.getX() - pose.getX();
-        double dy = targetPose.getY() - pose.getY();
+        double dx = HubPose.getX() - pose.getX();
+        double dy = HubPose.getY() - pose.getY();
         double targetAngle = Math.atan2(dy, dx);
         double delta = targetAngle - (pose.getRotation().getRadians() - Math.PI);
         delta = Math.atan2(Math.sin(delta), Math.cos(delta));
@@ -791,29 +779,4 @@ public final class RobotStateMachine {
         return checkZone() == FieldZone.ALLIANCE;
     }
 
-    private Optional<Pose2d> getBestPoseTarget() {
-        if (checkZone() == FieldZone.ALLIANCE) {
-            return Optional.of(HubPose);
-        } else {
-            // return feed position
-            if (getAlliance() == Alliance.Blue) {
-                if (checkZone() == FieldZone.NEUTRAL_TOP) {
-                    // top blue pose
-                    return Optional.of(new Pose2d(1.0, 1.681, new Rotation2d()));
-                } else if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
-                    // bottom blue pose
-                    return Optional.of(new Pose2d(1.0, 5.835, new Rotation2d()));
-                }
-            } else {
-                if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
-                    // bottom red pose
-                    return Optional.of(new Pose2d(15.7, 5.835, new Rotation2d()));
-                } else if (checkZone() == FieldZone.NEUTRAL_TOP) {
-                    // top red pose
-                    return Optional.of(new Pose2d(15.7, 1.681, new Rotation2d()));
-                }
-            }
-        }
-        return Optional.empty();
-    }
 }
