@@ -4,14 +4,9 @@
 
 package frc.robot.subsystems.hopper;
 
-import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -19,7 +14,6 @@ import frc.robot.Constants;
  * Hopper subsystem that controls the indexer and kicker motors.
  */
 public class Hopper extends SubsystemBase {
-  /** Creates a new Hopper. */
   TalonFX m_hopperMotor = new TalonFX(Constants.MotorConstants.kIndexerMotorID);
   TalonFX m_kickerMotor = new TalonFX(Constants.MotorConstants.kKickerMotorID);
 
@@ -28,14 +22,12 @@ public class Hopper extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("Hopper/IndexerVelocityRPS",    m_hopperMotor.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Hopper/IndexerStatorCurrentA", m_hopperMotor.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Hopper/KickerVelocityRPS",     m_kickerMotor.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Hopper/KickerStatorCurrentA",  m_kickerMotor.getStatorCurrent().getValueAsDouble());
   }
 
-  /**
-   * Starts both hopper and kicker motors.
-   *
-   * @param hopperSpeed speed for the hopper motor
-   * @param kickerSpeed speed for the kicker motor
-   */
   public void startAllMotors(double hopperSpeed, double kickerSpeed) {
     m_hopperMotor.set(hopperSpeed);
     m_kickerMotor.set(kickerSpeed);

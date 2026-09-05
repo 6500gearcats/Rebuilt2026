@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.numbers.N1;
+
 import org.photonvision.simulation.VisionSystemSim;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -148,24 +151,33 @@ public class Vision extends SubsystemBase {
     estimator.update(
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
+
     for (VisionIO visionIO : m_visionOdometryCams) {
-      visionIO.getVisionEst().ifPresent(est -> {
+      // H-2: call getVisionEst() once per camera per loop
+      Optional<VisionEstimate> est = visionIO.getVisionEst();
 
-        // if (lastPose.minus(est.getPose()).getTranslation().getNorm() < 4) {
+      est.ifPresent(e -> {
+        Pose2d currentEst = estimator.getEstimatedPosition();
+        double dist = currentEst.getTranslation().getDistance(e.getPose().getTranslation());
 
-        estimator.addVisionMeasurement(est.getPose(), est.getTimestamp());
+        // H-3: reject measurements more than 4 m from current odometry estimate
+        if (dist > 4.0) return;
 
-        // }
-
+        // M-4: trust vision less as it diverges from odometry
+        Matrix<N3, N1> stdDevs = VecBuilder.fill(
+            0.1 + dist * 0.05,
+            0.1 + dist * 0.05,
+            Units.degreesToRadians(10 + dist * 5));
+        estimator.addVisionMeasurement(e.getPose(), e.getTimestamp(), stdDevs);
       });
-      if (visionIO.getName().contains("gcc")) {
-        visionIO.getVisionEst().ifPresent(est -> gccPub.set(est.getPose()));
-      } else if (visionIO.getName().contains("gcd")) {
-        visionIO.getVisionEst().ifPresent(est -> gcdPub.set(est.getPose()));
-      }
 
+      if (visionIO.getName().contains("gcc")) {
+        est.ifPresent(e -> gccPub.set(e.getPose()));
+      } else if (visionIO.getName().contains("gcd")) {
+        est.ifPresent(e -> gcdPub.set(e.getPose()));
+      }
     }
-    // In sim, fall back to drivetrain sim pose if module positions aren't simulated
+
     if (RobotBase.isSimulation() && m_poseSupplier != null) {
       m_field.setRobotPose(m_poseSupplier.get());
     } else {

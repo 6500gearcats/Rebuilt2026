@@ -5,36 +5,42 @@
 package frc.robot;
 
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.RobotStateMachine.RobotState;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-  private Timer stateTimer = new Timer();
   private final RobotContainer m_robotContainer;
   private final RobotStateMachine m_RobotStateMachine;
+  private final Timer m_healthTimer = new Timer();
 
   public Robot() {
-    // SignalLogger.setPath("media/sda1/ctre-logs/");
+    DataLogManager.start();
+    DataLogManager.logConsoleOutput(true);
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);
-    // DataLogManager.start();
+    m_healthTimer.start();
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     m_RobotStateMachine.periodic();
-    // SignalLogger.writeStruct("odometry", Pose2d.struct,
-    // m_RobotStateMachine.getPose());
-    // SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(),
-    // "seconds");
+    if (m_healthTimer.advanceIfElapsed(0.1)) {
+      SmartDashboard.putNumber("Robot/BatteryVoltageV", RobotController.getBatteryVoltage());
+      SmartDashboard.putNumber("Robot/CANBusUtilizationPct",
+          RobotController.getCANStatus().percentBusUtilization * 100.0);
+      SmartDashboard.putBoolean("Robot/RSLStatus", RobotController.getRSLState());
+    }
   }
 
   @Override

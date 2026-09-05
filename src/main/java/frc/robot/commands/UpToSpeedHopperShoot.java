@@ -18,6 +18,7 @@ public class UpToSpeedHopperShoot extends Command {
   Hopper m_Hopper;
   Flywheel m_Flywheel;
   private RobotStateMachine stateMachine = RobotStateMachine.getInstance();
+  private double m_shootSpeed;
 
   public UpToSpeedHopperShoot(Hopper m_Hopper, Flywheel m_Flywheel) {
     this.m_Hopper = m_Hopper;
@@ -27,7 +28,8 @@ public class UpToSpeedHopperShoot extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
+    // M-5: cache NT read once per activation rather than every 20ms loop
+    m_shootSpeed = SmartDashboard.getNumber("Shoot Speed", 0);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -38,7 +40,7 @@ public class UpToSpeedHopperShoot extends Command {
     }
     // m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
     // stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
-    m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
+    m_Flywheel.setSpeed(m_shootSpeed);
 
     if (m_Flywheel.isUpToSpeed()) {
       m_Hopper.startAllMotors(-0.9, 1);

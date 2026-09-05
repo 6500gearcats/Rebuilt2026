@@ -76,14 +76,14 @@ public class AlignTurretToHub extends Command {
       Translation2d errorFromPrev = prevPose.minus(currPose).getTranslation();
       double errorFromPrevRot = prevTurretRot - m_turret.getConvertedTurretPosition();
       Pose2d newTurretPose = new Pose2d(currPose.getTranslation(), turretAndRobot);
-      SmartDashboard.putNumber("errorFromPrev.getX", errorFromPrev.getX());
-      SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
-      SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
-      SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
-      SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
-      SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_targetPose.getTranslation()));
-      SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
-      SmartDashboard.putNumber("tunring_pos_setpoint", newError);
+      SmartDashboard.putNumber("Turret/AlignErrorX",          errorFromPrev.getX());
+      SmartDashboard.putNumber("Turret/AlignErrorY",          errorFromPrev.getY());
+      SmartDashboard.putNumber("Turret/AlignRobotRotError",   prevPose.minus(currPose).getRotation().getDegrees());
+      SmartDashboard.putNumber("Turret/AlignRotError",        errorFromPrevRot);
+      SmartDashboard.putNumber("Turret/TurretPlusRobotAngle", turretAndRobot.getDegrees());
+      SmartDashboard.putNumber("Turret/DistToHubM",           newTurretPose.getTranslation().getDistance(m_targetPose.getTranslation()));
+      SmartDashboard.putNumber("Turret/AlignmentErrorDeg",    turretToTargetAngle.getDegrees());
+      SmartDashboard.putNumber("Turret/PositionSetpointDeg",  newError);
       prevPose = currPose;
       prevTurretRot = m_turret.getConvertedTurretPosition();
     }

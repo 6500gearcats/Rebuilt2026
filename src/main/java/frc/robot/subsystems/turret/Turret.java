@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -25,6 +26,7 @@ public class Turret extends SubsystemBase {
   private boolean overridden = false;
   private boolean toZeroPos = false;
   TalonFXConfiguration talonFXConfigs;
+  private final Timer m_telemetryTimer = new Timer();
   // BOUNDS: 0.0 to 55 rotations
 
   public Turret() {
@@ -57,13 +59,19 @@ public class Turret extends SubsystemBase {
     slot2Configs.kD = 1;
 
     m_motor.getConfigurator().apply(talonFXConfigs);
+    m_telemetryTimer.start();
   }
 
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("switch on or off", m_switch.get());
-    SmartDashboard.putNumber("Motor Position", getMotorPosition());
-    SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
+    if (m_telemetryTimer.advanceIfElapsed(0.1)) {
+      SmartDashboard.putBoolean("Turret/LimitSwitch",       m_switch.get());
+      SmartDashboard.putNumber("Turret/MotorPositionRot",   getMotorPosition());
+      SmartDashboard.putNumber("Turret/PositionDeg",        getConvertedTurretPosition());
+      SmartDashboard.putNumber("Turret/StatorCurrentA",     m_motor.getStatorCurrent().getValueAsDouble());
+      SmartDashboard.putNumber("Turret/SupplyVoltageV",     m_motor.getSupplyVoltage().getValueAsDouble());
+      SmartDashboard.putNumber("Turret/TempC",              m_motor.getDeviceTemp().getValueAsDouble());
+    }
 
     if (toZeroPos) {
       if (!m_switch.get()) {
@@ -109,7 +117,7 @@ public class Turret extends SubsystemBase {
 
   public void setPosition(double deg) {
     double rotations = MathUtil.clamp(unconvertPosition(deg), 2.0, 53.0);
-    SmartDashboard.putNumber("UnconvPos", rotations);
+    SmartDashboard.putNumber("Turret/PositionSetpointRot", rotations);
     m_motor.setControl(m_request.withPosition(rotations));
   }
 

@@ -91,8 +91,8 @@ public final class RobotStateMachine {
         checkAlliance();
         exampleColor = whiteColor;
         m_telemetryTimer.start();
-        SmartDashboard.putString("RobotState", state.toString());
-        SmartDashboard.putString("FieldZone", currentZone.toString());
+        SmartDashboard.putString("Robot/State", state.toString());
+        SmartDashboard.putString("Robot/FieldZone", currentZone.toString());
     }
 
     public Flywheel getFlywheel() {
@@ -140,15 +140,20 @@ public final class RobotStateMachine {
             posePublisher.set(pose);
             turretPosePublisher.set(turretPose);
             newPostedValue();
-            SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
-            SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
-            SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
-            SmartDashboard.putString("RobotState", state.toString());
-            SmartDashboard.putString("FieldZone", currentZone.toString());
-            SmartDashboard.putBoolean("IsActive", isActive());
-            SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-            SmartDashboard.putNumber("distToTag2", distToTag());
-            SmartDashboard.putBoolean("isFacing", isFacingHub());
+            SmartDashboard.putBoolean("Robot/DriverConnected", joystick.isConnected());
+            SmartDashboard.putBoolean("Robot/GunnerConnected", m_gunner.isConnected());
+            SmartDashboard.putString("Robot/LEDColor", exampleColor.toHexString());
+            SmartDashboard.putString("Robot/State", state.toString());
+            SmartDashboard.putString("Robot/FieldZone", currentZone.toString());
+            SmartDashboard.putBoolean("Robot/IsActive", isActive());
+            SmartDashboard.putNumber("Robot/MatchTimeSec", DriverStation.getMatchTime());
+            SmartDashboard.putNumber("Robot/DistToHubM", distToTag());
+            SmartDashboard.putBoolean("Robot/IsFacingHub", isFacingHub());
+            ChassisSpeeds fieldSpeeds = getFieldSpeeds();
+            if (fieldSpeeds != null) {
+                SmartDashboard.putNumber("Robot/VelXMps", fieldSpeeds.vxMetersPerSecond);
+                SmartDashboard.putNumber("Robot/VelYMps", fieldSpeeds.vyMetersPerSecond);
+            }
         }
     }
 
@@ -344,7 +349,7 @@ public final class RobotStateMachine {
 
         // Sets the live countdown (prevents dropping below 0)
         double timeUntilSwitch = Math.max(0, matchTime - nextTargetTime);
-        SmartDashboard.putNumber("Time Until Switch", timeUntilSwitch);
+        SmartDashboard.putNumber("Robot/TimeUntilSwitchSec", timeUntilSwitch);
 
         // 2. Main State Machine
         if (gameData.contains("R")) {
