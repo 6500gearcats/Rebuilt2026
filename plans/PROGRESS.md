@@ -1,7 +1,7 @@
 ﻿# Rebuilt2026 Refactor — Implementation Progress
 
 **Branch:** `leto`  
-**Plan file:** `Rebuilt2026_MasterPlan.md`  
+**Plan file:** `Rebuilt2026_RefactorPlan.md`  
 **Last updated:** 2026-09-05
 
 ---
