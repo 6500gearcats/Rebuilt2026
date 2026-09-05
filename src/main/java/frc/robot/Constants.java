@@ -242,6 +242,9 @@ public final class Constants {
   public static class TurretConstants {
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
+    /** Turret base offset from robot center — measure from CAD in Stage 8-2 */
+    public static final Transform2d ROBOT_TO_TURRET_BASE = new Transform2d(
+        new Translation2d(0.0, 0.0), new Rotation2d()); // PLACEHOLDER
   }
 
 

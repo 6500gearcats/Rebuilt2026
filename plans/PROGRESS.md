@@ -75,12 +75,15 @@
 
 ## Stage 4 — Hackbots Integration (Files & Compile)
 
-| Description | Status |
-|-------------|--------|
-| Copy hood/turret Hackbots files into subsystem structure | ⬜ |
-| Resolve package names and imports | ⬜ |
-| Wire up CRT → single-CANcoder position (Hackbots change) | ⬜ |
-| Get project to compile with Hackbots files added | ⬜ |
+| Description | File(s) | Status | Commit |
+|-------------|---------|--------|--------|
+| Add `frc.robot.util` package: `OnboardLogger`, `StatusSignalUtil` | `util/` | ✅ | stage-4 |
+| Add `frc.robot.aiming` package (7 files): `AimParams`, `AimStrategy`, `AimConstraints`, `AimMeasurement`, `ToFAim`, `PhysicsAim`, `TuneAim` | `aiming/` | ✅ | stage-4 |
+| Add `frc.robot.subsystems.shooter` package (5 files): `Shooter`, `ShooterIO`, `ShooterIOHardware`, `ShooterIOSim`, `ShooterConstants` (CAN IDs = 0) | `subsystems/shooter/` | ✅ | stage-4 |
+| Add Hackbots turret IO layer: `TurretIO`, `TurretConstants` (single encoder, CAN IDs = 0), `TurretIOHardware` (simplified — no CRT), `TurretIOSim`, `TurretIODisabled` | `subsystems/turret/` | ✅ | stage-4 |
+| Add Stage 4 stub commands: `AimPrep`, `ShootWhenReady` | `commands/` | ✅ | stage-4 |
+| Add `ROBOT_TO_TURRET_BASE` placeholder to `Constants.TurretConstants` | `Constants.java` | ✅ | stage-4 |
+| Zero compile errors verified (`.\gradlew.bat compileJava`) | — | ✅ | stage-4 |
 
 **Source:** https://github.com/hackbots-3414/2026_Rebuilt  
 **Local clone:** `C:\projects\Gearcats\Hackbots\2026_Rebuilt\`
