@@ -140,6 +140,25 @@
 
 ---
 
+## Commenting Pass — Tutorial-Level Javadoc
+
+| File | Status | Commit |
+|------|--------|--------|
+| `aiming/AimParams.java` | ✅ | 6ba9932 |
+| `aiming/ToFAim.java` | ✅ | 6ba9932 |
+| `aiming/LeadCompensator.java` | ✅ | 6ba9932 |
+| `commands/AimPrep.java` | ✅ | 6ba9932 |
+| `commands/ShootWhenReady.java` | ✅ | 6ba9932 |
+| `subsystems/turret/Turret.java` | ✅ | 6ba9932 |
+| `subsystems/turret/TurretIO.java` | ✅ | 6ba9932 |
+| `subsystems/shooter/Shooter.java` | ✅ | 6ba9932 |
+| `subsystems/hopper/Hopper.java` | ✅ | 6ba9932 |
+| `superstructure/StateManager.java` | ✅ | 6ba9932 |
+| `RobotContainer.java` | ✅ | 6ba9932 |
+| `RobotStateMachine.java` | ✅ | 6ba9932 |
+
+---
+
 ## Stage 8 — Hardware, Wiring & Tuning
 
 | ID | Description | Status |
