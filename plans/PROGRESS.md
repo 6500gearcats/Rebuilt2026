@@ -92,11 +92,21 @@
 
 ## Stage 5 — Hackbots State Machine Wire-Up
 
-| Description | Status |
-|-------------|--------|
-| Migrate Hackbots `StateManager` logic into `RobotStateMachine` | ⬜ |
-| Wire `ToFAim` / `PhysicsAim` strategy into shooting sequence | ⬜ |
-| Integrate `DynamicMotionMagicVoltage` for hood/turret | ⬜ |
+| Description | File(s) | Status | Commit |
+|-------------|---------|--------|--------|
+| Replace `Flywheel m_Flywheel` → `Shooter m_Shooter` (mode-aware IO) | `RobotStateMachine.java` | ✅ | stage-5 |
+| Add `getAimParams()` via `ToFAim` strategy (Tag_POSE2D target, turret pose, field velocity) | `RobotStateMachine.java` | ✅ | stage-5 |
+| Add `isShootReady()` delegating to `Shooter.tracked()` | `RobotStateMachine.java` | ✅ | stage-5 |
+| Remove `updateTargetPose()` + `RangeFinder` dependency | `RobotStateMachine.java` | ✅ | stage-5 |
+| Replace Gearcats `Turret.java` with Hackbots version (uses `TurretIO`, `StateManager`) | `subsystems/turret/Turret.java` | ✅ | stage-5 |
+| Create `StateManager` bridge (robotPose / aimParams / shootReady Trigger) | `superstructure/StateManager.java` | ✅ | stage-5 |
+| Create `LocalizationConstants` stub (turret camera offset placeholder) | `vision/localization/LocalizationConstants.java` | ✅ | stage-5 |
+| Update `AimPrep` — parallel turret.track + shooter.shoot | `commands/AimPrep.java` | ✅ | stage-5 |
+| Update `ShootWhenReady` — waitUntil rsm::isShootReady, then feed | `commands/ShootWhenReady.java` | ✅ | stage-5 |
+| Simplify `SysIDUtil` — remove Flywheel/old Turret constructors (re-impl Stage 8) | `utility/SysIDUtil.java` | ✅ | stage-5 |
+| Delete superseded files (12 files) | `Flywheel`, `RangeFinder`, `CoolSnurbo`, `UncoolSnurbo`, `UpToSpeedHopperShoot`, `ShootingSequence`, `ShootingSequenceUTS`, `ShootFuel`, `AlignTurretToHub`, `SetTurretAngle`, `BurstFire`, `MoveTurret` | ✅ | stage-5 |
+| Update `RobotContainer` — Shooter wiring, new Turret(TurretIO), stub NamedCommands | `RobotContainer.java` | ✅ | stage-5 |
+| Zero compile errors verified (`.\gradlew.bat compileJava`) | — | ✅ | stage-5 |
 
 ---
 

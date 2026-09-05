@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Distance;
@@ -22,10 +21,15 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.aiming.AimConstraints;
+import frc.robot.aiming.AimParams;
+import frc.robot.aiming.ToFAim;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.turret.Flywheel;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterConstants;
+import frc.robot.subsystems.shooter.ShooterIOHardware;
+import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.utility.RangeFinder;
 
 /**
  * Singleton state machine that tracks robot state, pose, and field zone.
@@ -37,8 +41,8 @@ public final class RobotStateMachine {
     private String gameData = "";
     private boolean gotData = false;
 
-    public double shooterSpeed;
-    public double reqShooterSpeed;
+    private static final AimConstraints kScoringConstraints = new AimConstraints(
+        Rotation2d.fromDegrees(40), Rotation2d.fromDegrees(80), 100.0);
 
     private boolean switching = false;
     private boolean switchingRed = false;
@@ -53,7 +57,11 @@ public final class RobotStateMachine {
     private Pose2d turretPose = new Pose2d();
 
     private Vision m_vision;
-    private Flywheel m_Flywheel = new Flywheel(this);
+    private final Shooter m_Shooter = new Shooter(
+        Constants.RobotConstants.currentMode == Constants.Mode.REAL
+            ? new ShooterIOHardware()
+            : new ShooterIOSim());
+    private final ToFAim m_tofAim = new ToFAim(ShooterConstants.scoringMeasurements, kScoringConstraints);
 
     public static Pose3d Tag_POSE2D;
 
@@ -95,8 +103,21 @@ public final class RobotStateMachine {
         SmartDashboard.putString("Robot/FieldZone", currentZone.toString());
     }
 
-    public Flywheel getFlywheel() {
-        return m_Flywheel;
+    public Shooter getShooter() {
+        return m_Shooter;
+    }
+
+    public AimParams getAimParams() {
+        if (Tag_POSE2D == null) return AimParams.impossible();
+        ChassisSpeeds fs = getFieldSpeeds();
+        Translation2d velocity = (fs != null)
+            ? new Translation2d(fs.vxMetersPerSecond, fs.vyMetersPerSecond)
+            : Translation2d.kZero;
+        return m_tofAim.update(Tag_POSE2D, new Pose3d(turretPose), velocity);
+    }
+
+    public boolean isShootReady() {
+        return m_Shooter.tracked(() -> getAimParams()).getAsBoolean();
     }
 
     public CommandXboxController getDriver() {
@@ -124,8 +145,6 @@ public final class RobotStateMachine {
      */
     public void periodic() {
         // Control-critical — run every loop
-        reqShooterSpeed = m_Flywheel.getReqSpeed();
-        shooterSpeed = m_Flywheel.getSpeed();
         gameData = DriverStation.getGameSpecificMessage();
         alliance = getAlliance();
         checkAlliance();
@@ -133,7 +152,6 @@ public final class RobotStateMachine {
         currentZone = checkZone();
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
-        updateTargetPose();
 
         // Display-only — 10 Hz to reduce SmartDashboard/NT4 overhead
         if (m_telemetryTimer.advanceIfElapsed(0.1)) {
@@ -202,42 +220,6 @@ public final class RobotStateMachine {
         return targetPose;
     }
 
-    public void updateTargetPose() {
-        ChassisSpeeds speeds = getFieldSpeeds();
-        if (speeds == null) {
-            return;
-        }
-
-        if (speeds.vxMetersPerSecond < 0 && speeds.vyMetersPerSecond < 0) {
-            speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.vyMetersPerSecond * 1.3,
-                    speeds.omegaRadiansPerSecond);
-        }
-
-        Pose2d nextPose = new Pose2d(pose.getX() + speeds.vxMetersPerSecond * 0.2,
-                pose.getY() + speeds.vyMetersPerSecond * 0.2, new Rotation2d());
-
-        double distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
-        double shotVelocity = RangeFinder.getShotVelocity(distance);
-
-        // Apx launch angle is 65 deg
-        double shootAng = Units.degreesToRadians(65);
-        double dh = Units.inchesToMeters(56.375 - 19); // Delta height in inches
-        double timeOfFlight = ((shotVelocity * Math.sin(shootAng))
-                + Math.sqrt(Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) - (2 * 9.8 * dh))) / 9.8;
-
-        Optional<Pose2d> bestPose = getBestPoseTarget();
-        if (bestPose.isEmpty()) {
-            return;
-        }
-
-        Pose2d best = bestPose.get();
-        targetPose = new Pose2d(best.getX() + (-speeds.vxMetersPerSecond * timeOfFlight * 0.1),
-                best.getY() + (-speeds.vyMetersPerSecond * timeOfFlight * 0.1),
-                new Rotation2d());
-
-        targetPosePublisher.set(targetPose);
-    }
-
     public ChassisSpeeds getFieldSpeeds() {
         if (drivetrain == null) {
             return null;
@@ -268,10 +250,6 @@ public final class RobotStateMachine {
 
     public BooleanSupplier isFarEnough() {
         return () -> distToTag() > 4.2;
-    }
-
-    public boolean isUpToSpeed() {
-        return Math.abs(reqShooterSpeed - shooterSpeed) < 2;
     }
 
     public boolean isFacingHub() {

@@ -12,62 +12,51 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import java.util.Optional;
-
 import org.photonvision.simulation.SimCameraProperties;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotConstants;
-import frc.robot.commands.AlignTurretToHub;
-import frc.robot.commands.BurstFire;
-
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import frc.robot.commands.CoolSnurbo;
-import frc.robot.commands.MoveTurret;
+import frc.robot.commands.AimPrep;
 import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
-import frc.robot.commands.SetTurretAngle;
-import frc.robot.commands.ShootFuel;
-import frc.robot.commands.ShootingSequence;
-import frc.robot.commands.ShootingSequenceUTS;
+import frc.robot.commands.ShootWhenReady;
+
+import edu.wpi.first.wpilibj.GenericHID;
 import frc.robot.generated.TunerConstants;
-import frc.robot.generated.TunerConstants2;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
-import frc.robot.subsystems.turret.Flywheel;
-import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.TurretIODisabled;
+import frc.robot.subsystems.turret.TurretIOHardware;
+import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
-import frc.robot.utility.ShooterValuesSenable;
+import frc.robot.superstructure.StateManager;
 import frc.robot.utility.SysIDUtil;
 
 /**
@@ -76,23 +65,16 @@ import frc.robot.utility.SysIDUtil;
 public class RobotContainer {
         @SuppressWarnings("unused")
         private double speedModify = 1;
-        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
-                                                                                      // speed
-        private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
-                                                                                          // second
-                                                                                          // max angular velocity
+        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+        private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
-        /* Setting up bindings for necessary control of the swerve drive platform */
         private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
-                                                                                 // motors
+                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
+                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
         private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
         private final CommandXboxController joystick;
-        private final CommandPS4Controller pranav = new CommandPS4Controller(0);
-
         private final CommandXboxController joystick2 = new CommandXboxController(1);
         private final XboxController m_gunner;
 
@@ -104,15 +86,13 @@ public class RobotContainer {
 
         private final SendableChooser<Command> autoChooser;
 
-        private final Flywheel m_flywheel;
+        private final Shooter m_shooter;
 
-        private final Turret m_turret = new Turret();
+        private Turret m_turret;
 
         private final Intake m_intake = new Intake();
 
-
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
-        private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
         SysIDUtil m_turretSysID = new SysIDUtil();
         SysIDUtil m_flywheelSysID = new SysIDUtil();
@@ -120,6 +100,8 @@ public class RobotContainer {
         // Vision
         PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
+
+        private final StateManager m_stateManager;
 
         SlewRateLimiter filterXLimiter = new SlewRateLimiter(20);
         SlewRateLimiter filterYLimiter = new SlewRateLimiter(20);
@@ -129,49 +111,35 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
-                m_flywheel = robotStateMachine.getFlywheel();
+                m_shooter = robotStateMachine.getShooter();
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
+                m_stateManager = new StateManager(robotStateMachine);
+
+                // PathPlanner auto commands — shooting/turret stubs re-implemented in Stage 6
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
                                 new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
-                NamedCommands.registerCommand("ShootFuel", new ShootingSequence(hopper, m_flywheel, m_turret));
-                NamedCommands.registerCommand("ShootFuel3s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(3.2));
-                NamedCommands.registerCommand("ShootFuel10s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(10.0));
-                NamedCommands.registerCommand("ShootFuel7s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(7.0));
-                NamedCommands.registerCommand("ShootFuel5s",
-                                new ShootingSequence(hopper, m_flywheel, m_turret).withTimeout(5.0));
-                NamedCommands.registerCommand("NewShootFuel3s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(3.0));
-                NamedCommands.registerCommand("ManualShootFuel3s",
-                                new ShootingSequenceUTS(hopper, m_flywheel)
-                                                .withTimeout(3.0));
-                NamedCommands.registerCommand("TrenchStartAngle",
-                                new SetTurretAngle(m_turret, -90).withTimeout(1));
-                NamedCommands.registerCommand("NewShootFuel5s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(5.0));
-                NamedCommands.registerCommand("NewShootFuel10s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(10.0));
-                NamedCommands.registerCommand("NewShootFuel4s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(4.0));
-                NamedCommands.registerCommand("NewShootFuel8s",
-                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret, robotStateMachine)
-                                                .withTimeout(8.0));
-                NamedCommands.registerCommand("AlignTurret", new AlignTurretToHub(m_turret));
-                NamedCommands.registerCommand("AlignTurret1s", new AlignTurretToHub(m_turret).withTimeout(1));
+                NamedCommands.registerCommand("ShootFuel", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("ShootFuel3s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("ShootFuel10s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("ShootFuel7s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("ShootFuel5s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("NewShootFuel3s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("ManualShootFuel3s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("TrenchStartAngle", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("NewShootFuel5s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("NewShootFuel10s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("NewShootFuel4s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("NewShootFuel8s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("AlignTurret", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("AlignTurret1s", Commands.none()); // TODO Stage 6
                 NamedCommands.registerCommand("BopBop",
                                 new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
-                NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
+                NamedCommands.registerCommand("SpeedUp", Commands.none()); // TODO Stage 6
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
                 autoChooser = AutoBuilder.buildAutoChooser("testAuto");
@@ -192,16 +160,11 @@ public class RobotContainer {
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
                                                 m_photonVisionIO2);
-                                m_turret.goToZero();
-                                m_turretSysID = new SysIDUtil(m_turret);
-                                m_flywheelSysID = new SysIDUtil(m_flywheel);
+                                m_turret = new Turret(new TurretIOHardware());
                                 break;
                         case SIM:
-                                // TODO: Add Real Camera Constants to use here
                                 SimCameraProperties cameraProp = new SimCameraProperties();
                                 cameraProp.setCalibration(640, 480, Rotation2d.fromDegrees(100));
-                                // Approximate detection noise with average and standard deviation error in
-                                // pixels.
                                 cameraProp.setCalibError(0.25, 0.08);
                                 cameraProp.setFPS(60);
                                 cameraProp.setAvgLatencyMs(35);
@@ -214,11 +177,11 @@ public class RobotContainer {
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 camSim);
-                                m_flywheelSysID = new SysIDUtil(m_flywheel);
-
+                                m_turret = new Turret(new TurretIOSim());
                                 break;
                         default:
                                 m_vision = new Vision();
+                                m_turret = new Turret(new TurretIODisabled());
                                 break;
                 }
                 configureBindings();
@@ -231,75 +194,50 @@ public class RobotContainer {
          * Configures controller bindings and default commands.
          */
         private void configureBindings() {
-                // Note that X is defined as forward according to WPILib convention,
-                // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
-        //m_flywheel.setDefaultCommand(new RunCommand(()-> m_flywheel.setSpeed(RangeFinder.getShotVelocity(
-        //robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
-                                .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive left with negative X (left)
-                                .withRotationalRate(MathUtil.applyDeadband(joystick.getRightX(), 0.1) * MaxAngularRate * m_flywheel.speedModifier))); // Drive counterclockwise with negative X (left)
+                        () -> drive.withVelocityX(MathUtil.applyDeadband(joystick.getLeftY(), 0.1) * MaxSpeed)
+                                .withVelocityY(MathUtil.applyDeadband(joystick.getLeftX(), 0.1) * MaxSpeed)
+                                .withRotationalRate(MathUtil.applyDeadband(joystick.getRightX(), 0.1) * MaxAngularRate)));
         // @formatter:on
-                // Idle while the robot is disabled. This ensures the configured
-                // neutral mode is applied to the drive motors while disabled.
                 final var idle = new SwerveRequest.Idle();
                 RobotModeTriggers.disabled().whileTrue(
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-                // Reset the field-centric heading on left bumper press.
                 joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
 
-                // new Trigger(() -> Math.abs(joystick2.getRightX()) > 0.1)
-                // .whileTrue(new MoveTurret(m_turret, () -> joystick2.getRightX() * 0.2));
-
-                // joystick2.povRight().whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                // joystick2.povLeft().whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                // Intake
                 new Trigger(() -> Math.abs(m_gunner.getRightTriggerAxis()) > 0.1)
                                 .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.2)));
-                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
-
-                // joystick.rightBumper().onTrue(new RunHopper(hopper));
-                joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
                 joystick.leftBumper().whileTrue(new RunIntake(m_intake, -3));
 
+                // Shooter: rightBumper reverses, gunner left trigger → aim + shoot
+                joystick.rightBumper().whileTrue(m_shooter.reverse());
+
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
-                                .whileTrue(new ParallelCommandGroup(new RunCommand(
-                                                () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
-                                                new ShootingSequenceUTS(hopper, m_flywheel, m_turret,
-                                                                robotStateMachine)))
+                                .whileTrue(new ParallelCommandGroup(
+                                        new RunCommand(() -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 1)),
+                                        new AimPrep().build(m_turret, m_shooter, m_stateManager)))
                                 .onFalse(new InstantCommand(
-                                                () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
-                                                .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
+                                        () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0)));
 
-                joystick.y().onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-                joystick.back().onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
-                                .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
-
-                joystick.a().whileTrue(new AlignTurretToHub(m_turret));
-                new JoystickButton(m_gunner, XboxController.Button.kX.value)
-                                .onTrue(new InstantCommand(() -> m_turret.goToZero()));
+                // Gunner left bumper → feed when ready
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
-                                .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
-                new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
+                                .whileTrue(new ShootWhenReady().build(hopper, robotStateMachine));
 
-                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+                // Turret homing
+                joystick.y().onTrue(m_turret.home());
+                new JoystickButton(m_gunner, XboxController.Button.kX.value)
+                                .onTrue(m_turret.home());
 
-                if (m_flywheelSysID.isPresent()) {
-                        // Driver Back + A
-                        joystick.b().onTrue(m_flywheelSysID.sysIdAll().get()
-                                        .andThen(new InstantCommand(() -> System.out
-                                                        .println("Get Hoot Logs from TunerX"))));
-                }
+                // TODO Stage 6: POV 90/270 for manual turret jog (MoveTurret removed in Stage 5)
+                // TODO Stage 6: POV 0/180 for aim tuning
         }
 
         /**
          * Returns the currently selected autonomous command.
-         *
-         * @return selected command from the auto chooser
          */
         public Command getAutonomousCommand() {
                 return autoChooser.getSelected();

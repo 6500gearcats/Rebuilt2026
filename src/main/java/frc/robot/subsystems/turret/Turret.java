@@ -1,145 +1,164 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems.turret;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
+import static edu.wpi.first.units.Units.Rotations;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Timer;
+import java.util.function.Supplier;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.aiming.AimParams;
+import frc.robot.subsystems.turret.TurretIO.TurretIOInputs;
+import frc.robot.superstructure.StateManager;
+import frc.robot.util.OnboardLogger;
+import frc.robot.vision.localization.LocalizationConstants;
 
-/**
- * Turret subsystem that controls the yaw motor and tracks its position.
- */
 public class Turret extends SubsystemBase {
-  private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
-  private PositionVoltage m_request;
-  private final DigitalInput m_switch = new DigitalInput(4);
-  private boolean overridden = false;
-  private boolean toZeroPos = false;
-  TalonFXConfiguration talonFXConfigs;
-  private final Timer m_telemetryTimer = new Timer();
-  // BOUNDS: 0.0 to 55 rotations
 
-  public Turret() {
-    m_request = new PositionVoltage(0).withSlot(2);
-    talonFXConfigs = new TalonFXConfiguration();
+  private final TurretIO io;
+  private final TurretIOInputs inputs;
 
-    var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.2;
-    slot0Configs.kV = 5;
-    slot0Configs.kA = 3;
-    slot0Configs.kP = 3;
-    slot0Configs.kI = 0;
-    slot0Configs.kD = 0.4;
+  private final Alert calibrationAlert =
+      new Alert("Turret not calibrated successfully", AlertType.kError);
 
-    var slot1Configs = talonFXConfigs.Slot1;
-    slot1Configs.kS = 0.2;
-    slot1Configs.kV = SmartDashboard.getNumber("kV", 0);
-    slot1Configs.kA = SmartDashboard.getNumber("kA", 0);
-    slot1Configs.kP = SmartDashboard.getNumber("kP", 0);
-    slot1Configs.kI = 0;
-    slot1Configs.kD = SmartDashboard.getNumber("kD", 0);
+  private boolean tracking;
 
-    // This one is good
-    var slot2Configs = talonFXConfigs.Slot2;
-    slot2Configs.kS = 0.2;
-    slot2Configs.kV = 13;
-    slot2Configs.kA = 5;
-    slot2Configs.kP = 6;
-    slot2Configs.kI = 0;
-    slot2Configs.kD = 1;
+  private Angle reference = TurretConstants.kHomePosition;
 
-    m_motor.getConfigurator().apply(talonFXConfigs);
-    m_telemetryTimer.start();
+  public Turret(TurretIO io) {
+    super();
+    this.io = io;
+    inputs = new TurretIOInputs();
+    io.calibrate();
+    SmartDashboard.putData("Turret/Home", home());
+    Command calibrate = runOnce(io::calibrate).ignoringDisable(true);
+    SmartDashboard.putData("Turret/Calibrate", calibrate);
+    RobotModeTriggers.disabled().onTrue(calibrate);
+
+    OnboardLogger log = new OnboardLogger("Turret");
+    log.registerBoolean("Ready", ready());
+    log.registerBoolean("Tracking", () -> tracking);
+    log.registerMeasurement("Reference", () -> reference, Rotations);
   }
 
   @Override
   public void periodic() {
-    if (m_telemetryTimer.advanceIfElapsed(0.1)) {
-      SmartDashboard.putBoolean("Turret/LimitSwitch",       m_switch.get());
-      SmartDashboard.putNumber("Turret/MotorPositionRot",   getMotorPosition());
-      SmartDashboard.putNumber("Turret/PositionDeg",        getConvertedTurretPosition());
-      SmartDashboard.putNumber("Turret/StatorCurrentA",     m_motor.getStatorCurrent().getValueAsDouble());
-      SmartDashboard.putNumber("Turret/SupplyVoltageV",     m_motor.getSupplyVoltage().getValueAsDouble());
-      SmartDashboard.putNumber("Turret/TempC",              m_motor.getDeviceTemp().getValueAsDouble());
+    io.updateInputs(inputs);
+    calibrationAlert.set(!inputs.calibrated);
+  }
+
+  /**
+   * Continually tracks the aim target from the {@link StateManager}, accounting for robot rotation.
+   */
+  public Command track(StateManager state) {
+    return Commands.sequence(
+        this.run(() -> {
+          tracking = true;
+          Rotation2d robot = state.robotPose().getRotation();
+          AimParams params = state.aimParams();
+          if (!params.isOk()) {
+            return;
+          }
+          Angle mechanismAngle = params.yaw.minus(robot).getMeasure().plus(TurretConstants.kForwards);
+          setPosition(mechanismAngle, !state.shootReady.getAsBoolean());
+        }))
+        .finallyDo(() -> tracking = false);
+  }
+
+  /**
+   * Sends the turret to its home position and waits until it arrives.
+   */
+  public Command home() {
+    return Commands.sequence(
+        runOnce(() -> setPosition(TurretConstants.kHomePosition, false)),
+        Commands.waitUntil(ready()));
+  }
+
+  public Command forwards() {
+    return Commands.sequence(
+        runOnce(() -> setPosition(TurretConstants.kForwards, false)),
+        Commands.waitUntil(ready()));
+  }
+
+  /**
+   * Trigger that is true while the turret is at its reference position.
+   */
+  public Trigger ready() {
+    return new Trigger(() -> {
+      double delta = inputs.position.minus(inputs.reference).baseUnitMagnitude();
+      return Math.abs(delta) <= TurretConstants.kTolerance.baseUnitMagnitude();
+    });
+  }
+
+  public Trigger tracked(Supplier<AimParams> params) {
+    return new Trigger(() -> {
+      double delta = inputs.position.minus(inputs.reference).baseUnitMagnitude();
+      double epsilon = params.get().deltaYaw.getMeasure().baseUnitMagnitude();
+      return Math.abs(delta) <= epsilon && tracking;
+    });
+  }
+
+  public Pose3d turretPose(Pose2d robotPose) {
+    return new Pose3d(robotPose).transformBy(TurretConstants.kOffset);
+  }
+
+  /** Calculates the "ideal" position for the turret, choosing the closest congruent turn. */
+  private void setPosition(Angle position, boolean tracking) {
+    Angle min = TurretConstants.kMinAngle;
+    Angle max = TurretConstants.kMaxAngle;
+    reference = Rotations.of(findCC(
+        inputs.position.in(Rotations),
+        position.in(Rotations),
+        min.in(Rotations),
+        max.in(Rotations)));
+    io.setPosition(reference);
+  }
+
+  /**
+   * Returns the Closest Congruent value in the range [min, max], modulo 1.
+   *
+   * @param position  current non-wrapped position
+   * @param reference goal position in [0, 1]
+   * @param min       minimum position
+   * @param max       maximum position
+   */
+  protected static double findCC(double position, double reference, double min, double max) {
+    while (reference > max) reference -= 1.0;
+    while (reference < min) reference += 1.0;
+
+    if (reference > max) return max;
+
+    double error = Math.abs(reference - position);
+    if (error < 0.5) return reference;
+
+    double offset = (reference > position) ? -1 : 1;
+    while (true) {
+      double newReference = reference + offset;
+      if (newReference > max || newReference < min) break;
+      double newError = Math.abs(newReference - position);
+      if (Math.abs(newError) < 0.5) return newReference;
+      reference = newReference;
     }
-
-    if (toZeroPos) {
-      if (!m_switch.get()) {
-        m_motor.set(-0.5);
-      } else {
-        m_motor.set(0);
-        zeroMotorPosition();
-        toZeroPos = false;
-      }
-    }
+    return reference;
   }
 
-  public void setSpeed(double speed) {
-    if (!overridden) {
-      if (getMotorPosition() < 2 && speed < 0) {
-        speed = 0;
-      } else if (getMotorPosition() > 53 && speed > 0) {
-        speed = 0;
-      }
-    }
-    m_motor.set(speed);
-  }
-
-  public void toggleOverride() {
-    overridden = !overridden;
-  }
-
-  public double getMotorPosition() {
-    return m_motor.getPosition().getValueAsDouble();
-  }
-
-  public void zeroMotorPosition() {
-    m_motor.setPosition(0);
-  }
-
-  public double getConvertedTurretPosition() {
-    return -((getMotorPosition() * 4) - 110);
-  }
-
-  public double unconvertPosition(double pos) {
-    return ((-1 * pos) + 110) / 4;
-  }
-
-  public void setPosition(double deg) {
-    double rotations = MathUtil.clamp(unconvertPosition(deg), 2.0, 53.0);
-    SmartDashboard.putNumber("Turret/PositionSetpointRot", rotations);
-    m_motor.setControl(m_request.withPosition(rotations));
-  }
-
-  public double getSpeed() {
-    return m_motor.getVelocity().getValueAsDouble();
-  }
-
-  public void goToZero() {
-    toZeroPos = true;
-  }
-
-  public void updateSlotConfigs() {
-    var slot = talonFXConfigs.Slot1;
-    slot.kV = SmartDashboard.getNumber("kV", 0);
-    slot.kA = SmartDashboard.getNumber("kA", 0);
-    slot.kP = SmartDashboard.getNumber("kP", 0);
-    slot.kI = SmartDashboard.getNumber("kI", 0);
-    slot.kD = SmartDashboard.getNumber("kD", 0);
-    m_request = new PositionVoltage(0).withSlot(1);
-  }
-
-  public void setControl(ControlRequest req) {
-    m_motor.setControl(req);
+  public Transform3d turretCameraOffset() {
+    Transform3d turretRelative =
+        new Transform3d(Translation3d.kZero,
+            new Rotation3d(new Rotation2d(inputs.position.minus(TurretConstants.kForwards))))
+            .plus(LocalizationConstants.kTurretAoRToTurretCameraOffset);
+    return TurretConstants.kOffset.plus(turretRelative);
   }
 }
