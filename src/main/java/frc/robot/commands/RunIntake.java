@@ -11,7 +11,7 @@ import frc.robot.subsystems.intake.Intake;
 public class RunIntake extends Command {
   /** Creates a new RunIntake. */
   private Intake m_intake;
-  private double speed;;
+  private double speed;
 
   public RunIntake(Intake intake, double speed) {
     m_intake = intake;

@@ -14,7 +14,7 @@ public class CoolSnurbo extends Command {
 
   public CoolSnurbo(Flywheel m_flywheel) {
     this.m_flywheel = m_flywheel;
-    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(m_flywheel);
   }
 
   // Called when the command is initially scheduled.

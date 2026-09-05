@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -19,50 +18,30 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.derive;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.StandardOpenOption;
 import java.util.Optional;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
-import javax.crypto.ShortBufferException;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.photonvision.simulation.SimCameraProperties;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
 import frc.robot.commands.BurstFire;
@@ -88,8 +67,6 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.limelight.LimelightHelpers;
-import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.utility.RangeFinder;
@@ -218,21 +195,12 @@ public class RobotContainer {
                                 PhotonVisionIO m_photonVisionIO2 = new PhotonVisionIO("Thrifty_cam_1", false,
                                                 new Translation3d(0.254, 0.254, 0.2032),
                                                 new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
-                                LimelightIO m_ll = new LimelightIO("limelight-gcd", true, drivetrain.rotationSupplier(),
-                                                drivetrain.getAngularVel(),
-                                                false);
-                                LimelightIO m_ll2 = new LimelightIO("limelight-gcc", true,
-                                                drivetrain.rotationSupplier(),
-                                                drivetrain.getAngularVel(),
-                                                false);
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
                                                 m_photonVisionIO,
-                                                m_photonVisionIO2,
-                                                m_ll,
-                                                m_ll2);
+                                                m_photonVisionIO2);
                                 m_turret.goToZero();
                                 m_turretSysID = new SysIDUtil(m_turret);
                                 m_flywheelSysID = new SysIDUtil(m_flywheel);
@@ -348,62 +316,13 @@ public class RobotContainer {
                 return autoChooser.getSelected();
         }
 
-        /**
-         * Sets the initial robot and camera orientation for the primary Limelight.
-         */
         public void setRobotOrientation() {
-                Optional<Alliance> alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                        if (alliance.get().equals(Alliance.Blue)) {
-                                // drivetrain.resetPose(new Pose2d());
-                                // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
-                                drivetrain.seedFieldCentric();
-
-                                // GCD
-                                LimelightHelpers.SetRobotOrientation("limelight-gcd",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.26, 0.273, 0.15, 0, 150,
-                                                45);
-
-                                // GCC
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0,
-                                                0);
-
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.26, -0.273, 0.15,
-                                                0, 150,
-                                                -45);
-                        } else {
-                                // drivetrain.resetPose(new Pose2d());
-                                drivetrain.seedFieldCentric();
-                                // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
-
-                                // GCD
-                                LimelightHelpers.SetRobotOrientation("limelight-gcd",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                                0);
-
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.26, 0.273, 0.15, 0, 150,
-                                                45);
-
-                                // GCC
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                                0);
-
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.26, -0.273, 0.15,
-                                                0, 150,
-                                                -45);
-                        }
-                }
+                drivetrain.seedFieldCentric();
         }
 
         public void disableInitCode() {
-                m_vision.throttleLimelight();
         }
 
         public void disableExitCode() {
-                m_vision.resetLimelightThrottle();
         }
 }

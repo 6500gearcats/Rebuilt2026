@@ -642,10 +642,6 @@ public final class RobotStateMachine {
         }
     }
 
-    public double getPoseTime() {
-        return m_vision.getPoseTime();
-    }
-
     /**
      * Determines the field zone based on the current pose and alliance.
      *

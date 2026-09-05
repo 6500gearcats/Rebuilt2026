@@ -23,15 +23,12 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 
 public class Vision extends SubsystemBase {
@@ -148,7 +145,6 @@ public class Vision extends SubsystemBase {
     if (isReplay) {
       return;
     }
-    Pose2d lastPose = getEstimatedPose();
     estimator.update(
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
@@ -210,43 +206,7 @@ public class Vision extends SubsystemBase {
     return estimator.getEstimatedPosition();
   }
 
-  public double getPoseTime() {
-    for (VisionIO io : m_visionOdometryCams) {
-      if (io instanceof LimelightIO) {
-        return ((LimelightIO) io).getPoseTime();
-      }
-    }
-    return 0;
-  }
-
-  // public Optional<Pose2d> getEstPoses(String name) {
-  // for (VisionIO io : m_visionOdometryCams) {
-  // if (io instanceof LimelightIO) {
-  // if (name.equals(io.getName())) {
-  // return Optional.of(((LimelightIO) io).getEstPoses());
-  // }
-  // }
-  // }
-  // return Optional.empty();
-  // }
-
   public void resetVisionPose(Pose2d pose) {
     estimator.resetPose(pose);
-  }
-
-  public void throttleLimelight() {
-    for (VisionIO vision : m_visionOdometryCams) {
-      if (vision instanceof LimelightIO) {
-        ((LimelightIO) vision).throttleTemp();
-      }
-    }
-  }
-
-  public void resetLimelightThrottle() {
-    for (VisionIO vision : m_visionOdometryCams) {
-      if (vision instanceof LimelightIO) {
-        ((LimelightIO) vision).resetThrottle();
-      }
-    }
   }
 }
