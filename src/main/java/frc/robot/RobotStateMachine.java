@@ -34,7 +34,39 @@ import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.vision.Vision;
 
 /**
- * Singleton state machine that tracks robot state, pose, and field zone.
+ * Singleton that owns the robot's state, pose, aiming pipeline, and field-zone tracking.
+ *
+ * <h2>Why a Singleton?</h2>
+ * Many subsystems and commands need access to the same robot pose and aim state (drive, vision,
+ * turret, shooter, auto). A singleton eliminates the need to pass references through every
+ * constructor and keeps the shared state in one place. The instance is created eagerly at class
+ * load time (see {@link #instance}) so there is no thread-safety risk from lazy initialization.
+ *
+ * <h2>Aiming Pipeline</h2>
+ * The full shot-computation chain runs on-demand via {@link #getAimParams()}:
+ * <pre>
+ *   getAimParams()
+ *     → LeadCompensator.computeLeadTarget(hub, turretPose, fieldVelocity, m_tofAim)
+ *         → m_tofAim.update(virtualTarget, turretPose, kZero)   [15-iter convergence]
+ *         → AimParams { yaw, pitch, output, tof }
+ *     → m_tofAim.update(virtualTarget, turretPose, kZero)       [final params]
+ *     → AimParams (used by Turret.track and Shooter.shoot)
+ * </pre>
+ *
+ * <h2>Periodic Structure</h2>
+ * {@link #periodic()} has two tiers:
+ * <ul>
+ *   <li><b>Every loop (50 Hz):</b> pose update, field-zone check, turret pose calculation.
+ *       These feed directly into the 20 ms control loop and must run each cycle.
+ *   <li><b>10 Hz (rate-limited by {@code m_telemetryTimer}):</b> SmartDashboard writes, NT4
+ *       struct publishes, LED color updates. Slower SmartDashboard writes reduce NT4 bandwidth
+ *       and prevent loop overruns (see Stage 0 for the overrun history).
+ * </ul>
+ *
+ * <h2>LED / Color State Machine</h2>
+ * The {@link #getState()} method implements a schedule-driven LED pattern based on the match
+ * timer and game-specific data from the Driver Station. Red flashes, green flashes, and solid
+ * colors signal alliance-specific scoring windows to the drive team.
  */
 public final class RobotStateMachine {
     private static final RobotStateMachine instance = new RobotStateMachine();
@@ -111,6 +143,33 @@ public final class RobotStateMachine {
         return m_Shooter;
     }
 
+    /**
+     * Runs the full aiming pipeline and returns the current lead-compensated shot parameters.
+     *
+     * <p>Called every loop by:
+     * <ul>
+     *   <li>{@code Shooter.tracked()} (polled by the WPILib scheduler via the Trigger)
+     *   <li>{@code Turret.track()} (inside the tracking run() command)
+     *   <li>{@code periodic()} at 10 Hz for SmartDashboard telemetry
+     * </ul>
+     *
+     * <h2>Pipeline</h2>
+     * <ol>
+     *   <li>Guard: if no AprilTag pose is available yet, return {@link AimParams#impossible()}.
+     *   <li>Get field-relative velocity from drivetrain. Use zero if drivetrain is not yet bound
+     *       (prevents NPE during simulation startup before drivetrain is wired).
+     *   <li>{@link LeadCompensator#computeLeadTarget} iterates 5 times to find the virtual target
+     *       pose that compensates for robot motion during ball flight. Caches result in
+     *       {@code m_lastLeadTarget} for telemetry ({@code Aiming/LeadOffsetXM/YM}).
+     *   <li>{@link ToFAim#update} computes final pitch, speed, yaw, and TOF from the virtual
+     *       target distance. Called with {@link Translation2d#kZero} velocity because lead
+     *       compensation was already handled by {@link LeadCompensator}.
+     * </ol>
+     *
+     * @return shot parameters; status is {@link frc.robot.aiming.AimParams.AimStatus#Impossible}
+     *         when no target is available, the distance is out of range, or the required angle
+     *         violates {@code kScoringConstraints}
+     */
     public AimParams getAimParams() {
         if (Tag_POSE2D == null) return AimParams.impossible();
         ChassisSpeeds fs = getFieldSpeeds();
@@ -118,6 +177,8 @@ public final class RobotStateMachine {
             ? new Translation2d(fs.vxMetersPerSecond, fs.vyMetersPerSecond)
             : Translation2d.kZero;
         Pose3d shooterPose = new Pose3d(turretPose);
+        // Outer lead-compensation loop — shifts the hub by -velocity*tof to get a virtual target.
+        // Passes kZero to ToFAim so lead is not double-counted inside ToFAim's own loop.
         m_lastLeadTarget = LeadCompensator.computeLeadTarget(Tag_POSE2D, shooterPose, velocity, m_tofAim);
         return m_tofAim.update(m_lastLeadTarget, shooterPose, Translation2d.kZero);
     }
@@ -147,19 +208,38 @@ public final class RobotStateMachine {
     }
 
     /**
-     * Updates pose, field zone, and publishes telemetry.
+     * Called by the WPILib framework every 20 ms (50 Hz). Updates all control-critical state
+     * and publishes telemetry at a reduced rate to avoid loop overruns.
+     *
+     * <h2>Tier 1 — Every Loop (control-critical)</h2>
+     * <ul>
+     *   <li>Game-specific data: used by the LED state machine to know which scoring windows
+     *       are active for this alliance.
+     *   <li>Pose refresh: fuses the latest vision estimate into the odometry pose. Runs every
+     *       loop so the aiming pipeline always has the freshest position.
+     *   <li>Field zone: determines ALLIANCE / NEUTRAL / OPPONENT for game-state LED feedback.
+     *   <li>Turret pose: recomputes the turret's field position from the current robot pose and
+     *       a fixed offset. Used as the shooter origin in the aiming pipeline.
+     * </ul>
+     *
+     * <h2>Tier 2 — 10 Hz (display only)</h2>
+     * SmartDashboard and NT4 struct publishes do not affect control; they only provide
+     * AdvantageScope / Shuffleboard visibility. Rate-limiting to 10 Hz reduces the NT4 update
+     * flood that caused loop overruns before Stage 0.
      */
     public void periodic() {
-        // Control-critical — run every loop
+        // --- Tier 1: control-critical, every loop ---
         gameData = DriverStation.getGameSpecificMessage();
         alliance = getAlliance();
         checkAlliance();
         refreshPoseFromVision();
         currentZone = checkZone();
+        // Turret is mounted 0.1524 m behind and 0.0635 m to the left of robot center (field frame),
+        // then rotated with the robot. This gives the actual field position of the launch point.
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
 
-        // Display-only — 10 Hz to reduce SmartDashboard/NT4 overhead
+        // --- Tier 2: display only, 10 Hz ---
         if (m_telemetryTimer.advanceIfElapsed(0.1)) {
             posePublisher.set(pose);
             turretPosePublisher.set(turretPose);
