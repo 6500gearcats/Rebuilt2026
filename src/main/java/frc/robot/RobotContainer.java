@@ -21,7 +21,6 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import org.photonvision.simulation.SimCameraProperties;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,12 +32,10 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AimPrep;
-import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.ShootWhenReady;
 
@@ -63,8 +60,6 @@ import frc.robot.utility.SysIDUtil;
  * Central robot wiring for subsystems, commands, and operator bindings.
  */
 public class RobotContainer {
-        @SuppressWarnings("unused")
-        private double speedModify = 1;
         private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
         private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
@@ -122,20 +117,21 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
                                 new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
-                NamedCommands.registerCommand("ShootFuel", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("ShootFuel3s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("ShootFuel10s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("ShootFuel7s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("ShootFuel5s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("NewShootFuel3s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("ManualShootFuel3s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("TrenchStartAngle", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("NewShootFuel5s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("NewShootFuel10s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("NewShootFuel4s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("NewShootFuel8s", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("AlignTurret", Commands.none()); // TODO Stage 6
-                NamedCommands.registerCommand("AlignTurret1s", Commands.none()); // TODO Stage 6
+                NamedCommands.registerCommand("ShootFuel",         aimAndShoot());
+                NamedCommands.registerCommand("ShootFuel3s",       aimAndShoot().withTimeout(3.0));
+                NamedCommands.registerCommand("ShootFuel5s",       aimAndShoot().withTimeout(5.0));
+                NamedCommands.registerCommand("ShootFuel7s",       aimAndShoot().withTimeout(7.0));
+                NamedCommands.registerCommand("ShootFuel10s",      aimAndShoot().withTimeout(10.0));
+                NamedCommands.registerCommand("NewShootFuel3s",    aimAndShoot().withTimeout(3.0));
+                NamedCommands.registerCommand("NewShootFuel4s",    aimAndShoot().withTimeout(4.0));
+                NamedCommands.registerCommand("NewShootFuel5s",    aimAndShoot().withTimeout(5.0));
+                NamedCommands.registerCommand("NewShootFuel8s",    aimAndShoot().withTimeout(8.0));
+                NamedCommands.registerCommand("NewShootFuel10s",   aimAndShoot().withTimeout(10.0));
+                NamedCommands.registerCommand("ManualShootFuel3s",
+                        new ShootWhenReady().build(hopper, robotStateMachine).withTimeout(3.0));
+                NamedCommands.registerCommand("TrenchStartAngle",  m_turret.home());
+                NamedCommands.registerCommand("AlignTurret",       m_turret.track(m_stateManager));
+                NamedCommands.registerCommand("AlignTurret1s",     m_turret.track(m_stateManager).withTimeout(1.0));
                 NamedCommands.registerCommand("BopBop",
                                 new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
@@ -232,8 +228,16 @@ public class RobotContainer {
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(m_turret.home());
 
-                // TODO Stage 6: POV 90/270 for manual turret jog (MoveTurret removed in Stage 5)
-                // TODO Stage 6: POV 0/180 for aim tuning
+                        // Manual turret jog — gunner POV right/left
+                joystick2.pov(90).whileTrue(m_turret.jog(0.5));
+                joystick2.pov(270).whileTrue(m_turret.jog(-0.5));
+        }
+
+        /** Parallel aim + feed command used for all timed auto shooting. */
+        private Command aimAndShoot() {
+                return Commands.parallel(
+                        new AimPrep().build(m_turret, m_shooter, m_stateManager),
+                        new ShootWhenReady().build(hopper, robotStateMachine));
         }
 
         /**

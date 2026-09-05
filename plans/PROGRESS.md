@@ -112,11 +112,16 @@
 
 ## Stage 6 — RobotContainer & Auto
 
-| Description | Status |
-|-------------|--------|
-| Update `RobotContainer` with new Hackbots-sourced subsystem bindings | ⬜ |
-| Verify PathPlanner `NamedCommand` strings are preserved | ⬜ |
-| Verify all autos run with new subsystem structure | ⬜ |
+| Description | File(s) | Status | Commit |
+|-------------|---------|--------|--------|
+| Replace all shooting `NamedCommands` stubs with `aimAndShoot()` (15 commands) | `RobotContainer.java` | ✅ | stage-6 |
+| Add `aimAndShoot()` helper — parallel AimPrep + ShootWhenReady | `RobotContainer.java` | ✅ | stage-6 |
+| Add gunner POV 90/270 manual turret jog (`m_turret.jog(±0.5)`) | `RobotContainer.java` | ✅ | stage-6 |
+| Add `jog(double rotationsPerSecond)` command to `Turret.java` | `subsystems/turret/Turret.java` | ✅ | stage-6 |
+| Fix `ShootWhenReady` — `runOnce` → `startEnd` for proper hopper cleanup on interrupt | `commands/ShootWhenReady.java` | ✅ | stage-6 |
+| Add aiming telemetry — `AimParams.setupLogging("Aiming", ...)` + `Robot/IsShootReady` | `RobotStateMachine.java` | ✅ | stage-6 |
+| Remove dead `speedModify`, `DriverStation`, `POVButton`, `RunHopper` imports | `RobotContainer.java` | ✅ | stage-6 |
+| Zero compile errors verified | — | ✅ | stage-6 |
 
 ---
 

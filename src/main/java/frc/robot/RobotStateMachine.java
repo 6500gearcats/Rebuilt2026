@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.aiming.AimConstraints;
 import frc.robot.aiming.AimParams;
 import frc.robot.aiming.ToFAim;
+import frc.robot.util.OnboardLogger;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
@@ -101,6 +102,7 @@ public final class RobotStateMachine {
         m_telemetryTimer.start();
         SmartDashboard.putString("Robot/State", state.toString());
         SmartDashboard.putString("Robot/FieldZone", currentZone.toString());
+        AimParams.setupLogging(new OnboardLogger("Aiming"), this::getAimParams);
     }
 
     public Shooter getShooter() {
@@ -167,6 +169,7 @@ public final class RobotStateMachine {
             SmartDashboard.putNumber("Robot/MatchTimeSec", DriverStation.getMatchTime());
             SmartDashboard.putNumber("Robot/DistToHubM", distToTag());
             SmartDashboard.putBoolean("Robot/IsFacingHub", isFacingHub());
+            SmartDashboard.putBoolean("Robot/IsShootReady", isShootReady());
             ChassisSpeeds fieldSpeeds = getFieldSpeeds();
             if (fieldSpeeds != null) {
                 SmartDashboard.putNumber("Robot/VelXMps", fieldSpeeds.vxMetersPerSecond);

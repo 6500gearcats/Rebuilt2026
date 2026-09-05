@@ -154,6 +154,14 @@ public class Turret extends SubsystemBase {
     return reference;
   }
 
+  /**
+   * Jogs the turret at a fixed speed, stepping the position reference each loop.
+   * Stops when the command ends. Typical speed: ±0.5 rot/s.
+   */
+  public Command jog(double rotationsPerSecond) {
+    return this.run(() -> setPosition(reference.plus(Rotations.of(rotationsPerSecond * 0.02)), false));
+  }
+
   public Transform3d turretCameraOffset() {
     Transform3d turretRelative =
         new Transform3d(Translation3d.kZero,

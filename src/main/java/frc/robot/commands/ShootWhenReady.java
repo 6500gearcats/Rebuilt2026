@@ -12,6 +12,6 @@ public class ShootWhenReady {
   public Command build(Hopper hopper, RobotStateMachine rsm) {
     return Commands.sequence(
         Commands.waitUntil(rsm::isShootReady),
-        hopper.runOnce(() -> hopper.startAllMotors(-0.9, 1)));
+        hopper.startEnd(() -> hopper.startAllMotors(-0.9, 1), hopper::stopAllMotors));
   }
 }
