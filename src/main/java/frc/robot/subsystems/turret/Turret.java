@@ -19,7 +19,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -148,8 +148,9 @@ public class Turret extends SubsystemBase {
    * @param deg desired position in degress
    */
   public void setPosition(double deg) {
-    SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
-    m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
+    double rotations = MathUtil.clamp(unconvertPosition(deg), 2.0, 53.0);
+    SmartDashboard.putNumber("UnconvPos", rotations);
+    m_motor.setControl(m_request.withPosition(rotations));
   }
 
   /*

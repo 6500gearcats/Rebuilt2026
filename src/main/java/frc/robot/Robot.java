@@ -4,11 +4,7 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.SignalLogger;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.net.PortForwarder;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -19,7 +15,6 @@ import frc.robot.RobotStateMachine.RobotState;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-  private Timer m_gcTimer = new Timer();
   private Timer stateTimer = new Timer();
   private final RobotContainer m_robotContainer;
   private final RobotStateMachine m_RobotStateMachine;
@@ -29,9 +24,6 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);
-    if (m_gcTimer.advanceIfElapsed(5)) {
-      System.gc();
-    }
     // DataLogManager.start();
   }
 
@@ -39,9 +31,6 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     m_RobotStateMachine.periodic();
-    if (m_gcTimer.advanceIfElapsed(0.1)) {
-      System.gc();
-    }
     // SignalLogger.writeStruct("odometry", Pose2d.struct,
     // m_RobotStateMachine.getPose());
     // SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(),

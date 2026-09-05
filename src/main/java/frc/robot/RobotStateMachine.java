@@ -17,6 +17,7 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
@@ -30,7 +31,7 @@ import frc.robot.utility.RangeFinder;
  * Singleton state machine that tracks robot state, pose, and field zone.
  */
 public final class RobotStateMachine {
-    private static RobotStateMachine instance;
+    private static final RobotStateMachine instance = new RobotStateMachine();
 
     private RobotState state = RobotState.ACTIVE;
     private String gameData = "";
@@ -84,12 +85,12 @@ public final class RobotStateMachine {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final XboxController m_gunner = new XboxController(1);
+    private final Timer m_telemetryTimer = new Timer();
 
     private RobotStateMachine() {
         checkAlliance();
-
         exampleColor = whiteColor;
-
+        m_telemetryTimer.start();
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
     }
@@ -115,9 +116,6 @@ public final class RobotStateMachine {
      * @return singleton instance
      */
     public static RobotStateMachine getInstance() {
-        if (instance == null) {
-            instance = new RobotStateMachine();
-        }
         return instance;
     }
 
@@ -125,28 +123,33 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        // Control-critical — run every loop
         reqShooterSpeed = m_Flywheel.getReqSpeed();
         shooterSpeed = m_Flywheel.getSpeed();
-        SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
-        SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
         gameData = DriverStation.getGameSpecificMessage();
         alliance = getAlliance();
         checkAlliance();
         refreshPoseFromVision();
         currentZone = checkZone();
-        posePublisher.set(pose);
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
-        turretPosePublisher.set(turretPose);
-        SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
-        newPostedValue();
-        SmartDashboard.putString("RobotState", state.toString());
-        SmartDashboard.putString("FieldZone", currentZone.toString());
-        SmartDashboard.putBoolean("IsActive", isActive());
-        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-        SmartDashboard.putNumber("distToTag2", distToTag());
-        SmartDashboard.putBoolean("isFacing", isFacingHub());
         updateTargetPose();
+
+        // Display-only — 10 Hz to reduce SmartDashboard/NT4 overhead
+        if (m_telemetryTimer.advanceIfElapsed(0.1)) {
+            posePublisher.set(pose);
+            turretPosePublisher.set(turretPose);
+            newPostedValue();
+            SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
+            SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
+            SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
+            SmartDashboard.putString("RobotState", state.toString());
+            SmartDashboard.putString("FieldZone", currentZone.toString());
+            SmartDashboard.putBoolean("IsActive", isActive());
+            SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+            SmartDashboard.putNumber("distToTag2", distToTag());
+            SmartDashboard.putBoolean("isFacing", isFacingHub());
+        }
     }
 
     private void newPostedValue() {
@@ -191,19 +194,14 @@ public final class RobotStateMachine {
     }
 
     public Pose2d getTargetPose() {
-        updateTargetPose();
         return targetPose;
     }
 
     public void updateTargetPose() {
         ChassisSpeeds speeds = getFieldSpeeds();
-        ChassisSpeeds robotRelSpeeds = getChassisSpeeds();
-        if (speeds == null && robotRelSpeeds == null) {
+        if (speeds == null) {
             return;
         }
-
-        SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
         if (speeds.vxMetersPerSecond < 0 && speeds.vyMetersPerSecond < 0) {
             speeds = new ChassisSpeeds(speeds.vxMetersPerSecond * 1.3, speeds.vyMetersPerSecond * 1.3,
@@ -243,10 +241,8 @@ public final class RobotStateMachine {
     }
 
     public ChassisSpeeds getChassisSpeeds() {
-        return drivetrain.getKinematics().toChassisSpeeds(
-                drivetrain.getModule(0).getCurrentState(), drivetrain.getModule(1).getCurrentState(),
-                drivetrain.getModule(2).getCurrentState(),
-                drivetrain.getModule(3).getCurrentState());
+        if (drivetrain == null) return new ChassisSpeeds();
+        return drivetrain.getState().Speeds;
     }
 
     public void resetVisionPose(Pose2d pose) {

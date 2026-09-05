@@ -181,7 +181,7 @@ public final class Constants {
       try {
         config = RobotConfig.fromGUISettings();
       } catch (Exception e) {
-        // Handle exception as needed
+        System.err.println("[Constants] RobotConfig load failed — deploy PathPlanner GUI settings to fix. Autos will not run.");
         e.printStackTrace();
       }
     }

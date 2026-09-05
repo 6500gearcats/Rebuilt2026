@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -31,6 +32,7 @@ public class AlignTurretToHub extends Command {
 
   private Pose2d prevPose = new Pose2d();
   private double prevTurretRot = 0;
+  private final Timer m_telemetryTimer = new Timer();
 
   public AlignTurretToHub(Turret turret) {
     m_turret = turret;
@@ -38,40 +40,21 @@ public class AlignTurretToHub extends Command {
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    m_telemetryTimer.restart();
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     Pose2d currPose = m_StateMachine.getTurretPose();
-    Translation2d errorFromPrev = prevPose.minus(currPose).getTranslation();
-    double errorFromPrevRot = prevTurretRot - m_turret.getConvertedTurretPosition();
-    SmartDashboard.putNumber("errorFromPrev.getX", errorFromPrev.getX());
-    SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
-    SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
-    SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
-    /* if (errorFromPrev.getX() < 0.2 && errorFromPrev.getY() < 0.2
-        && prevPose.minus(currPose).getRotation().getDegrees() < 2 && errorFromPrevRot < 1) {
-      return;
-    } */
-    Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
+    Pose2d m_targetPose = m_StateMachine.getTargetPose();
 
     Translation2d robotToTarget = m_targetPose.getTranslation()
-        .minus(m_StateMachine.getTurretPose().getTranslation()); // gets x and y difference between robot and april tag
-    Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation()
-        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));// gets rotation of motor in
-                                                                                     // relation to field
-
-    Pose2d newTurretPose = new Pose2d(m_StateMachine.getTurretPose().getTranslation(), turretAndRobot);
-    SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
-    SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_targetPose.getTranslation()));
-
-    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); // angle of x and y difference
-                                                                                     // minue rotation between tag/robot
-    SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
+        .minus(currPose.getTranslation());
+    Rotation2d turretAndRobot = currPose.getRotation()
+        .plus(new Rotation2d(Math.toRadians(m_turret.getConvertedTurretPosition())));
+    Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot);
 
     double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
     newError = (Math.abs(newError) - 180) * (newError / Math.abs(newError));
@@ -85,16 +68,25 @@ public class AlignTurretToHub extends Command {
       }
     }
     if (Math.abs(newError) > 0.005) {
-
       m_turret.setPosition(newError);
     }
 
-    // double error = pid.calculate(m_turret.getConvertedTurretPosition(),
-    // newError); // sets turret speed
-    // m_turret.setSpeed(error);
-    SmartDashboard.putNumber("tunring_pos_setpoint", newError);
-    // SmartDashboard.putNumber("turretTurnRate", rate);
-    // m_turret.setSpeed(rate);
+    // Debug telemetry — 10 Hz
+    if (m_telemetryTimer.advanceIfElapsed(0.1)) {
+      Translation2d errorFromPrev = prevPose.minus(currPose).getTranslation();
+      double errorFromPrevRot = prevTurretRot - m_turret.getConvertedTurretPosition();
+      Pose2d newTurretPose = new Pose2d(currPose.getTranslation(), turretAndRobot);
+      SmartDashboard.putNumber("errorFromPrev.getX", errorFromPrev.getX());
+      SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
+      SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
+      SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
+      SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
+      SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_targetPose.getTranslation()));
+      SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
+      SmartDashboard.putNumber("tunring_pos_setpoint", newError);
+      prevPose = currPose;
+      prevTurretRot = m_turret.getConvertedTurretPosition();
+    }
   }
 
   // Called once the command ends or is interrupted.
