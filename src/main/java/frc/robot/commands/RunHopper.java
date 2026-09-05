@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.hal.simulation.RoboRioDataJNI;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
 import frc.robot.RobotStateMachine.FieldZone;
