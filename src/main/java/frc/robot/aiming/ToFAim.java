@@ -78,6 +78,7 @@ public class ToFAim implements AimStrategy {
     params.pitch = Rotation2d.fromDegrees(pitch);
     params.output = shooterControl;
     params.control = SpeedControl.MechanismControl;
+    params.tof = timeMap.get(distance);
     Translation2d finalOffset = target.minus(afterShooting);
     params.yaw = Rotation2d.fromRadians(Math.atan2(finalOffset.getY(), finalOffset.getX()));
 

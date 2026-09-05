@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.aiming.AimConstraints;
 import frc.robot.aiming.AimParams;
+import frc.robot.aiming.LeadCompensator;
 import frc.robot.aiming.ToFAim;
 import frc.robot.util.OnboardLogger;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -56,6 +57,7 @@ public final class RobotStateMachine {
     private Color greenColor = new Color(0, 191, 0);
 
     private Pose2d turretPose = new Pose2d();
+    private Pose3d m_lastLeadTarget = new Pose3d();
 
     private Vision m_vision;
     private final Shooter m_Shooter = new Shooter(
@@ -115,7 +117,9 @@ public final class RobotStateMachine {
         Translation2d velocity = (fs != null)
             ? new Translation2d(fs.vxMetersPerSecond, fs.vyMetersPerSecond)
             : Translation2d.kZero;
-        return m_tofAim.update(Tag_POSE2D, new Pose3d(turretPose), velocity);
+        Pose3d shooterPose = new Pose3d(turretPose);
+        m_lastLeadTarget = LeadCompensator.computeLeadTarget(Tag_POSE2D, shooterPose, velocity, m_tofAim);
+        return m_tofAim.update(m_lastLeadTarget, shooterPose, Translation2d.kZero);
     }
 
     public boolean isShootReady() {
@@ -170,6 +174,10 @@ public final class RobotStateMachine {
             SmartDashboard.putNumber("Robot/DistToHubM", distToTag());
             SmartDashboard.putBoolean("Robot/IsFacingHub", isFacingHub());
             SmartDashboard.putBoolean("Robot/IsShootReady", isShootReady());
+            if (Tag_POSE2D != null) {
+                SmartDashboard.putNumber("Aiming/LeadOffsetXM", m_lastLeadTarget.getX() - Tag_POSE2D.getX());
+                SmartDashboard.putNumber("Aiming/LeadOffsetYM", m_lastLeadTarget.getY() - Tag_POSE2D.getY());
+            }
             ChassisSpeeds fieldSpeeds = getFieldSpeeds();
             if (fieldSpeeds != null) {
                 SmartDashboard.putNumber("Robot/VelXMps", fieldSpeeds.vxMetersPerSecond);

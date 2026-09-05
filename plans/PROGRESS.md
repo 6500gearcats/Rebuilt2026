@@ -127,11 +127,16 @@
 
 ## Stage 7 — Lead Compensation Enhancement
 
-| Description | Status |
-|-------------|--------|
-| Implement `LeadCompensator` utility (5-iteration iterative lead calc) | ⬜ |
-| Replace lookup-table TOF approach from archive2025 | ⬜ |
-| Validate against `InterpolatingDoubleTreeMap` shot data | ⬜ |
+| Description | File(s) | Status | Commit |
+|-------------|---------|--------|--------|
+| Add `tof` field to `AimParams` — populated by aim strategy for downstream use | `aiming/AimParams.java` | ✅ | stage-7 |
+| Populate `params.tof` from `timeMap.get(distance)` in `ToFAim.update()` | `aiming/ToFAim.java` | ✅ | stage-7 |
+| Create `LeadCompensator` — 5-iter outer loop shifting hub by `velocity*tof`; inner strategy called with kZero velocity to avoid double-counting | `aiming/LeadCompensator.java` | ✅ | stage-7 |
+| Rewire `getAimParams()` — `LeadCompensator` → `m_tofAim.update(leadTarget, shooter, kZero)` | `RobotStateMachine.java` | ✅ | stage-7 |
+| Add `Aiming/LeadOffsetXM/YM` telemetry at 10 Hz | `RobotStateMachine.java` | ✅ | stage-7 |
+| Zero compile errors verified | — | ✅ | stage-7 |
+
+> **Architecture note:** `ToFAim` already does equivalent lead compensation internally (15-iteration convergence of `afterShooting = shooter + velocity*tof`). `LeadCompensator` makes the lead offset explicit and observable by separating it as an outer loop. Inner `ToFAim` is called with `kZero` velocity so lead is not double-counted. Verification (hits at 2 m/s) requires hardware — Stage 8.
 
 ---
 

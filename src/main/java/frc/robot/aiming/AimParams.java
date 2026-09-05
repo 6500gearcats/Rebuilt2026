@@ -35,6 +35,8 @@ public class AimParams {
   public Rotation2d deltaYaw = Rotation2d.fromDegrees(4);
   /** the tolerated error in the shot's velocity */
   public double deltaOutput = 1.5;
+  /** time-of-flight in seconds from launch to target; populated by the aim strategy */
+  public double tof = 0.0;
 
   public AimParams() {}
 
