@@ -10,7 +10,6 @@ import frc.robot.RobotStateMachine;
 import frc.robot.RobotStateMachine.FieldZone;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.turret.Flywheel;
-import frc.robot.utility.RangeFinder;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class UpToSpeedHopperShoot extends Command {
@@ -36,9 +35,6 @@ public class UpToSpeedHopperShoot extends Command {
       return;
     }
     if (SmartDashboard.getBoolean("Aligned", true)) {
-      m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
-          stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
-      // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
       if (stateMachine.isFarEnough()) {
         if (m_Flywheel.isUpToSpeed()) {
           m_Hopper.startAllMotors(-1, 1);

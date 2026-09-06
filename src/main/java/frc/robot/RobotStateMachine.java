@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
@@ -62,6 +63,8 @@ public final class RobotStateMachine {
     public static Pose2d HubPose;
 
     private Pose2d targetPose = new Pose2d();
+
+    private ShotSolution shotSolution = ShotSolution.empty();
 
     private Pose2d pose = new Pose2d();
     private FieldZone currentZone = FieldZone.ALLIANCE;
@@ -222,53 +225,75 @@ public final class RobotStateMachine {
         return targetPose;
     }
 
+    /**
+     * Returns the current shared target, velocity, and flywheel solution.
+     *
+     * @return the latest shot solution
+     */
+    public ShotSolution getShotSolution() {
+        updateTargetPose();
+        return shotSolution;
+    }
+
     public void updateTargetPose() {
         ChassisSpeeds speeds = getFieldSpeeds();
+        Optional<Pose2d> bestPose = getBestPoseTarget();
 
-        if (speeds == null) {
+        if (speeds == null || bestPose.isEmpty()) {
             return;
         }
 
         SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
-        double distance = getTurretPose().getTranslation().getDistance(HubPose.getTranslation());
-        double shotVelocity = RangeFinder.getShotVelocity(distance);
-
-        double tof = getTOF(distance);// RangeFinder.getTOF(distance);
-
-        Pose2d nextPose = getTurretPose();
-
-        double currX = getTurretPose().getX();
-        double currY = getTurretPose().getY();
-
-        for (int i = 0; i < 20; i++) {
-            shotVelocity = RangeFinder.getShotVelocity(distance);
-            tof = getTOF(distance);// RangeFinder.getTOF(distance);
-
-            double predX = currX + (speeds.vxMetersPerSecond * tof);
-            double predY = currY + (speeds.vyMetersPerSecond * tof);
-            distance = Math.sqrt((predX * predX) + (predY * predY));
-
-            nextPose = new Pose2d(
-                    getTurretPose().getX() + (speeds.vxMetersPerSecond * tof),
-                    getTurretPose().getY() + (speeds.vyMetersPerSecond * tof),
-                    new Rotation2d());
-
-            distance = nextPose.getTranslation().getDistance(HubPose.getTranslation());
-        }
-
-        Optional<Pose2d> bestPose = getBestPoseTarget();
-        if (bestPose.isEmpty()) {
+        Pose2d best = bestPose.get();
+        Translation2d targetVector = best.getTranslation().minus(getTurretPose().getTranslation());
+        double distance = targetVector.getNorm();
+        if (distance < 1e-9) {
             return;
         }
 
-        Pose2d best = bestPose.get();
+        Translation2d turretVelocity = getTurretFieldVelocity(speeds);
+        Translation2d unitVectorToTarget = targetVector.div(distance);
+        double radialVelocity = turretVelocity.getX() * unitVectorToTarget.getX()
+                + turretVelocity.getY() * unitVectorToTarget.getY();
+
+        // Solve the range/TOF coupling iteratively. Positive radial velocity means
+        // the turret is moving toward the target, so the effective stationary-shot
+        // distance is shorter. Lateral velocity is left for turret aiming.
+        double effectiveDistance = distance;
+        double tof = getTOF(distance);
+        for (int i = 0; i < 5; i++) {
+            tof = getTOF(effectiveDistance);
+            effectiveDistance = Math.max(0.0, distance - radialVelocity * tof);
+        }
+        double shotVelocity = RangeFinder.getShotVelocity(effectiveDistance);
+
+        // Use the full turret velocity for the aim lead, including the tangential
+        // velocity caused by rotating around the robot center.
         targetPose = new Pose2d(
-                best.getX() + (-speeds.vxMetersPerSecond * getTOF(distance)),
-                best.getY() + (-speeds.vyMetersPerSecond * getTOF(distance)),
+                best.getX() - turretVelocity.getX() * tof,
+                best.getY() - turretVelocity.getY() * tof,
                 new Rotation2d());
         targetPosePublisher.set(targetPose);
+
+        shotSolution = new ShotSolution(
+                targetPose,
+                distance,
+                effectiveDistance,
+                tof,
+                radialVelocity,
+                shotVelocity,
+                turretVelocity.getX(),
+                turretVelocity.getY());
+
+        SmartDashboard.putNumber("TurretVelX", turretVelocity.getX());
+        SmartDashboard.putNumber("TurretVelY", turretVelocity.getY());
+        SmartDashboard.putNumber("RadialVelocity", radialVelocity);
+        SmartDashboard.putNumber("ShotDistance", distance);
+        SmartDashboard.putNumber("EffectiveShotDistance", effectiveDistance);
+        SmartDashboard.putNumber("ShotTOF", tof);
+        SmartDashboard.putNumber("ShotVelocity", shotVelocity);
 
         // @formatter:off
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -339,6 +364,21 @@ public final class RobotStateMachine {
         return ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), pose.getRotation());
     }
 
+    /**
+     * Calculates the field-relative velocity of the turret base, including the
+     * robot's rotational contribution at the turret offset.
+     *
+     * @param fieldSpeeds field-relative chassis speeds
+     * @return field-relative turret-base velocity
+     */
+    public Translation2d getTurretFieldVelocity(ChassisSpeeds fieldSpeeds) {
+        Translation2d turretOffset = TurretConstants.ROBOT_TO_TURRET_BASE.getTranslation()
+                .rotateBy(pose.getRotation());
+        return new Translation2d(
+                fieldSpeeds.vxMetersPerSecond - fieldSpeeds.omegaRadiansPerSecond * turretOffset.getY(),
+                fieldSpeeds.vyMetersPerSecond + fieldSpeeds.omegaRadiansPerSecond * turretOffset.getX());
+    }
+
     public ChassisSpeeds getChassisSpeeds() {
         return drivetrain.getKinematics().toChassisSpeeds(
                 drivetrain.getModule(0).getCurrentState(), drivetrain.getModule(1).getCurrentState(),
@@ -367,7 +407,74 @@ public final class RobotStateMachine {
     }
 
     public boolean isUpToSpeed() {
-        return Math.abs(reqShooterSpeed - shooterSpeed) < 2;
+        return m_Flywheel.isUpToSpeed();
+    }
+
+    /** Shared target and velocity data used by turret and flywheel control. */
+    public static final class ShotSolution {
+        private final Pose2d targetPose;
+        private final double distance;
+        private final double effectiveDistance;
+        private final double timeOfFlight;
+        private final double radialVelocity;
+        private final double flywheelSpeed;
+        private final double turretVelocityX;
+        private final double turretVelocityY;
+
+        private ShotSolution(
+                Pose2d targetPose,
+                double distance,
+                double effectiveDistance,
+                double timeOfFlight,
+                double radialVelocity,
+                double flywheelSpeed,
+                double turretVelocityX,
+                double turretVelocityY) {
+            this.targetPose = targetPose;
+            this.distance = distance;
+            this.effectiveDistance = effectiveDistance;
+            this.timeOfFlight = timeOfFlight;
+            this.radialVelocity = radialVelocity;
+            this.flywheelSpeed = flywheelSpeed;
+            this.turretVelocityX = turretVelocityX;
+            this.turretVelocityY = turretVelocityY;
+        }
+
+        private static ShotSolution empty() {
+            return new ShotSolution(new Pose2d(), 0, 0, 0, 0, 0, 0, 0);
+        }
+
+        public Pose2d getTargetPose() {
+            return targetPose;
+        }
+
+        public double getDistance() {
+            return distance;
+        }
+
+        public double getEffectiveDistance() {
+            return effectiveDistance;
+        }
+
+        public double getTimeOfFlight() {
+            return timeOfFlight;
+        }
+
+        public double getRadialVelocity() {
+            return radialVelocity;
+        }
+
+        public double getFlywheelSpeed() {
+            return flywheelSpeed;
+        }
+
+        public double getTurretVelocityX() {
+            return turretVelocityX;
+        }
+
+        public double getTurretVelocityY() {
+            return turretVelocityY;
+        }
     }
 
     public boolean isFacingHub() {
