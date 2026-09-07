@@ -201,7 +201,7 @@ public class RobotContainer {
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
-                autoChooser = AutoBuilder.buildAutoChooser("SOMLeft");
+                autoChooser = AutoBuilder.buildAutoChooser("SOMRight");
 
                 SmartDashboard.putData("Auto Chooser", autoChooser);
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
