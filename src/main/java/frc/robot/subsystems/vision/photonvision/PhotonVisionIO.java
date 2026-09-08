@@ -39,6 +39,7 @@ public class PhotonVisionIO implements VisionIO {
 
     private double lastEstTimestamp = 0;
     public boolean isNewResult = false;
+    private PhotonPipelineResult cachedResult = new PhotonPipelineResult();
 
     /**
      * Creates a PhotonVision IO instance.
@@ -56,10 +57,7 @@ public class PhotonVisionIO implements VisionIO {
         this.robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
         m_camera = new PhotonCamera(cameraName);
 
-        estimator = new PhotonPoseEstimator(
-                kTagLayout,
-                PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                robotToCamera);
+        estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
     }
 
     @Override
@@ -85,7 +83,9 @@ public class PhotonVisionIO implements VisionIO {
     }
 
     public PhotonPipelineResult getLatestResult() {
-        return m_camera.getLatestResult();
+        var unread = m_camera.getAllUnreadResults();
+        if (!unread.isEmpty()) cachedResult = unread.get(unread.size() - 1);
+        return cachedResult;
     }
 
     @Override
@@ -274,7 +274,7 @@ public class PhotonVisionIO implements VisionIO {
      */
     public Optional<VisionEstimate> getVisionEst() {
         PhotonPipelineResult result = getLatestResult();
-        var visionEst = estimator.update(result);
+        var visionEst = estimator.update(result, Optional.empty(), Optional.empty(), Optional.empty());
         double latestTimestamp = result.getTimestampSeconds();
         boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
         if (newResult) {

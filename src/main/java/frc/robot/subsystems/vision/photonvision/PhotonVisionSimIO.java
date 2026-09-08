@@ -47,6 +47,7 @@ public class PhotonVisionSimIO implements VisionIO {
 
     private double lastEstTimestamp = 0;
     public boolean isNewResult = false;
+    private PhotonPipelineResult cachedResult = new PhotonPipelineResult();
 
     /**
      * Creates a simulated PhotonVision IO instance.
@@ -78,10 +79,7 @@ public class PhotonVisionSimIO implements VisionIO {
         // This is extremely resource-intensive and is disabled by default.
         cameraSim.enableDrawWireframe(true);
 
-        estimator = new PhotonPoseEstimator(
-                kTagLayout,
-                PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
-                robotToCamera);
+        estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
     }
 
     @Override
@@ -107,7 +105,9 @@ public class PhotonVisionSimIO implements VisionIO {
     }
 
     public PhotonPipelineResult getLatestResult() {
-        return cameraSim.getCamera().getLatestResult();
+        var unread = cameraSim.getCamera().getAllUnreadResults();
+        if (!unread.isEmpty()) cachedResult = unread.get(unread.size() - 1);
+        return cachedResult;
     }
 
     @Override
@@ -308,8 +308,8 @@ public class PhotonVisionSimIO implements VisionIO {
      */
     public Optional<VisionEstimate> getVisionEst() {
         PhotonPipelineResult result = getLatestResult();
-        var visionEst = estimator.update(result);
-        double latestTimestamp = cameraSim.getCamera().getLatestResult().getTimestampSeconds();
+        var visionEst = estimator.update(result, Optional.empty(), Optional.empty(), Optional.empty());
+        double latestTimestamp = result.getTimestampSeconds();
         boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
         if (newResult) {
             lastEstTimestamp = latestTimestamp;

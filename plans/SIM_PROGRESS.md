@@ -27,15 +27,17 @@ Tracks execution of simulation improvement work. See `sim_plan.md` for full rati
 
 ## S-2 — Fix PhotonVision API Deprecations
 
-6 `[removal]` warnings in `PhotonVisionIO.java` and `PhotonVisionSimIO.java`.
+Started with 7 `[removal]` warnings. Fixed 5; 2 remain due to PhotonVision RC API state.
 
 | Task | Description | Status | Commit |
 |------|-------------|--------|--------|
-| S2-1 | Map all 6 deprecation sites across both files | ⬜ | — |
-| S2-2 | Update `PhotonPoseEstimator` constructor calls (2 sites) | ⬜ | — |
-| S2-3 | Replace `getLatestResult()` with `getAllUnreadResults()` loop | ⬜ | — |
-| S2-4 | Replace deprecated `estimator.update(result)` calls | ⬜ | — |
-| S2-5 | Compile — confirm zero warnings | ⬜ | — |
+| S2-1 | Map all deprecation sites across both files | ✅ | — |
+| S2-2 | Replace deprecated 3-arg constructor with 2-arg (strategy removed from ctor) | ✅ | sim-s2 |
+| S2-3 | Replace `getLatestResult()` with `getAllUnreadResults()` + cache | ✅ | sim-s2 |
+| S2-4 | Replace `estimator.update(result)` with 4-arg overload | ✅ | sim-s2 |
+| S2-5 | Zero warnings | ⬜ blocked — in v2026.1.1-rc-3 ALL update() overloads are deprecated; no non-deprecated replacement exists yet in this RC. Revisit when PhotonVision publishes a stable v2026 release. |
+
+**Net result:** 7 → 2 warnings. Remaining 2 are `update()` calls — both files, one site each.
 
 ---
 
@@ -87,7 +89,7 @@ Tracks execution of simulation improvement work. See `sim_plan.md` for full rati
 | Stage | Files | Status |
 |-------|-------|--------|
 | S-1 | `limelight/` (deleted), `VisionEstimate.java` | ✅ |
-| S-2 | `PhotonVisionIO.java`, `PhotonVisionSimIO.java` | ⬜ |
+| S-2 | `PhotonVisionIO.java`, `PhotonVisionSimIO.java` | ⚠️ partial (2 warnings remain, RC blocker) |
 | S-3 | `ShooterIOSim.java` | ⬜ |
 | S-4 | `Hopper.java` | ⬜ |
 | S-5 | `Intake.java` | ⬜ |
