@@ -7,25 +7,39 @@ import edu.wpi.first.units.measure.AngularVelocity;
 
 public class ShooterIOSim implements ShooterIO {
 
+  // Commanded target — what the control loop wants.
+  private AngularVelocity targetVelocity = RotationsPerSecond.zero();
+
+  // Simulated actual speed — approaches target via a first-order lag each 20 ms loop.
+  // Alpha 0.94 / blend 0.06 gives ~1 s to reach 95% of target, realistic for a Falcon
+  // 500 driving a flywheel with moderate rotational inertia.
+  private AngularVelocity actualVelocity = RotationsPerSecond.zero();
+  private static final double kAlpha = 0.94;
+
   private Angle hoodAngle = Rotations.zero();
-  private AngularVelocity shooterVelocity = RotationsPerSecond.zero();
 
   public ShooterIOSim() {}
 
+  @Override
   public void updateInputs(ShooterIOInputs inputs) {
+    // Apply first-order lag: step actual velocity toward target each loop.
+    actualVelocity = actualVelocity.times(kAlpha).plus(targetVelocity.times(1.0 - kAlpha));
+
     inputs.shooter1MotorConnected = true;
     inputs.shooter2MotorConnected = true;
-    inputs.shooter1Velocity = shooterVelocity;
-    inputs.shooter2Velocity = shooterVelocity;
+    inputs.shooter1Velocity = actualVelocity;
+    inputs.shooter2Velocity = actualVelocity;
 
     inputs.hoodMotorConnected = true;
     inputs.hoodPosition = hoodAngle;
   }
 
+  @Override
   public void setVelocity(AngularVelocity velocity, boolean useRecovery) {
-    shooterVelocity = velocity;
+    targetVelocity = velocity;
   }
 
+  @Override
   public void setAngle(Angle angle) {
     hoodAngle = angle;
   }

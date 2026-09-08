@@ -6,6 +6,7 @@ package frc.robot.subsystems.hopper;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -51,6 +52,13 @@ public class Hopper extends SubsystemBase {
     SmartDashboard.putNumber("Hopper/IndexerStatorCurrentA", m_hopperMotor.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putNumber("Hopper/KickerVelocityRPS",     m_kickerMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Hopper/KickerStatorCurrentA",  m_kickerMotor.getStatorCurrent().getValueAsDouble());
+
+    if (RobotBase.isSimulation()) {
+      // Falcon 500 free speed ~100 RPS; seed CTRE sim state so telemetry reads realistic values.
+      final double kFreeSpeedRPS = 100.0;
+      m_hopperMotor.getSimState().setRotorVelocity(m_hopperMotor.get() * kFreeSpeedRPS);
+      m_kickerMotor.getSimState().setRotorVelocity(m_kickerMotor.get() * kFreeSpeedRPS);
+    }
   }
 
   /**

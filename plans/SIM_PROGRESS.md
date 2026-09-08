@@ -45,10 +45,10 @@ Started with 7 `[removal]` warnings. Fixed 5; 2 remain due to PhotonVision RC AP
 
 | Task | Description | Status | Commit |
 |------|-------------|--------|--------|
-| S3-1 | Add `targetVelocity` field; decouple `setVelocity()` from `updateInputs()` | ⬜ | — |
-| S3-2 | Add exponential filter (0.92/0.08) for ramp-up and ramp-down | ⬜ | — |
-| S3-3 | Verify `isUpToSpeed()` threshold still works with the lag | ⬜ | — |
-| S3-4 | Run auto in sim — confirm shot waits for flywheel spin-up | ⬜ | — |
+| S3-1 | Add `targetVelocity` field; decouple `setVelocity()` from `updateInputs()` | ✅ | sim-s3-s5 |
+| S3-2 | Add exponential filter (alpha=0.94, ~1 s to 95%) for ramp-up and ramp-down | ✅ | sim-s3-s5 |
+| S3-3 | `Shooter.tracked()` reads `inputs.shooter1Velocity` — lag now blocks it until speed reached | ✅ | sim-s3-s5 |
+| S3-4 | Run auto in sim — confirm shot waits for flywheel spin-up | ⬜ deferred to S-6 |
 
 ---
 
@@ -56,9 +56,9 @@ Started with 7 `[removal]` warnings. Fixed 5; 2 remain due to PhotonVision RC AP
 
 | Task | Description | Status | Commit |
 |------|-------------|--------|--------|
-| S4-1 | Add `getSimState().setRotorVelocity()` calls inside `isSimulation()` guard | ⬜ | — |
-| S4-2 | Define `kFreeSpeedRPS` constant (~100 RPS for Falcon 500) | ⬜ | — |
-| S4-3 | Confirm `Hopper/IndexerVelocityRPS` non-zero in sim | ⬜ | — |
+| S4-1 | Add `getSimState().setRotorVelocity()` inside `RobotBase.isSimulation()` guard | ✅ | sim-s3-s5 |
+| S4-2 | `kFreeSpeedRPS = 100.0` (Falcon 500 ~6380 RPM) defined inline in sim block | ✅ | sim-s3-s5 |
+| S4-3 | Confirm `Hopper/IndexerVelocityRPS` non-zero in sim | ⬜ deferred to S-6 |
 
 ---
 
@@ -66,10 +66,10 @@ Started with 7 `[removal]` warnings. Fixed 5; 2 remain due to PhotonVision RC AP
 
 | Task | Description | Status | Commit |
 |------|-------------|--------|--------|
-| S5-1 | Read `Intake.java` — identify motor fields and control modes | ⬜ | — |
-| S5-2 | Add simState seeding for roller motor (velocity) | ⬜ | — |
-| S5-3 | Add simState seeding for deploy motor (velocity + position integration) | ⬜ | — |
-| S5-4 | Confirm Intake telemetry shows realistic values in sim | ⬜ | — |
+| S5-1 | `Intake.java` — two TalonFX motors: roller (duty cycle) and deploy (duty cycle + position) | ✅ | sim-s3-s5 |
+| S5-2 | Roller: `setRotorVelocity(get() * kFreeSpeedRPS)` | ✅ | sim-s3-s5 |
+| S5-3 | Deploy: `setRotorVelocity()` + `addRotorPosition(vel * 0.02)` per loop | ✅ | sim-s3-s5 |
+| S5-4 | Confirm Intake telemetry shows realistic values in sim | ⬜ deferred to S-6 |
 
 ---
 
@@ -90,7 +90,7 @@ Started with 7 `[removal]` warnings. Fixed 5; 2 remain due to PhotonVision RC AP
 |-------|-------|--------|
 | S-1 | `limelight/` (deleted), `VisionEstimate.java` | ✅ |
 | S-2 | `PhotonVisionIO.java`, `PhotonVisionSimIO.java` | ⚠️ partial (2 warnings remain, RC blocker) |
-| S-3 | `ShooterIOSim.java` | ⬜ |
-| S-4 | `Hopper.java` | ⬜ |
-| S-5 | `Intake.java` | ⬜ |
+| S-3 | `ShooterIOSim.java` | ✅ |
+| S-4 | `Hopper.java` | ✅ |
+| S-5 | `Intake.java` | ✅ |
 | S-6 | — (validation run) | ⬜ |

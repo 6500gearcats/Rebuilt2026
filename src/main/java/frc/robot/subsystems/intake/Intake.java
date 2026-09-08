@@ -6,6 +6,7 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
@@ -22,6 +23,16 @@ public class Intake extends SubsystemBase {
     SmartDashboard.putNumber("Intake/RollerVelocityRPS",   m_intakeMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Intake/DeployStatorCurrentA", m_intakeDeployMotor.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putNumber("Intake/RollerStatorCurrentA", m_intakeMotor.getStatorCurrent().getValueAsDouble());
+
+    if (RobotBase.isSimulation()) {
+      // Seed CTRE sim state so velocity/position signals read realistic values in sim telemetry.
+      final double kFreeSpeedRPS = 100.0;
+      final double kLoopPeriodS = 0.02;
+      m_intakeMotor.getSimState().setRotorVelocity(m_intakeMotor.get() * kFreeSpeedRPS);
+      double deployVelRPS = m_intakeDeployMotor.get() * kFreeSpeedRPS;
+      m_intakeDeployMotor.getSimState().setRotorVelocity(deployVelRPS);
+      m_intakeDeployMotor.getSimState().addRotorPosition(deployVelRPS * kLoopPeriodS);
+    }
   }
 
   public void setIntakeSpeed(double speed) {
