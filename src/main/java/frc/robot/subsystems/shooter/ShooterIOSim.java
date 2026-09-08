@@ -5,6 +5,14 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
+/**
+ * Simulation implementation of {@link ShooterIO}. Models the flywheel as a first-order lag
+ * system so that the {@link Shooter} subsystem's {@code isUpToSpeed()} logic works realistically
+ * in simulation without any physical hardware.
+ *
+ * <p>The hood position is set instantly (no lag) because hood dynamics are not important to
+ * test in simulation at this stage.
+ */
 public class ShooterIOSim implements ShooterIO {
 
   // Commanded target — what the control loop wants.

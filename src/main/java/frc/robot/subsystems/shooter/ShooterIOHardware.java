@@ -15,6 +15,18 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import frc.robot.subsystems.shooter.ShooterConstants.HoodConstants;
 import frc.robot.util.StatusSignalUtil;
 
+/**
+ * Hardware implementation of {@link ShooterIO} that controls real TalonFX motors via CTRE
+ * Phoenix 6 CAN.
+ *
+ * <p>Shooter motors: two TalonFX motors, shooter 2 configured as a follower of shooter 1 so
+ * only shooter 1 receives control requests. Hood motor: one TalonFX with a CANcoder for absolute
+ * position feedback.
+ *
+ * <p>All status signals are registered with {@link StatusSignalUtil} in the constructor
+ * for bulk refresh at the start of each loop. This avoids the latency of individual
+ * blocking reads and is required by the CTRE Phoenix 6 best-practices for high-frequency loops.
+ */
 public class ShooterIOHardware implements ShooterIO {
   private final TalonFX shooter1Motor;
   private final TalonFX shooter2Motor;
@@ -22,17 +34,27 @@ public class ShooterIOHardware implements ShooterIO {
   private final TalonFX hoodMotor;
   private final CANcoder hoodCANcoder;
 
+  /** Last commanded velocity — used to skip redundant CAN writes when the setpoint hasn't changed. */
   private AngularVelocity lastVelocity = RotationsPerSecond.zero();
   private boolean lastRecoveryEnabled = false;
+  /** Last commanded hood angle — used to skip redundant CAN writes. */
   private Angle lastAngle = Rotations.zero();
 
+  /** Torque-based FOC velocity control — used for normal shooting. */
   private final VelocityTorqueCurrentFOC shooterControl = new VelocityTorqueCurrentFOC(0);
+  /** Duty-cycle velocity control — used in recovery mode to reduce current draw. */
   private final VelocityDutyCycle speedupControl = new VelocityDutyCycle(0);
   private final CoastOut coastControl = new CoastOut();
 
+  /** MotionMagic with dynamic cruise/acceleration — smooths hood moves to avoid jerky motion. */
   private final DynamicMotionMagicVoltage hoodControl =
       new DynamicMotionMagicVoltage(0, 0, 0).withSlot(ShooterConstants.HoodConstants.kSlot);
 
+  /**
+   * Constructs the hardware layer. Applies motor configs from {@link ShooterConstants},
+   * configures shooter 2 as a follower of shooter 1, and registers all status signals
+   * for bulk refresh.
+   */
   public ShooterIOHardware() {
     shooter1Motor = new TalonFX(ShooterConstants.kMotor1Id);
     shooter1Motor.getConfigurator().apply(ShooterConstants.kMotorConfig);
@@ -127,6 +149,13 @@ public class ShooterIOHardware implements ShooterIO {
     inputs.hoodCANcoderPosition = hoodCANcoder.getPosition(false).getValue();
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Optimization: the control request is only sent over CAN when the velocity or recovery
+   * mode changes. CAN bus traffic is reduced because this method is called every 20 ms loop
+   * cycle, but the setpoint typically changes much less frequently.
+   */
   public void setVelocity(AngularVelocity velocity, boolean useRecovery) {
     if (velocity.baseUnitMagnitude() == 0) {
       shooter1Motor.setControl(coastControl);
@@ -143,6 +172,7 @@ public class ShooterIOHardware implements ShooterIO {
     }
   }
 
+  /** {@inheritDoc} Skips the CAN write when the angle setpoint has not changed. */
   public void setAngle(Angle angle) {
     if (!angle.equals(lastAngle)) {
       hoodMotor.setControl(hoodControl.withPosition(angle));

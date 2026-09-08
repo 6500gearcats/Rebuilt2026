@@ -31,11 +31,11 @@ Tracks execution of the documentation improvement plan. See `doc_plan.md` for fu
 
 | Task | Files | Status | Commit |
 |------|-------|--------|--------|
-| D2-1 | `ShooterIO.java`, `ShooterIOHardware.java`, `ShooterIOSim.java` | ⬜ | — |
-| D2-2 | `util/OnboardLogger.java` | ⬜ | — |
-| D2-3 | `subsystems/intake/Intake.java` | ⬜ | — |
-| D2-4 | `aiming/AimMeasurement.java` | ⬜ | — |
-| D2-5 | `subsystems/turret/TurretIOSim.java` | ⬜ | — |
+| D2-1 | `ShooterIO.java`, `ShooterIOHardware.java`, `ShooterIOSim.java` | ✅ | `docs-d2` |
+| D2-2 | `util/OnboardLogger.java` | ✅ | `docs-d2` |
+| D2-3 | `subsystems/intake/Intake.java` | ✅ | `docs-d2` |
+| D2-4 | `aiming/AimMeasurement.java` | ✅ | `docs-d2` |
+| D2-5 | `subsystems/turret/TurretIOSim.java` | ✅ | `docs-d2` |
 
 ---
 
@@ -64,5 +64,5 @@ Tracks execution of the documentation improvement plan. See `doc_plan.md` for fu
 | Stage | Files | Status |
 |-------|-------|--------|
 | D-1 | 5 files | ✅ |
-| D-2 | 5 files / 7 actual files | ⬜ |
+| D-2 | 5 files / 7 actual files | ✅ |
 | D-3 | 13 tasks / ~20 actual files | ⬜ |
