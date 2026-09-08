@@ -9,33 +9,47 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 
 
+/**
+ * Rumbles a controller's left motor for as long as the command is scheduled, then stops
+ * both motors when the command ends.
+ *
+ * <p>Used as haptic feedback for game-state events (e.g., "shooter is up to speed").
+ * Bind this as a {@code whileTrue} trigger so it automatically cancels when the
+ * condition clears.
+ *
+ * <p><b>Asymmetry note:</b> {@link #execute()} sets only the left rumble motor to full;
+ * {@link #end(boolean)} zeroes <em>both</em> left and right. This is intentional — on some
+ * controllers a previous command or button binding may have set the right motor. Zeroing
+ * both in {@code end()} guarantees the controller is quiet regardless of prior state.
+ */
 public class ControllerRumble extends Command {
 
   GenericHID m_controller;
 
-  /** Creates a new GunnerRumble. */
+  /**
+   * @param controller The controller to rumble. Can be any {@link GenericHID}, including
+   *                   XboxController and PS4Controller.
+   */
   public ControllerRumble(GenericHID controller) {
-    // Use addRequirements() here to declare subsystem dependencies.
     m_controller = controller;
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {}
 
-  // Called every time the scheduler runs while the command is scheduled.
+  /** Sets the left rumble motor to full strength. */
   @Override
   public void execute() {
     m_controller.setRumble(RumbleType.kLeftRumble, 1);
   }
 
-  // Called once the command ends or is interrupted.
+  /** Zeroes both rumble motors to guarantee the controller is silent after the command ends. */
   @Override
   public void end(boolean interrupted) {
     m_controller.setRumble(RumbleType.kBothRumble, 0);
   }
 
-  // Returns true when the command should end.
+  /** This command runs until cancelled externally (e.g., by a trigger going false). */
   @Override
   public boolean isFinished() {
     return false;
