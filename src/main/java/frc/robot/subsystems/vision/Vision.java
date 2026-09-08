@@ -92,6 +92,7 @@ public class Vision extends SubsystemBase {
   private Supplier<Pose2d> m_poseSupplier;
 
   private boolean isReplay = false;
+  private int m_loopCount = 0;
 
   public Field2d m_field = new Field2d();
 
@@ -187,6 +188,14 @@ public class Vision extends SubsystemBase {
     if (isReplay) {
       return;
     }
+
+    // Rate-limit to every 4th loop (~12.5 Hz). Camera frames arrive at 30-60 FPS max;
+    // running pose estimation at 50 Hz wastes loop budget without improving accuracy.
+    m_loopCount++;
+    if (m_loopCount % 4 != 0) {
+      return;
+    }
+
     estimator.update(
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());

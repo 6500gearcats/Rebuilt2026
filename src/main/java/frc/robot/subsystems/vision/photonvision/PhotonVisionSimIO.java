@@ -83,9 +83,8 @@ public class PhotonVisionSimIO implements VisionIO {
         cameraSim.enableRawStream(true);
         cameraSim.enableProcessedStream(true);
 
-        // Enable drawing a wireframe visualization of the field to the camera streams.
-        // This is extremely resource-intensive and is disabled by default.
-        cameraSim.enableDrawWireframe(true);
+        // Wireframe disabled — it is extremely resource-intensive and tanks loop timing.
+        cameraSim.enableDrawWireframe(false);
 
         estimator = new PhotonPoseEstimator(
                 kTagLayout,
