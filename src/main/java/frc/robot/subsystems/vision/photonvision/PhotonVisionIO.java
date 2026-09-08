@@ -57,7 +57,10 @@ public class PhotonVisionIO implements VisionIO {
         this.robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
         m_camera = new PhotonCamera(cameraName);
 
-        estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
+        estimator = new PhotonPoseEstimator(
+                kTagLayout,
+                PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                robotToCamera);
     }
 
     @Override

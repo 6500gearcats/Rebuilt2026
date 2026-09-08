@@ -79,7 +79,10 @@ public class PhotonVisionSimIO implements VisionIO {
         // This is extremely resource-intensive and is disabled by default.
         cameraSim.enableDrawWireframe(true);
 
-        estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
+        estimator = new PhotonPoseEstimator(
+                kTagLayout,
+                PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
+                robotToCamera);
     }
 
     @Override
