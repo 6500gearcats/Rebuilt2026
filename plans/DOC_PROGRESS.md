@@ -3,7 +3,7 @@
 Tracks execution of the documentation improvement plan. See `doc_plan.md` for full rationale and task details.
 
 **Branch:** `leto`  
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-08 (D-3 complete)
 
 ---
 
@@ -43,19 +43,19 @@ Tracks execution of the documentation improvement plan. See `doc_plan.md` for fu
 
 | Task | Files | Status | Commit |
 |------|-------|--------|--------|
-| D3-1 | `subsystems/turret/TurretIODisabled.java` | ⬜ | — |
-| D3-2 | `aiming/TuneAim.java` | ⬜ | — |
-| D3-3 | `subsystems/drivetrain/CommandSwerveDrivetrain.java` | ⬜ | — |
-| D3-4 | `subsystems/turret/TurretIOHardware.java` | ⬜ | — |
-| D3-5 | `commands/RunIntake.java` | ⬜ | — |
-| D3-6 | `commands/ControllerRumble.java` | ⬜ | — |
-| D3-7 | `commands/StaggerHopper.java` | ⬜ | — |
-| D3-8 | `util/StatusSignalUtil.java` | ⬜ | — |
-| D3-9 | `subsystems/shooter/ShooterConstants.java` | ⬜ | — |
-| D3-10 | `VisionIO.java`, `VisionEstimate.java`, `PhotonVisionIO.java`, `PhotonVisionSimIO.java` | ⬜ | — |
-| D3-11 | `aiming/AimStrategy.java` | ⬜ | — |
-| D3-12 | `Constants.java` inner classes, `Main.java` | ⬜ | — |
-| D3-13 | `subsystems/drivetrain/SysIDUtil.java`, `subsystems/shooter/ShooterValuesSenable.java` | ⬜ | — |
+| D3-1 | `subsystems/turret/TurretIODisabled.java` | ✅ | `docs-d3-drivetrain` |
+| D3-2 | `aiming/TuneAim.java` | ✅ | `docs-d3-aiming` |
+| D3-3 | `subsystems/drivetrain/CommandSwerveDrivetrain.java` | ✅ | `docs-d3-drivetrain` |
+| D3-4 | `subsystems/turret/TurretIOHardware.java` | ✅ | `docs-d3-drivetrain` |
+| D3-5 | `commands/RunIntake.java` | ✅ | `docs-d3-commands` |
+| D3-6 | `commands/ControllerRumble.java` | ✅ | `docs-d3-commands` |
+| D3-7 | `commands/StaggerHopper.java` | ✅ | `docs-d3-commands` |
+| D3-8 | `util/StatusSignalUtil.java` | ✅ | `docs-d3-util` |
+| D3-9 | `subsystems/shooter/ShooterConstants.java` | ✅ | `docs-d3-constants` |
+| D3-10 | `VisionIO.java`, `VisionEstimate.java`, `PhotonVisionIO.java`, `PhotonVisionSimIO.java` | ✅ | `docs-d3-vision` |
+| D3-11 | `aiming/AimStrategy.java` | ✅ | `docs-d3-aiming` |
+| D3-12 | `Constants.java` inner classes, `Main.java` | ✅ | `docs-d3-constants` |
+| D3-13 | `subsystems/drivetrain/SysIDUtil.java`, `subsystems/shooter/ShooterValuesSenable.java` | ✅ | `docs-d3-util` |
 
 ---
 
@@ -65,4 +65,4 @@ Tracks execution of the documentation improvement plan. See `doc_plan.md` for fu
 |-------|-------|--------|
 | D-1 | 5 files | ✅ |
 | D-2 | 5 files / 7 actual files | ✅ |
-| D-3 | 13 tasks / ~20 actual files | ⬜ |
+| D-3 | 13 tasks / ~20 actual files | ✅ |
