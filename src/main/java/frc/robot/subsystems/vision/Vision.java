@@ -189,9 +189,23 @@ public class Vision extends SubsystemBase {
       return;
     }
 
+    m_loopCount++;
+
+    // In simulation, the CTRE 5ms notifier already tracks odometry via Phoenix 6.
+    // Running the Kalman filter on top causes loop overruns (35ms+) from lock contention
+    // with the CTRE sim thread. Instead, pin the estimator to the drivetrain ground-truth
+    // pose so getEstimatedPose() callers remain accurate, and update the field display.
+    if (RobotBase.isSimulation()) {
+      if (m_loopCount % 4 == 0 && m_poseSupplier != null) {
+        Pose2d groundTruth = m_poseSupplier.get();
+        estimator.resetPose(groundTruth);
+        m_field.setRobotPose(groundTruth);
+      }
+      return;
+    }
+
     // Rate-limit to every 4th loop (~12.5 Hz). Camera frames arrive at 30-60 FPS max;
     // running pose estimation at 50 Hz wastes loop budget without improving accuracy.
-    m_loopCount++;
     if (m_loopCount % 4 != 0) {
       return;
     }
@@ -226,11 +240,7 @@ public class Vision extends SubsystemBase {
       }
     }
 
-    if (RobotBase.isSimulation() && m_poseSupplier != null) {
-      m_field.setRobotPose(m_poseSupplier.get());
-    } else {
-      m_field.setRobotPose(estimator.getEstimatedPosition());
-    }
+    m_field.setRobotPose(estimator.getEstimatedPosition());
   }
 
   /**
