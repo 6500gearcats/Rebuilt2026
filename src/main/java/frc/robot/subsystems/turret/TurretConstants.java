@@ -21,9 +21,9 @@ import edu.wpi.first.units.measure.Angle;
 
 /** Turret hardware constants. CAN IDs and encoder offset set in Stage 8. */
 public class TurretConstants {
-  // CAN IDs — TBD at wiring (Stage 8)
-  protected static final int kMotorId = 0;
-  protected static final int kEncoderId = 0;
+  // CAN IDs — placeholder values unique in simulation; reassign in Stage 8-1
+  protected static final int kMotorId = 34;
+  protected static final int kEncoderId = 35;
 
   protected static final double kSupplyCurrentLimit = 100;
 

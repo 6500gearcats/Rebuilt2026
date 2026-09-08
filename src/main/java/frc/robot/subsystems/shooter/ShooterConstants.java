@@ -48,9 +48,9 @@ import frc.robot.aiming.AimMeasurement;
  * </ul>
  */
 public final class ShooterConstants {
-  // CAN IDs — TBD at wiring (Stage 8)
-  protected static final int kMotor1Id = 0;
-  protected static final int kMotor2Id = 0;
+  // CAN IDs — placeholder values unique in simulation; reassign in Stage 8-1
+  protected static final int kMotor1Id = 30;
+  protected static final int kMotor2Id = 31;
 
   /**
    * Speed error (RPS below target) that triggers automatic switch to recovery control mode.
@@ -130,9 +130,9 @@ public final class ShooterConstants {
    * offset is TBD until the hood is physically assembled and zeroed in Stage 8-3.
    */
   public static final class HoodConstants {
-    // CAN IDs — TBD at wiring (Stage 8)
-    protected static final int kMotorID = 0;
-    protected static final int kCANcoderId = 0;
+    // CAN IDs — placeholder values unique in simulation; reassign in Stage 8-1
+    protected static final int kMotorID = 32;
+    protected static final int kCANcoderId = 33;
 
     protected static final double kRatio = 0.0028888888888;
 
