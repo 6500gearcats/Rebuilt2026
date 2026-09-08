@@ -119,4 +119,5 @@ tasks.withType(JavaCompile) {
 // Javadoc classpath and would cause unfixable "reference not found" errors otherwise.
 javadoc {
     options.addStringOption('Xdoclint:none', '-quiet')
+    destinationDir = file('docs')
 }

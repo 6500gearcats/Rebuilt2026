@@ -1,0 +1,13 @@
+frc.robot
+frc.robot.aiming
+frc.robot.commands
+frc.robot.generated
+frc.robot.subsystems.drivetrain
+frc.robot.subsystems.hopper
+frc.robot.subsystems.intake
+frc.robot.subsystems.shooter
+frc.robot.subsystems.turret
+frc.robot.subsystems.vision
+frc.robot.subsystems.vision.photonvision
+frc.robot.superstructure
+frc.robot.util
