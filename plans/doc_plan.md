@@ -27,6 +27,10 @@ non-obvious. Private methods are documented when the logic would surprise a read
 | `ShootWhenReady.java` | Good |
 | `AimPrep.java` | Good |
 | `TurretIO.java` | Good |
+| `subsystems/drivetrain/Telemetry.java` | Class + constructor + method Javadoc in place |
+| `subsystems/vision/LocalizationConstants.java` | Class + field Javadoc adequate for a placeholder file |
+| `subsystems/turret/TurretConstants.java` | Class Javadoc + field docs; Stage 8 TODOs clearly marked |
+| `aiming/AimConstraints.java` | Simple record; existing docs sufficient |
 | `generated/TunerConstants*.java` | Auto-generated — never hand-document |
 
 ---
@@ -200,6 +204,8 @@ These are interfaces and subsystems where missing docs prevent safe reuse.
 - `periodic()`: note that CTRE internal odometry handles updates; empty override is intentional
 - Supplier methods: `rotationSupplier()`, `modulePositionsSupplier()`, `poseSupplier()`, `getPigeon()`, `getAngularVel()`
 
+**File:** `src/main/java/frc/robot/subsystems/drivetrain/CommandSwerveDrivetrain.java`
+
 ### D3-4 `TurretIOHardware.java`
 - Class Javadoc + constructor: follower setup, MotionMagic `DynamicMotionMagicVoltage` rationale
 - `updateInputs()`: explain why motor encoder is used post-calibration instead of CANcoder
@@ -230,6 +236,8 @@ These are interfaces and subsystems where missing docs prevent safe reuse.
 - `getBestRange()`: document the zeroed camera/target height arguments and their implication
 - `PhotonVisionSimIO`: `mountedOnTurret()`, `isMountedOnTurret()`, `getCameraSim()`
 
+**Files:** `src/main/java/frc/robot/subsystems/vision/VisionIO.java`, `VisionEstimate.java`; `subsystems/vision/photonvision/PhotonVisionIO.java`, `PhotonVisionSimIO.java`
+
 ### D3-11 `AimStrategy.java`
 - `update()`: document the contract (must not return null, must fill `status`, when to return `impossible()`)
 
@@ -240,6 +248,8 @@ These are interfaces and subsystems where missing docs prevent safe reuse.
 ### D3-13 `SysIDUtil.java` + `ShooterValuesSenable.java`
 - `SysIDUtil`: document stubs and when they'll be implemented (Stage 8)
 - `ShooterValuesSenable`: confirm if live code or dead; document or delete
+
+**Files:** `src/main/java/frc/robot/subsystems/drivetrain/SysIDUtil.java`; `src/main/java/frc/robot/subsystems/shooter/ShooterValuesSenable.java`
 
 ---
 
@@ -258,8 +268,8 @@ D-2 and D-3 can be batched by related subsystem.
 | `docs-d2-shooter` | `ShooterIO.java`, `ShooterIOHardware.java`, `ShooterIOSim.java` |
 | `docs-d2-logger-intake-aim` | `OnboardLogger.java`, `Intake.java`, `AimMeasurement.java`, `TurretIOSim.java` |
 | `docs-d3-commands` | `RunIntake.java`, `ControllerRumble.java`, `StaggerHopper.java` |
-| `docs-d3-drivetrain` | `CommandSwerveDrivetrain.java`, `TurretIOHardware.java`, `TurretIODisabled.java` |
-| `docs-d3-vision` | `VisionIO.java`, `VisionEstimate.java`, `PhotonVisionIO.java`, `PhotonVisionSimIO.java` |
+| `docs-d3-drivetrain` | `subsystems/drivetrain/CommandSwerveDrivetrain.java`, `TurretIOHardware.java`, `TurretIODisabled.java` |
+| `docs-d3-vision` | `subsystems/vision/VisionIO.java`, `VisionEstimate.java`, `photonvision/PhotonVisionIO.java`, `PhotonVisionSimIO.java` |
 | `docs-d3-aiming` | `TuneAim.java`, `AimStrategy.java` |
 | `docs-d3-constants` | `Constants.java` inner classes, `ShooterConstants.java` |
-| `docs-d3-util` | `StatusSignalUtil.java`, `SysIDUtil.java`, `ShooterValuesSenable.java` |
+| `docs-d3-util` | `util/StatusSignalUtil.java`, `subsystems/drivetrain/SysIDUtil.java`, `subsystems/shooter/ShooterValuesSenable.java` |

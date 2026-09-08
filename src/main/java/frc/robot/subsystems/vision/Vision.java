@@ -34,33 +34,45 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 
+/**
+ * Fuses AprilTag pose estimates from one or more cameras into a
+ * {@link SwerveDrivePoseEstimator} (Kalman filter) to produce a single best-estimate
+ * robot pose for the aiming and autonomous pipelines.
+ *
+ * <h2>How the Kalman Filter Works (brief)</h2>
+ * The filter maintains a probability distribution over the robot's pose. It has two
+ * sources of information:
+ * <ul>
+ *   <li><b>Odometry (wheel encoders + gyro):</b> accurate over short distances but drifts
+ *       over time. Tuned with {@code m_stateStndDev} — smaller numbers = trust odometry more.
+ *   <li><b>Vision (AprilTag detections):</b> accurate globally but noisy measurement-to-
+ *       measurement. Tuned with the dynamic {@code stdDevs} in {@link #periodic()} — smaller
+ *       numbers = trust vision more.
+ * </ul>
+ * The filter blends both sources optimally, weighting each by its stated uncertainty.
+ *
+ * <h2>Multi-Camera Fusion</h2>
+ * Any number of {@link VisionIO} instances can be passed to the full constructor. Only those
+ * that return {@code true} from {@link VisionIO#forPoseEstimation()} are used for Kalman
+ * filter updates; others may be used for non-localization tasks (e.g., range finding).
+ *
+ * <h2>Replay Mode</h2>
+ * Constructing with the no-arg constructor sets {@code isReplay = true}, which bypasses all
+ * estimation logic. This is a placeholder for AdvantageKit log-replay — the pose would instead
+ * come from replayed log inputs rather than live cameras.
+ */
 public class Vision extends SubsystemBase {
-  /*
-   * This uses the Kulman Filter to estimate the pose of the robot.
-   * HIGHLY RECOMMENDED to research the Kalman Filter to properly understand this.
-   */
-
-  /*
-   * You can tune Standard deviation of repective estimation/measurement to
-   * configure how much you trust them.
-   * Smaller numbers will cause the filter to
-   * "trust" the estimate from that particular component more than the others.
-   * This in turn means the particualr component will have a stronger influence
-   * on the final pose estimate.
-   */
-
-  /*
-   * The Standard Deviation for the Model's States.
-   * Increase numbers to trust the model's state estimates less
-   * This matrix is in the form [x, y, theta]ᵀ, with units in meters and radians,
-   * then meters.
+  /**
+   * Odometry trust matrix [x, y, θ] in meters/radians.
+   * Current values: trust odometry tightly (0.1 m, 0.1 m, 0.1°). Increase to trust
+   * wheel encoders less when slippage or loop overruns cause odometry drift.
    */
   private static final Vector<N3> m_stateStndDev = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(0.1));
 
-  /*
-   * The Standard Deviation for the Vsion Measurements (i,e. NOSIE);
-   * Increase numbers to trust mesurements from Vision less.
-   * This matrix is in the form [x, y, theta]ᵀ, with units in meters and radians.
+  /**
+   * Base vision trust matrix [x, y, θ] in meters/radians — used as the starting point
+   * before the distance-scaled penalty in {@link #periodic()} is applied.
+   * Increase to trust AprilTag detections less globally.
    */
   private static final Vector<N3> m_visionStndDev = VecBuilder.fill(0.1, 0.1, Units.degreesToRadians(0.1));
 
@@ -137,12 +149,39 @@ public class Vision extends SubsystemBase {
     SmartDashboard.putData("Field", m_field);
   }
 
+  /**
+   * No-arg constructor — activates replay mode. All estimation is bypassed;
+   * {@link #periodic()} and {@link #simulationPeriodic()} return immediately.
+   * Used as a placeholder when AdvantageKit log-replay is implemented.
+   */
   public Vision() {
     io = null;
     estimator = null;
     isReplay = true;
   }
 
+  /**
+   * Runs every 20 ms. Performs three stages:
+   *
+   * <ol>
+   *   <li><b>Odometry propagation:</b> updates the Kalman filter with the latest wheel encoder
+   *       positions and gyro heading. This step runs even when no vision targets are visible and
+   *       keeps the pose estimate moving correctly between vision updates.
+   *   <li><b>Vision fusion:</b> for each camera flagged for pose estimation, calls
+   *       {@link VisionIO#getVisionEst()} once per loop.
+   *       <ul>
+   *         <li>Measurements more than 4 m from the current odometry estimate are rejected
+   *             outright — this guards against tag-ID misdetections or extreme lens distortion
+   *             that would otherwise jump the pose wildly.
+   *         <li>Accepted measurements are weighted by a distance-scaled standard deviation:
+   *             {@code σ = 0.1 + dist * 0.05} for x and y (meters), and
+   *             {@code σ = 10° + dist * 5°} for heading. Farther detections are trusted less
+   *             because pixel errors project to larger field errors at range.
+   *       </ul>
+   *   <li><b>Field2d telemetry:</b> in simulation the field widget shows the ground-truth pose
+   *       from the drivetrain; on hardware it shows the filter's own estimate.
+   * </ol>
+   */
   @Override
   public void periodic() {
     if (isReplay) {
@@ -153,17 +192,17 @@ public class Vision extends SubsystemBase {
         m_swerveModulePositionSupplier.get());
 
     for (VisionIO visionIO : m_visionOdometryCams) {
-      // H-2: call getVisionEst() once per camera per loop
       Optional<VisionEstimate> est = visionIO.getVisionEst();
 
       est.ifPresent(e -> {
         Pose2d currentEst = estimator.getEstimatedPosition();
         double dist = currentEst.getTranslation().getDistance(e.getPose().getTranslation());
 
-        // H-3: reject measurements more than 4 m from current odometry estimate
+        // Reject detections more than 4 m from current odometry — guards against
+        // bad tag-ID detections or extreme lens distortion.
         if (dist > 4.0) return;
 
-        // M-4: trust vision less as it diverges from odometry
+        // Scale standard deviation by distance: farther detections are less precise.
         Matrix<N3, N1> stdDevs = VecBuilder.fill(
             0.1 + dist * 0.05,
             0.1 + dist * 0.05,
@@ -185,15 +224,22 @@ public class Vision extends SubsystemBase {
     }
   }
 
+  /**
+   * Runs every 20 ms in simulation only. Advances the PhotonVision simulation by one step,
+   * using the drivetrain's ground-truth pose from {@code m_poseSupplier}.
+   *
+   * <p>For cameras mounted on the turret, the camera transform is updated by the current turret
+   * rotation before the simulation frame is computed. The rotation is currently hardcoded to 5°
+   * as a placeholder — TODO: replace with the actual turret angle from the {@link
+   * frc.robot.subsystems.turret.Turret} subsystem once the turret is wired in (Stage 8).
+   */
   @Override
   public void simulationPeriodic() {
     if (isReplay) {
       return;
     }
-    // TODO: Get turret angle from turret subsystem
     if (m_turretCamSims.size() > 0) {
       for (PhotonVisionSimIO cameraSim : m_turretCamSims) {
-        // The turret the camera is mounted on is rotated 5 degrees
         Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(5));
         Transform3d robotToCamera = new Transform3d(
             cameraSim.robotToCameraTrl.rotateBy(turretRotation),
@@ -204,20 +250,31 @@ public class Vision extends SubsystemBase {
     sim.update(m_poseSupplier.get());
   }
 
+  /**
+   * Registers the field AprilTag layout and all cameras with the PhotonVision
+   * simulation system. Called once from the full constructor when at least one
+   * {@link PhotonVisionSimIO} is detected in the IO list.
+   */
   public void setUpSim() {
     tagLayout = VisionConstants.kTagLayout;
     sim.addAprilTags(tagLayout);
-    // Add this camera to the vision system simulation with the given
-    // robot-to-camera transform.
     for (PhotonVisionSimIO cameraSim : m_simCameras) {
       sim.addCamera(cameraSim.getCameraSim(), cameraSim.robotToCamera);
     }
   }
 
+  /**
+   * Returns the Kalman filter's current best-estimate robot pose.
+   * May be stale by up to one loop cycle (20 ms).
+   */
   public Pose2d getEstimatedPose() {
     return estimator.getEstimatedPosition();
   }
 
+  /**
+   * Resets the Kalman filter's internal pose to {@code pose}.
+   * Use at auto start or after a known field position is established.
+   */
   public void resetVisionPose(Pose2d pose) {
     estimator.resetPose(pose);
   }

@@ -130,6 +130,7 @@ public final class RobotStateMachine {
         AimParams.setupLogging(new OnboardLogger("Aiming"), this::getAimParams);
     }
 
+    /** Returns the shared {@link Shooter} subsystem owned by this state machine. */
     public Shooter getShooter() {
         return m_Shooter;
     }
@@ -174,14 +175,20 @@ public final class RobotStateMachine {
         return m_tofAim.update(m_lastLeadTarget, shooterPose, Translation2d.kZero);
     }
 
+    /**
+     * Returns {@code true} when the shooter flywheel is at the target speed for the current
+     * aim parameters. Convenience wrapper used by button bindings and SmartDashboard telemetry.
+     */
     public boolean isShootReady() {
         return m_Shooter.tracked(() -> getAimParams()).getAsBoolean();
     }
 
+    /** Returns the driver's command controller (port 0). */
     public CommandXboxController getDriver() {
         return joystick;
     }
 
+    /** Returns the gunner's Xbox controller (port 1). */
     public XboxController getGunner() {
         return m_gunner;
     }
@@ -257,6 +264,21 @@ public final class RobotStateMachine {
         }
     }
 
+    /**
+     * Advances the LED blink pattern by one step, called at 10 Hz from {@link #periodic()}.
+     *
+     * <p>Three blink modes are supported:
+     * <ul>
+     *   <li>{@code switchingRed} — alternates between red and black to signal this alliance's
+     *       scoring window opening (drive team should start shooting).
+     *   <li>{@code switchingGreen} — alternates between green and black to signal a scoring
+     *       window closing (drive team should stop shooting).
+     *   <li>{@code switching} — alternates between white and black as a neutral countdown flash
+     *       during the 7-second transition buffer before the window boundary.
+     * </ul>
+     * Only one mode is active at a time; {@link #getState()} sets the flags and clears all three
+     * when the transition buffer expires.
+     */
     private void newPostedValue() {
         if (switchingRed) {
             if (exampleColor.equals(whiteColor) || exampleColor.equals(blackColor) || exampleColor.equals(greenColor)) {
@@ -279,6 +301,20 @@ public final class RobotStateMachine {
         }
     }
 
+    /**
+     * Updates {@link #Tag_POSE2D} and {@link #HubPose} for the current alliance.
+     *
+     * <p>AprilTag IDs used as the scoring target:
+     * <ul>
+     *   <li>Tag 10 — Red alliance hub (field center, red side)
+     *   <li>Tag 20 — Blue alliance hub (field center, blue side)
+     * </ul>
+     *
+     * <p>The hub's physical center is 0.5842 m behind (in the tag's facing direction) the
+     * AprilTag face, because the tag is mounted on the rim of the hub, not at its center.
+     * {@code HubPose} compensates for this offset and represents the actual ball-entry point
+     * used by the aiming pipeline.
+     */
     private void checkAlliance() {
         if (getAlliance() == Alliance.Red) {
             Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
@@ -290,14 +326,21 @@ public final class RobotStateMachine {
                         new Rotation2d()));
     }
 
+    /** Returns the hub center pose (0.5842 m behind the AprilTag face). */
     public Pose2d getHubPose() {
         return HubPose;
     }
 
+    /** Returns the last computed turret pose in field coordinates. */
     public Pose2d getTurretPose() {
         return turretPose;
     }
 
+    /**
+     * Returns the robot's current field-relative chassis speeds, or {@code null} if the
+     * drivetrain has not yet been bound via {@link #bindDrivetrain(CommandSwerveDrivetrain)}.
+     * Callers must null-check the result.
+     */
     public ChassisSpeeds getFieldSpeeds() {
         if (drivetrain == null) {
             return null;
@@ -305,27 +348,52 @@ public final class RobotStateMachine {
         return ChassisSpeeds.fromRobotRelativeSpeeds(getChassisSpeeds(), pose.getRotation());
     }
 
+    /**
+     * Returns the robot-relative chassis speeds from the drivetrain's odometry state.
+     * Returns zero speeds if the drivetrain has not been bound yet.
+     */
     public ChassisSpeeds getChassisSpeeds() {
         if (drivetrain == null) return new ChassisSpeeds();
         return drivetrain.getState().Speeds;
     }
 
+    /**
+     * Resets the vision estimator's internal pose to {@code pose}. Use after a known
+     * field-relative position is established (e.g., after placing against a wall at auto start).
+     */
     public void resetVisionPose(Pose2d pose) {
         m_vision.resetVisionPose(pose);
     }
 
+    /**
+     * Binds the drivetrain subsystem so field-relative speeds can be fetched for lead
+     * compensation. Must be called from {@link RobotContainer} before teleop begins.
+     */
     public void bindDrivetrain(CommandSwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
     }
 
+    /** Returns the straight-line distance from the robot to the hub center (meters). */
     public double distToTag() {
         return pose.getTranslation().getDistance(HubPose.getTranslation());
     }
 
+    /**
+     * Returns a supplier that is {@code true} when the robot is more than 4.2 m from the hub.
+     * Used as a Trigger condition to gate shooting commands — shots closer than 4.2 m risk
+     * hitting the hub rim at a too-steep angle with the current shooter geometry.
+     */
     public BooleanSupplier isFarEnough() {
         return () -> distToTag() > 4.2;
     }
 
+    /**
+     * Returns {@code true} when the robot's shooter face is pointed within 20° of the hub.
+     *
+     * <p>The shooter is mounted on the <em>back</em> of the robot, so the facing direction is
+     * the robot heading rotated by π (180°). Subtracting π from the robot heading converts
+     * "robot forward" to "shooter forward" before computing the angular error to the hub.
+     */
     public boolean isFacingHub() {
         double dx = HubPose.getX() - pose.getX();
         double dy = HubPose.getY() - pose.getY();
@@ -374,9 +442,26 @@ public final class RobotStateMachine {
     }
 
     /**
-     * Returns the current robot state.
+     * Drives the LED color state machine based on match time and game-specific data, then
+     * returns the current {@link RobotState}.
      *
-     * @return current state enum
+     * <p><b>Warning — side effects:</b> This method calls {@link #setState(RobotState)} (which
+     * in turn calls {@link #refreshPoseFromVision()} and {@link #update(RobotState)}) and
+     * mutates {@code switching}, {@code switchingRed}, {@code switchingGreen}, and
+     * {@code exampleColor}. It also writes {@code Robot/TimeUntilSwitchSec} to SmartDashboard.
+     * Do not call this method when you only want to read the state — call the field {@code state}
+     * directly via {@link #isActive()} instead.
+     *
+     * <h2>LED / Scoring-Window Schedule</h2>
+     * The FMS game-specific message encodes which hub color is active. When the first character
+     * is {@code 'R'} or {@code 'B'}, two interleaved schedules run — one for the alliance whose
+     * color was announced, one for the opposing alliance. At each schedule boundary a 3-second
+     * flash sequence fires ({@code switchingRed} → red blink, {@code switchingGreen} → green
+     * blink, {@code switching} → white blink) to signal the drive team that the scoring window
+     * is changing. The flash sequences are coordinated through {@link #newPostedValue()}, which
+     * is called at 10 Hz from {@link #periodic()}.
+     *
+     * @return current {@link RobotState} after applying all state transitions
      */
     public RobotState getState() {
         double matchTime = DriverStation.getMatchTime();
@@ -647,12 +732,11 @@ public final class RobotStateMachine {
         return state;
     }
     /**
-     * Update state and refresh pose from vision.
-     */
-    /**
-     * Requests a transition to the specified state.
+     * Requests a transition to the specified state. No-ops if already in that state.
+     * Refreshes the cached pose from vision before applying the transition so any LED or
+     * aiming logic that runs immediately after has an up-to-date position.
      *
-     * @param next next state to apply
+     * @param next the desired state
      */
     public void setState(RobotState next) {
         if (next == state)
@@ -661,6 +745,7 @@ public final class RobotStateMachine {
         update(next);
     }
 
+    /** Toggles between ACTIVE and INACTIVE. Convenience wrapper for operator button bindings. */
     public void switchState() {
         if (getState() == RobotState.ACTIVE) {
             setState(RobotState.INACTIVE);
@@ -725,6 +810,19 @@ public final class RobotStateMachine {
         }
     }
 
+    /**
+     * Returns {@code true} when the robot is physically inside a trench run.
+     *
+     * <p>The four trench regions are defined by field coordinates (meters, origin at blue
+     * alliance wall corner):
+     * <ul>
+     *   <li>Blue trench top: x ∈ [3.7, 5.3], y ∈ [6.5, 8.3]
+     *   <li>Blue trench bottom: x ∈ [3.7, 5.3], y ∈ [0, 1.8]
+     *   <li>Red trench top: x ∈ [10.9, 12.8], y ∈ [6.5, 8.3]
+     *   <li>Red trench bottom: x ∈ [10.9, 12.8], y ∈ [0, 1.8]
+     * </ul>
+     * Used by the flywheel to limit hood angle while passing under the trench bar.
+     */
     public boolean underTrench() {
         double xPose = pose.getX();
         double yPose = pose.getY();
@@ -741,35 +839,67 @@ public final class RobotStateMachine {
         }
     }
 
+    /** Returns the cached game-specific message string (may be empty before FMS connects). */
     public String getGameData() {
         return gameData;
     }
 
+    /**
+     * Stores the game-specific message and marks it as received so {@link #hasData()} returns
+     * {@code true}. Once data is received, {@link Robot#teleopPeriodic()} stops polling.
+     */
     public void setGameData(String data) {
         gameData = data;
         gotData = true;
     }
 
+    /**
+     * Returns {@code true} once the game-specific message has been received from the FMS
+     * or Driver Station. Used to gate the one-time alliance/state setup in teleop.
+     */
     public boolean hasData() {
         return gotData;
     }
 
+    /**
+     * Returns the current alliance from the Driver Station, defaulting to Blue when the
+     * alliance is not yet known (e.g., during simulation or before FMS connect).
+     */
     public Alliance getAlliance() {
         return DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
     }
 
+    /**
+     * Whether the robot is allowed to shoot.
+     * ACTIVE means the scoring window is open for this alliance; INACTIVE means it is not.
+     */
     public enum RobotState {
-        ACTIVE, INACTIVE
+        /** Scoring window is open — robot may shoot. */
+        ACTIVE,
+        /** Scoring window is closed — robot should not shoot. */
+        INACTIVE
     }
 
+    /** Describes where the robot is on the field relative to alliance boundaries. */
     public enum FieldZone {
-        ALLIANCE, NEUTRAL_TOP, NEUTRAL_CENTER, NEUTRAL_BOTTOM, OPPONENT
+        /** Robot is in its own alliance's protected zone (x < 5.4 m for Blue, x > 11.0 m for Red). */
+        ALLIANCE,
+        /** Robot is in the neutral zone near the top of the field (y > 4.2 m). */
+        NEUTRAL_TOP,
+        /** Robot is in the neutral zone near the center of the field (3.8 m ≤ y ≤ 4.2 m). */
+        NEUTRAL_CENTER,
+        /** Robot is in the neutral zone near the bottom of the field (y < 3.8 m). */
+        NEUTRAL_BOTTOM,
+        /** Robot is in the opponent's protected zone. */
+        OPPONENT
     }
 
+    /** Returns {@code true} when the current state is {@link RobotState#ACTIVE}. */
     public boolean isActive() {
         return getState() == RobotState.ACTIVE;
     }
 
+    /** Returns {@code true} when the robot is in its own alliance's zone. */
     public boolean isInAlliance() {
         return checkZone() == FieldZone.ALLIANCE;
     }
