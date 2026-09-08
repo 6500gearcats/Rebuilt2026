@@ -41,7 +41,7 @@ import frc.robot.commands.ShootWhenReady;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -53,7 +53,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.superstructure.StateManager;
-import frc.robot.subsystems.SysIDUtil;
+import frc.robot.subsystems.drivetrain.SysIDUtil;
 
 /**
  * Central robot configuration class — the "wiring diagram" that connects subsystems, commands,

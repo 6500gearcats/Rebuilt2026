@@ -25,7 +25,7 @@ import frc.robot.aiming.AimParams;
 import frc.robot.aiming.LeadCompensator;
 import frc.robot.aiming.ToFAim;
 import frc.robot.util.OnboardLogger;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.shooter.ShooterIOHardware;

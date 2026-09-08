@@ -22,9 +22,12 @@ Tracks execution of the package consolidation plan. See `pkg_plan.md` for ration
 | P-2 | Move `SysIDUtil.java` → `subsystems/SysIDUtil.java` | ⬜ | — |
 | P-3 | Move `ShooterValuesSenable.java` → `subsystems/shooter/` | ⬜ | — |
 | P-4 | Move `LocalizationConstants.java` → `subsystems/vision/` | ⬜ | — |
-| P-5 | Delete empty `utility/`, `vision/localization/`, `vision/` directories | ⬜ | — |
-| P-6 | Update all affected import statements | ⬜ | — |
-| P-7 | Compile verify — BUILD SUCCESSFUL | ⬜ | — |
+| P-5 | Delete empty `utility/`, `vision/localization/`, `vision/` directories | ✅ | a0c1f1b |
+| P-6 | Update all affected import statements | ✅ | a0c1f1b |
+| P-7 | Compile verify — BUILD SUCCESSFUL | ✅ | a0c1f1b |
+| P-8 | Create `subsystems/drivetrain/`; move `CommandSwerveDrivetrain`, `Telemetry`, `SysIDUtil` | ⬜ | — |
+| P-9 | Update imports in `RobotContainer`, `RobotStateMachine`, `TunerConstants`, `TunerConstants2` | ⬜ | — |
+| P-10 | Compile verify — BUILD SUCCESSFUL | ⬜ | — |
 
 ---
 
@@ -32,4 +35,5 @@ Tracks execution of the package consolidation plan. See `pkg_plan.md` for ration
 
 | Stage | Status |
 |-------|--------|
-| P-1 through P-7 (single commit) | ⬜ |
+| P-1 — P-7 (initial consolidation) | ✅ |
+| P-8 — P-10 (drivetrain subfolder) | ⬜ |

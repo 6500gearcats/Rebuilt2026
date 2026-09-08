@@ -111,10 +111,29 @@ After P-1 through P-4:
 
 ---
 
+## P-6 — Move drivetrain files into `subsystems/drivetrain/`
+
+`CommandSwerveDrivetrain`, `Telemetry`, and `SysIDUtil` currently sit loose in
+`subsystems/`. Every other subsystem has its own subfolder. Moving these three files
+makes the pattern uniform: `subsystems/` contains only subfolders, one per mechanism.
+
+**From → To:**
+- `frc.robot.subsystems.CommandSwerveDrivetrain` → `frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain`
+- `frc.robot.subsystems.Telemetry` → `frc.robot.subsystems.drivetrain.Telemetry`
+- `frc.robot.subsystems.SysIDUtil` → `frc.robot.subsystems.drivetrain.SysIDUtil`
+
+**Files to update:**
+- `CommandSwerveDrivetrain.java`, `Telemetry.java`, `SysIDUtil.java` — package declarations
+- `RobotContainer.java` — imports `CommandSwerveDrivetrain` and `SysIDUtil`
+- `RobotStateMachine.java` — imports `CommandSwerveDrivetrain`
+- `generated/TunerConstants.java` — imports `CommandSwerveDrivetrain` (auto-generated; update carefully)
+- `generated/TunerConstants2.java` — imports `CommandSwerveDrivetrain` (auto-generated; update carefully)
+
+---
+
 ## Commit Strategy
 
-One commit for all changes — it is a pure mechanical refactor with no logic changes,
-and splitting it would leave the codebase in a broken intermediate state between commits.
+One commit per phase — each is a pure mechanical refactor with no logic changes.
 
 | Commit tag | Content |
 |------------|---------|
