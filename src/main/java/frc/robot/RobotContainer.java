@@ -155,37 +155,8 @@ public class RobotContainer {
                 m_gunner = robotStateMachine.getGunner();
                 m_stateManager = new StateManager(robotStateMachine);
 
-                // PathPlanner auto commands — shooting/turret stubs re-implemented in Stage 6
-                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
-                NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
-                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
-                NamedCommands.registerCommand("IntakeLong",
-                                new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
-                NamedCommands.registerCommand("ShootFuel",         aimAndShoot());
-                NamedCommands.registerCommand("ShootFuel3s",       aimAndShoot().withTimeout(3.0));
-                NamedCommands.registerCommand("ShootFuel5s",       aimAndShoot().withTimeout(5.0));
-                NamedCommands.registerCommand("ShootFuel7s",       aimAndShoot().withTimeout(7.0));
-                NamedCommands.registerCommand("ShootFuel10s",      aimAndShoot().withTimeout(10.0));
-                NamedCommands.registerCommand("NewShootFuel3s",    aimAndShoot().withTimeout(3.0));
-                NamedCommands.registerCommand("NewShootFuel4s",    aimAndShoot().withTimeout(4.0));
-                NamedCommands.registerCommand("NewShootFuel5s",    aimAndShoot().withTimeout(5.0));
-                NamedCommands.registerCommand("NewShootFuel8s",    aimAndShoot().withTimeout(8.0));
-                NamedCommands.registerCommand("NewShootFuel10s",   aimAndShoot().withTimeout(10.0));
-                NamedCommands.registerCommand("ManualShootFuel3s",
-                        new ShootWhenReady().build(hopper, robotStateMachine).withTimeout(3.0));
-                NamedCommands.registerCommand("TrenchStartAngle",  m_turret.home());
-                NamedCommands.registerCommand("AlignTurret",       m_turret.track(m_stateManager));
-                NamedCommands.registerCommand("AlignTurret1s",     m_turret.track(m_stateManager).withTimeout(1.0));
-                NamedCommands.registerCommand("BopBop",
-                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
-                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
-                NamedCommands.registerCommand("SpeedUp", Commands.none()); // TODO Stage 6
-                SmartDashboard.putNumber("Shoot Speed", 0);
-
-                autoChooser = AutoBuilder.buildAutoChooser("testAuto");
-
-                SmartDashboard.putData("Auto Chooser", autoChooser);
-                CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+                // IO selection must run before NamedCommands registration — m_turret and m_vision
+                // are used below and will be null if the switch runs after them.
                 switch (RobotConstants.currentMode) {
                         case REAL:
                                 PhotonVisionIO m_photonVisionIO = new PhotonVisionIO("Thrifty_cam_2", false,
@@ -224,6 +195,38 @@ public class RobotContainer {
                                 m_turret = new Turret(new TurretIODisabled());
                                 break;
                 }
+
+                // PathPlanner auto commands — shooting/turret stubs re-implemented in Stage 6
+                NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
+                NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
+                NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
+                NamedCommands.registerCommand("IntakeLong",
+                                new ParallelCommandGroup(new RunIntake(m_intake, -0.1).withTimeout(0.8)));
+                NamedCommands.registerCommand("ShootFuel",         aimAndShoot());
+                NamedCommands.registerCommand("ShootFuel3s",       aimAndShoot().withTimeout(3.0));
+                NamedCommands.registerCommand("ShootFuel5s",       aimAndShoot().withTimeout(5.0));
+                NamedCommands.registerCommand("ShootFuel7s",       aimAndShoot().withTimeout(7.0));
+                NamedCommands.registerCommand("ShootFuel10s",      aimAndShoot().withTimeout(10.0));
+                NamedCommands.registerCommand("NewShootFuel3s",    aimAndShoot().withTimeout(3.0));
+                NamedCommands.registerCommand("NewShootFuel4s",    aimAndShoot().withTimeout(4.0));
+                NamedCommands.registerCommand("NewShootFuel5s",    aimAndShoot().withTimeout(5.0));
+                NamedCommands.registerCommand("NewShootFuel8s",    aimAndShoot().withTimeout(8.0));
+                NamedCommands.registerCommand("NewShootFuel10s",   aimAndShoot().withTimeout(10.0));
+                NamedCommands.registerCommand("ManualShootFuel3s",
+                        new ShootWhenReady().build(hopper, robotStateMachine).withTimeout(3.0));
+                NamedCommands.registerCommand("TrenchStartAngle",  m_turret.home());
+                NamedCommands.registerCommand("AlignTurret",       m_turret.track(m_stateManager));
+                NamedCommands.registerCommand("AlignTurret1s",     m_turret.track(m_stateManager).withTimeout(1.0));
+                NamedCommands.registerCommand("BopBop",
+                                new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
+                                                .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
+                NamedCommands.registerCommand("SpeedUp", Commands.none()); // TODO Stage 6
+                SmartDashboard.putNumber("Shoot Speed", 0);
+
+                autoChooser = AutoBuilder.buildAutoChooser("testAuto");
+
+                SmartDashboard.putData("Auto Chooser", autoChooser);
+                CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 configureBindings();
                 robotStateMachine.bindVision(m_vision);
                 robotStateMachine.bindDrivetrain(drivetrain);
