@@ -28,7 +28,15 @@ import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.subsystems.vision.VisionIO;
 
 /**
- * VisionIO implementation for PhotonVision simulation cameras.
+ * {@link VisionIO} implementation for PhotonVision cameras in simulation.
+ *
+ * <p>Wraps a {@link PhotonCameraSim} that renders synthetic frames based on the
+ * simulated robot pose. Uses {@code LOWEST_AMBIGUITY} pose strategy (vs.
+ * {@code MULTI_TAG_PNP_ON_COPROCESSOR} in hardware) because the sim estimator
+ * does not run on a coprocessor thread.
+ *
+ * <p>Wireframe rendering is enabled for visual debugging — it is resource-intensive
+ * and should be disabled for performance-sensitive sim runs.
  */
 public class PhotonVisionSimIO implements VisionIO {
     // Simulation
@@ -107,6 +115,11 @@ public class PhotonVisionSimIO implements VisionIO {
         return yaw;
     }
 
+    /**
+     * Returns the most recent simulated pipeline result, caching it for intra-loop consistency.
+     *
+     * @return the latest {@link PhotonPipelineResult} (never null, may be empty)
+     */
     public PhotonPipelineResult getLatestResult() {
         var unread = cameraSim.getCamera().getAllUnreadResults();
         if (!unread.isEmpty()) cachedResult = unread.get(unread.size() - 1);
@@ -252,14 +265,21 @@ public class PhotonVisionSimIO implements VisionIO {
         return range;
     }
 
+    /** Returns the underlying {@link PhotonCameraSim} for registration with the vision simulation world. */
     public PhotonCameraSim getCameraSim() {
         return cameraSim;
     }
 
+    /**
+     * Marks this camera as physically mounted on the turret.
+     * When true, the Vision subsystem updates the camera's pose each loop to track
+     * the turret's current angle instead of treating it as fixed to the robot frame.
+     */
     public void mountedOnTurret() {
         mountedOnTurret = true;
     }
 
+    /** @return true if this camera is mounted on the turret and its pose must be updated each loop. */
     public boolean isMountedOnTurret() {
         return mountedOnTurret;
     }

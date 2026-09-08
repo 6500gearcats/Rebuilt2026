@@ -25,7 +25,14 @@ import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.subsystems.vision.VisionIO;
 
 /**
- * VisionIO implementation backed by PhotonVision cameras.
+ * {@link VisionIO} implementation backed by a physical PhotonVision camera.
+ *
+ * <p>Uses {@code MULTI_TAG_PNP_ON_COPROCESSOR} pose strategy — the coprocessor
+ * solves 3D pose from all visible AprilTags simultaneously for maximum accuracy.
+ * Falls back gracefully when only one tag is visible.
+ *
+ * <p>{@link #getLatestResult()} caches the most recent pipeline result so
+ * multiple callers within the same loop cycle read a consistent snapshot.
  */
 public class PhotonVisionIO implements VisionIO {
     private final PhotonCamera m_camera;
@@ -85,6 +92,13 @@ public class PhotonVisionIO implements VisionIO {
         return yaw;
     }
 
+    /**
+     * Returns the most recent pipeline result, caching it for intra-loop consistency.
+     * Drains all unread results and keeps only the newest; if no new result is available,
+     * returns the last cached one.
+     *
+     * @return the latest {@link PhotonPipelineResult} (never null, may be empty)
+     */
     public PhotonPipelineResult getLatestResult() {
         var unread = m_camera.getAllUnreadResults();
         if (!unread.isEmpty()) cachedResult = unread.get(unread.size() - 1);

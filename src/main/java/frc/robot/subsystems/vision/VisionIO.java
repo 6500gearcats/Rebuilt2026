@@ -3,7 +3,15 @@ package frc.robot.subsystems.vision;
 import java.util.Optional;
 
 /**
- * IO abstraction for vision sources (PhotonVision, Limelight, or simulation).
+ * IO abstraction for a single vision camera source.
+ *
+ * <p>Implementations exist for real hardware ({@link frc.robot.subsystems.vision.photonvision.PhotonVisionIO}),
+ * simulation ({@link frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO}), and
+ * disabled-mode stubs. The {@link frc.robot.subsystems.vision.Vision} subsystem holds a
+ * list of {@code VisionIO} instances and fuses their pose estimates into the Kalman filter.
+ *
+ * <p>All angle values are in degrees (PhotonVision convention). All range values are in meters.
+ * When no target is visible, accessors return 0 as a safe default.
  */
 public interface VisionIO {
     /** @return camera name for dashboards and logging. */
