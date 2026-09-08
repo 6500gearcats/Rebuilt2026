@@ -23,7 +23,7 @@ import frc.robot.aiming.AimParams;
 import frc.robot.subsystems.turret.TurretIO.TurretIOInputs;
 import frc.robot.superstructure.StateManager;
 import frc.robot.util.OnboardLogger;
-import frc.robot.vision.localization.LocalizationConstants;
+import frc.robot.subsystems.vision.LocalizationConstants;
 
 /**
  * Turret subsystem — a single-axis yaw mechanism that rotates the shooter to face the hub.

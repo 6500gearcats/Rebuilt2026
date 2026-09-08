@@ -1,4 +1,4 @@
-package frc.robot.utility;
+package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;

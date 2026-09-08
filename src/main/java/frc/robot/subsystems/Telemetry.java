@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.subsystems;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
@@ -27,7 +27,7 @@ public class Telemetry {
 
         /**
          * Construct a telemetry object, with the specified max speed of the robot
-         * 
+         *
          * @param maxSpeed Maximum speed in meters per second
          */
         public Telemetry(double maxSpeed) {

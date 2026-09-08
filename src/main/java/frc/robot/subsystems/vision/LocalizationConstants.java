@@ -1,4 +1,4 @@
-package frc.robot.vision.localization;
+package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Transform3d;
 

@@ -53,7 +53,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.superstructure.StateManager;
-import frc.robot.utility.SysIDUtil;
+import frc.robot.subsystems.SysIDUtil;
 
 /**
  * Central robot configuration class — the "wiring diagram" that connects subsystems, commands,
