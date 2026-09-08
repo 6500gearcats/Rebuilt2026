@@ -59,13 +59,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    // m_robotContainer.setRobotOrientation();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
-    // SignalLogger.start();
     m_RobotStateMachine.setState(RobotState.ACTIVE);
   }
 
@@ -75,7 +73,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousExit() {
-    // SignalLogger.stop();
   }
 
   @Override
@@ -125,8 +122,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {
-    // SignalLogger.stop();
-
   }
 
   @Override

@@ -314,10 +314,6 @@ public final class RobotStateMachine {
         m_vision.resetVisionPose(pose);
     }
 
-    // public void getVisionEst(String name) {
-    // m_vision.getEstPoses(name);
-    // }
-
     public void bindDrivetrain(CommandSwerveDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
     }

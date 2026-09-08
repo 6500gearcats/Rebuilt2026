@@ -8,14 +8,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.hopper.Hopper;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class StaggerHopper extends SequentialCommandGroup {
-  /** Creates a new StaggerHopper. */
   public StaggerHopper(Hopper hopper) {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
     addCommands(new RunHopper(hopper).withTimeout(0.35), new WaitCommand(0.2));
 
   }
