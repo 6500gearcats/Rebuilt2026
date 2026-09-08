@@ -80,7 +80,6 @@ public final class RobotStateMachine {
     private boolean switching = false;
     private boolean switchingRed = false;
     private boolean switchingGreen = false;
-    private boolean postedValue = false;
     private Color exampleColor;
     private Color whiteColor = new Color(237, 237, 237);
     private Color blackColor = new Color(49, 49, 49);
