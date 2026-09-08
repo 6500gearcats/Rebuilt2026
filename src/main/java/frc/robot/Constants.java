@@ -41,10 +41,12 @@ public final class Constants {
   public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout
       .loadField(AprilTagFields.k2026RebuiltAndymark);
 
+  /** Selects the robot operating mode (real vs. simulation) at startup. */
   public static class RobotConstants {
     public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
   }
 
+  /** Indicates whether the robot is running on real hardware or in simulation. */
   public enum Mode {
     /** Running on a real robot. */
     REAL,
@@ -53,6 +55,13 @@ public final class Constants {
     SIM,
   }
 
+  /**
+   * Drive base physical constants and CAN IDs for the MAXSwerve drivetrain.
+   *
+   * <p>Note: CAN IDs here are for the older REV MAXSwerve configuration. The robot
+   * is being migrated to CTRE TalonFX swerve (see {@link frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain});
+   * these constants remain for legacy code compatibility.
+   */
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
@@ -100,6 +109,7 @@ public final class Constants {
 
   }
 
+  /** Per-module gear ratios, encoder conversion factors, and PID gains for MAXSwerve modules. */
   public static final class ModuleConstants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T,
     // 13T, or 14T.
@@ -155,11 +165,19 @@ public final class Constants {
     public static final int kTurningMotorCurrentLimit = 20; // amps
   }
 
+  /** Operator interface — USB port assignments for driver and gunner controllers. */
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kGunnerControllerPort = 1;
   }
 
+  /**
+   * PathPlanner and autonomous-mode constants.
+   *
+   * <p>{@link #config} is loaded from the PathPlanner GUI settings file at startup.
+   * If loading fails (e.g., the file was not deployed), autos will not run and an error
+   * is printed to the Driver Station console.
+   */
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;
@@ -185,14 +203,22 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
 
+  /** Free-speed reference for REV NEO motors (used in MAXSwerve drive feed-forward). */
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
 
+  /** IMU configuration — tilt angle for the gyro relative to the robot frame. */
   public static final class GyroConstants {
     public static final double kTiltPitch = 65; // 11? tilt angle=
   }
 
+  /**
+   * Vision camera calibration constants.
+   *
+   * <p>{@link #kSingleTagStdDevs} and {@link #kMultiTagStdDevs} are placeholder values
+   * (marked with "Fake values") — measure experimentally with the physical robot in Stage 8.
+   */
   public static class VisionConstants {
     public static final String kCameraNameTag = "Microsoft_LifeCam_HD-3000";
     public static final String kCameraNameNote = "Microsoft_LifeCam_VX-5000";
@@ -222,6 +248,10 @@ public final class Constants {
 
   }
 
+  /**
+   * Legacy CAN IDs for motors not yet migrated to subsystem-specific constants classes.
+   * These IDs are from the Hackbots configuration and require re-assignment in Stage 8-1.
+   */
   public static class MotorConstants {
     public static final int kTurretYawMotorID = 12;
     public static final int kShooterMotorRightID = 13;
@@ -233,6 +263,12 @@ public final class Constants {
     public static final int kKickerMotorID = 23;
   }
 
+  /**
+   * Robot-to-turret geometric transform constants.
+   *
+   * <p>{@link #ROBOT_TO_TURRET_BASE} is a placeholder — measure from CAD and confirm
+   * physically in Stage 8-2.
+   */
   public static class TurretConstants {
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;

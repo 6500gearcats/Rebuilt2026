@@ -6,6 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
 
+/**
+ * Robot program entry point. Launches the WPILib robot framework with {@link Robot} as the
+ * implementation class. Do not modify this class — all robot logic belongs in {@link Robot},
+ * subsystems, and commands.
+ */
 public final class Main {
   private Main() {
   }
