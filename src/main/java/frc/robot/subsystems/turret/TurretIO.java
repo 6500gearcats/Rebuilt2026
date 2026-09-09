@@ -109,6 +109,7 @@ public interface TurretIO {
       log.registerMeasurement("Temperature", () -> temperature, Celsius);
       log.registerMeasurement("Velocity", () -> velocity, RevolutionsPerSecond);
       log.registerMeasurement("Position", () -> position, Revolutions);
+      log.registerEnergy("Energy", () -> voltage, () -> statorCurrent);
     }
   }
 

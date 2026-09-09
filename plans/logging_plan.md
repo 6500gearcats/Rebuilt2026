@@ -17,18 +17,26 @@ motors. Audit found it does not — see below.
 | Subsystem | Motors | Voltage | Supply Current | Stator Current | Energy | Logged where |
 |---|---|---|---|---|---|---|
 | Drivetrain | 4 drive + 4 steer TalonFX | ❌ | ❌ | ❌ | ❌ | Nowhere — only kinematic state (`Telemetry.java`) |
-| Shooter | shooter1, shooter2, hood TalonFX | ✅ read | ✅ read | ✅ read | ❌ | **Nowhere** — read into `ShooterIOInputs`, used only for control math |
-| Turret | 1 TalonFX | ✅ read | ✅ read | ✅ read | ❌ | **Nowhere** — same pattern as Shooter |
+| Shooter | shooter1, shooter2, hood TalonFX | ✅ | ✅ | ✅ | ❌ | `ShooterIOInputs` self-registers with `OnboardLogger` — see correction below |
+| Turret | 1 TalonFX | ✅ | ✅ | ✅ | ❌ | `TurretIOInputs` self-registers with `OnboardLogger` — same pattern |
 | Intake | roller, deploy TalonFX | ❌ | ❌ | ✅ | ❌ | `SmartDashboard.putNumber` → `DataLogManager` |
 | Hopper | indexer, kicker TalonFX | ❌ | ❌ | ✅ | ❌ | `SmartDashboard.putNumber` → `DataLogManager` |
 
 **Root blocker, found during this audit:** `OnboardLogger.logAll()` — the method that
 actually writes any registered signal to the `.wpilog` file — is **never called anywhere**
-in the codebase (verified by repo-wide grep). `Shooter` and `Turret` already register a few
-values through `OnboardLogger` (Hood Reference, Velocity Reference, Ready, Tracking, etc.)
-but because `logAll()` has no call site, **none of that has ever been written**. This is not
-new breakage from this plan — it's a pre-existing silent failure that this plan must fix
-first, or every other change below is equally silent.
+in the codebase (verified by repo-wide grep). This is not new breakage from this plan — it's
+a pre-existing silent failure that this plan fixes first (L-0), before anything else in this
+plan can be verified to actually write.
+
+**Correction to the original audit (recorded here rather than silently fixed, since the
+user was given the wrong answer once already):** the initial pass read `Shooter.java` and
+`Turret.java` but not `ShooterIO.java`/`TurretIO.java`. Both `ShooterIOInputs` and
+`TurretIOInputs` already self-register every voltage/current/temperature field with
+`OnboardLogger` in their own constructors — this is a second, separate `OnboardLogger`
+instance from the one `Shooter`/`Turret` use for control-loop values, both under the same
+namespace. That data was never "unlogged" as originally stated to the user; it was only
+ever inert because of the L-0 bug above. L-2 and L-3 below are corrected accordingly — they
+now only add energy tracking, since voltage/current/temperature registration already exists.
 
 `CTRE SignalLogger.start()` is also not called anywhere — the CAN-level auto-capture
 mechanism an earlier session's notes assumed was active does not exist in this codebase.
@@ -92,31 +100,30 @@ Add `registerEnergy(String name, Supplier<Voltage> voltage, Supplier<Current> cu
 
 ---
 
-## L-2 — Shooter: log existing voltage/current/temperature + energy
+## L-2 — Shooter: add energy tracking (voltage/current/temp already logged)
 
-**File:** `src/main/java/frc/robot/subsystems/shooter/Shooter.java`
+**File:** `src/main/java/frc/robot/subsystems/shooter/ShooterIO.java`
 
-`ShooterIOInputs` already carries `shooter1/shooter2/hoodVoltage`, `SupplyCurrent`,
-`StatorCurrent`, `Temperature` — populated every loop by `ShooterIOHardware.updateInputs()`,
-just never logged. Add to the existing `OnboardLogger log = new OnboardLogger("Shooter")`
-block in the constructor:
-- `Shooter1/Voltage`, `Shooter1/SupplyCurrentA`, `Shooter1/StatorCurrentA`, `Shooter1/TempC`
-- Same three for `Shooter2` and `Hood`
-- `registerEnergy` for each of the 3 motors
+`ShooterIOInputs`'s constructor already registers `SupplyCurrent`, `TorqueCurrent`,
+`StatorCurrent`, `Voltage`, `Temperature`, `Velocity` for `shooter1`, `shooter2`, and `hood`
+via `OnboardLogger`. Add, in that same constructor, right after the existing registrations
+for each motor:
+- `registerEnergy("Shooter 1 Energy", () -> shooter1Voltage, () -> shooter1StatorCurrent)`
+- Same for `Shooter 2` and `Hood`
 
-No new hardware reads needed — suppliers just read the already-populated `inputs` struct.
+Stator current is used (not supply) because it reflects mechanical load per motor, matching
+what `registerEnergy`'s Javadoc recommends for per-motor draw.
 
 ---
 
-## L-3 — Turret: same treatment
+## L-3 — Turret: add energy tracking (voltage/current/temp already logged)
 
-**File:** `src/main/java/frc/robot/subsystems/turret/Turret.java`
+**File:** `src/main/java/frc/robot/subsystems/turret/TurretIO.java`
 
-`TurretIOInputs` already carries `voltage`, `supplyCurrent`, `statorCurrent`,
-`torqueCurrent`, `temperature`. Add to the existing `OnboardLogger log = new
-OnboardLogger("Turret")` block:
-- `Voltage`, `SupplyCurrentA`, `StatorCurrentA`, `TorqueCurrentA`, `TempC`
-- `registerEnergy`
+`TurretIOInputs`'s constructor already registers `Voltage`, `Supply Current`,
+`Stator Current`, `Torque Current`, `Temperature`, `Velocity`, `Position`. Add one line to
+that same constructor:
+- `registerEnergy("Energy", () -> voltage, () -> statorCurrent)`
 
 ---
 

@@ -83,6 +83,7 @@ public interface ShooterIO {
       log.registerMeasurement("Shooter 1 Voltage", () -> shooter1Voltage, Volts);
       log.registerMeasurement("Shooter 1 Temperature", () -> shooter1Temperature, Celsius);
       log.registerMeasurement("Shooter 1 Velocity", () -> shooter1Velocity, RotationsPerSecond);
+      log.registerEnergy("Shooter 1 Energy", () -> shooter1Voltage, () -> shooter1StatorCurrent);
 
       log.registerBoolean("Shooter 2 Motor Connected", () -> shooter2MotorConnected);
       log.registerMeasurement("Shooter 2 Supply Current", () -> shooter2SupplyCurrent, Amps);
@@ -91,6 +92,7 @@ public interface ShooterIO {
       log.registerMeasurement("Shooter 2 Voltage", () -> shooter2Voltage, Volts);
       log.registerMeasurement("Shooter 2 Temperature", () -> shooter2Temperature, Celsius);
       log.registerMeasurement("Shooter 2 Velocity", () -> shooter2Velocity, RotationsPerSecond);
+      log.registerEnergy("Shooter 2 Energy", () -> shooter2Voltage, () -> shooter2StatorCurrent);
 
       log.registerBoolean("Hood Motor Connected", () -> hoodMotorConnected);
       log.registerMeasurement("Hood Supply Current", () -> hoodSupplyCurrent, Amps);
@@ -100,6 +102,7 @@ public interface ShooterIO {
       log.registerMeasurement("Hood Temperature", () -> hoodTemperature, Celsius);
       log.registerMeasurement("Hood Velocity", () -> hoodVelocity, RotationsPerSecond);
       log.registerMeasurement("Hood Position", () -> hoodPosition, Rotations);
+      log.registerEnergy("Hood Energy", () -> hoodVoltage, () -> hoodStatorCurrent);
 
       log.registerBoolean("Hood CANcoder Connected", () -> hoodCANcoderConnected);
       log.registerMeasurement("Hood CANcoder Position", () -> hoodCANcoderPosition, Rotations);
