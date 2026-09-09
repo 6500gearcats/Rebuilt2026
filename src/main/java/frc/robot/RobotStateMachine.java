@@ -74,14 +74,30 @@ import frc.robot.subsystems.vision.Vision;
  * colors signal alliance-specific scoring windows to the drive team.
  */
 public final class RobotStateMachine {
+    /**
+     * Must be declared before {@link #instance} below. Java runs static field initializers in
+     * textual/declaration order — {@code instance}'s initializer calls {@code new
+     * RobotStateMachine()} immediately, which runs every instance field initializer in this
+     * class, including {@code m_tofAim = new ToFAim(..., kScoringConstraints)}. If this field
+     * were declared <em>after</em> {@code instance} (as it was until 2026-09-09), that
+     * constructor call would run before this field's own initializer had executed, so
+     * {@code kScoringConstraints} would still be {@code null} at the moment {@code m_tofAim}
+     * captured it — permanently, since {@code ToFAim}'s constructor just does a plain field
+     * assignment, not a live reference. The bug was latent for a long time because nothing
+     * called {@link #getAimParams()} reliably until {@code OnboardLogger.logAll()} was wired
+     * into {@code Robot.robotPeriodic()} the same day — once every loop started reaching
+     * {@code computeAimParams()} unconditionally, the resulting
+     * {@code NullPointerException} in {@code AimConstraints.check()} crashed the robot
+     * immediately on the very first loop. See {@code plans/review_plan.md} for the fix.
+     */
+    private static final AimConstraints kScoringConstraints = new AimConstraints(
+        Rotation2d.fromDegrees(40), Rotation2d.fromDegrees(80), 100.0);
+
     private static final RobotStateMachine instance = new RobotStateMachine();
 
     private RobotState state = RobotState.ACTIVE;
     private String gameData = "";
     private boolean gotData = false;
-
-    private static final AimConstraints kScoringConstraints = new AimConstraints(
-        Rotation2d.fromDegrees(40), Rotation2d.fromDegrees(80), 100.0);
 
     private boolean switching = false;
     private boolean switchingRed = false;

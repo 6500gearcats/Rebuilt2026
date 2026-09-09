@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,10 +17,11 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import frc.robot.RobotStateMachine.FieldZone;
+import frc.robot.aiming.AimParams;
 
 /**
- * Unit tests for {@link RobotStateMachine#checkZone}. Added 2026-09-09 — see
- * {@code plans/review_plan.md} R6-4.
+ * Unit tests for {@link RobotStateMachine#checkZone} and {@link RobotStateMachine#getAimParams}.
+ * Added 2026-09-09 — see {@code plans/review_plan.md} R6-4.
  *
  * <p>{@code RobotStateMachine} is an eagerly-initialized singleton with a private constructor
  * — these tests drive it through the shared {@link RobotStateMachine#getInstance()} instance
@@ -90,5 +93,33 @@ class RobotStateMachineTest {
 
     rsm.setPose(new Pose2d(8.0, 3.5, new edu.wpi.first.math.geometry.Rotation2d()));
     assertEquals(FieldZone.NEUTRAL_TOP, rsm.checkZone()); // y=3.5 < 3.8
+  }
+
+  /**
+   * Regression test for a real crash found 2026-09-09 running the sim after this session's
+   * changes: {@code getAimParams()} -&gt; {@code computeAimParams()} ->
+   * {@code LeadCompensator.computeLeadTarget()} -&gt; {@code ToFAim.update()} threw a
+   * {@code NullPointerException} on {@code this.constraints.check(params)} because
+   * {@code m_tofAim}'s {@code constraints} field was permanently {@code null} — a static
+   * field ordering bug in this class ({@code kScoringConstraints} was declared textually
+   * <em>after</em> {@code instance}, so {@code instance}'s eager {@code new
+   * RobotStateMachine()} ran {@code m_tofAim}'s constructor before {@code kScoringConstraints}
+   * had a value). Fixed by reordering the field declarations — see the Javadoc on
+   * {@code kScoringConstraints} itself for the full mechanism.
+   *
+   * <p>None of the {@code checkZone()} tests above would have caught this — they never call
+   * {@link RobotStateMachine#getAimParams()}, which is the only path that reaches
+   * {@code m_tofAim}. This test exists specifically to close that gap.
+   *
+   * <p>Asserts only that the call completes and returns a non-null result — not a specific
+   * {@code AimStatus}, since that depends on {@code Tag_POSE2D} having been set by
+   * {@code checkAlliance()} (it has, by construction) and on distance/constraint geometry
+   * this test doesn't control precisely. The crash this guards against was an exception, not
+   * a wrong value, so "doesn't throw" is the correct — and sufficient — assertion.
+   */
+  @Test
+  void getAimParamsDoesNotThrow() {
+    AimParams result = assertDoesNotThrow(rsm::getAimParams);
+    assertNotNull(result);
   }
 }

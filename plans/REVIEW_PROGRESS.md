@@ -248,6 +248,21 @@ Discovered while implementing this plan, not part of the original review:
   real flywheel warm-up.
 - **D-6 — `FieldZone`/`checkZone()` swap** (see above) — found while writing R6-4. Needs a
   human decision; can't be resolved from code alone.
+- **Real crash, found running the sim after this session's changes** — `getAimParams()` threw
+  `NullPointerException` on `this.constraints.check(params)` inside `ToFAim.update()`, taking
+  the whole robot program down on the first loop. Root cause: `RobotStateMachine.instance`
+  was declared *before* `kScoringConstraints` in the source. Java initializes static fields in
+  textual order, and `instance`'s eager `new RobotStateMachine()` runs every instance field
+  initializer — including `m_tofAim = new ToFAim(..., kScoringConstraints)` — before
+  `kScoringConstraints`'s own initializer has run, so `m_tofAim` permanently captured `null`.
+  This bug predates this session; it was latent because nothing called `getAimParams()`
+  reliably until `OnboardLogger.logAll()` was wired up (`03368ea`), and R2's caching change
+  moved the call into the unconditional per-loop path, making the crash immediate and certain
+  rather than depending on the gunner holding the aim trigger. Fixed by reordering the two
+  field declarations, with a Javadoc on `kScoringConstraints` explaining why the order
+  matters. Added a regression test (`RobotStateMachineTest.getAimParamsDoesNotThrow`) — none
+  of the R6-4 `checkZone()` tests exercised this path, since `checkZone()` never touches
+  `m_tofAim`.
 
 This list, plus the CAN ID collision found during the README rewrite (a separate plan), is
 the running argument for why "verify by doing the adjacent work carefully" keeps finding
