@@ -4,7 +4,7 @@ Tracks execution of the audit plan. See `audit_plan.md` for method and full rati
 Read-only — no code changes in this pass.
 
 **Branch:** `leto`
-**Last updated:** 2026-09-09 (R-3 complete)
+**Last updated:** 2026-09-09 (R-4 complete)
 
 ---
 
@@ -21,7 +21,7 @@ Read-only — no code changes in this pass.
 | R-1 | `Rebuilt2026_RefactorPlan.md` + `PROGRESS.md` + `ISSUES.md` | ✅ |
 | R-2 | `cleanup.md` + `CLEANUP_PROGRESS.md` | ✅ |
 | R-3 | `pkg_plan.md` + `PKG_PROGRESS.md` | ✅ |
-| R-4 | `sim_plan.md` + `SIM_PROGRESS.md` | ⬜ |
+| R-4 | `sim_plan.md` + `SIM_PROGRESS.md` | ✅ |
 | R-5 | `doc_plan.md` + `DOC_PROGRESS.md` | ⬜ |
 | R-6 | `logging_plan.md` + `LOGGING_PROGRESS.md` | ⬜ |
 
@@ -185,3 +185,33 @@ didn't happen; the code doesn't have a documentation bug, the progress file does
 No further work is needed on this plan's substance. Recommend the eventual fix-it plan just
 correct `PKG_PROGRESS.md` to mark P-1 through P-10 all ✅ under commit `a0c1f1b`, so the next
 person reading it doesn't waste time re-doing already-complete moves.
+
+---
+
+## R-4 Findings — Simulation Plan
+
+| ID | Claim | Verdict | Detail |
+|---|---|---|---|
+| S-1 | Delete `limelight/` package; strip `VisionEstimate.java` to PhotonVision-only | ✅ | Zero `limelight/` matches anywhere in `src/`; zero `Limelight` references in `VisionEstimate.java` |
+| S-3 | `ShooterIOSim` first-order lag, `kAlpha = 0.94` | ✅ | `targetVelocity`/`actualVelocity` fields and the exact `times(kAlpha).plus(...times(1.0-kAlpha))` line are present |
+| S-4 | Hopper `getSimState().setRotorVelocity()` under `RobotBase.isSimulation()` | ✅ | Present, unchanged by this session's logging additions to the same file |
+| S-5 | Intake `getSimState()` velocity + position seeding | ✅ | Present, unchanged by this session's logging additions to the same file |
+| S-6 | Auto path validation | ✅ correctly still ⬜ | Runtime/manual exercise, not code — no completion claim to falsify |
+
+**S-2 (PhotonVision API deprecations) — the progress file's specific claim doesn't match
+current code, but per the user this is an intentional, undocumented-in-the-tracker
+decision, not a regression.** `SIM_PROGRESS.md` records S2-2 as "Replace deprecated 3-arg
+constructor with 2-arg (strategy removed from ctor)." Current code in both
+`PhotonVisionIO.java` and `PhotonVisionSimIO.java` still calls the original 3-arg form —
+`new PhotonPoseEstimator(kTagLayout, PoseStrategy.X, robotToCamera)`. The user confirmed
+during this review: the deprecated 3-arg constructor was deliberately kept rather than
+migrated, superseding whatever S2-2's commit originally did. The tracker was never updated
+to reflect that later decision. S2-3 (`getAllUnreadResults()` caching) and S2-4 (4-arg
+`update()` overload) do match current code as claimed. S2-5's "2 warnings remain, blocked on
+PhotonVision RC" is still accurate as a description of what's outstanding, independent of
+the S2-2 question — vendordep is still pinned to `v2026.1.1-rc-3`, unchanged since
+`SIM_PROGRESS.md` was last updated.
+
+**Recommend the eventual fix-it plan** add a note to `SIM_PROGRESS.md`'s S2-2 row recording
+the decision to keep the deprecated constructor, so a future reader doesn't attempt to "fix"
+something that was deliberately left as-is.
