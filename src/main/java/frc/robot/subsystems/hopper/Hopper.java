@@ -4,12 +4,16 @@
 
 package frc.robot.subsystems.hopper;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.OnboardLogger;
 
 /**
  * Hopper subsystem — two motors that move balls from the storage area into the shooter.
@@ -36,22 +40,39 @@ import frc.robot.Constants;
  * Unlike the turret and shooter, the hopper does not use an IO interface. It drives the TalonFX
  * motors directly with percent-output duty-cycle control ({@code .set(speed)}), which is sufficient
  * for this open-loop application — no position or velocity feedback is needed for ball feeding.
+ *
+ * <p>Voltage, supply current, stator current, and accumulated energy for both motors are
+ * logged to the {@code .wpilog} file via {@link OnboardLogger} (registered once in the
+ * constructor) rather than {@code SmartDashboard}, so they don't add to NT4 bandwidth and
+ * are retained past a live session for post-match review in AdvantageScope.
  */
 public class Hopper extends SubsystemBase {
   TalonFX m_hopperMotor = new TalonFX(Constants.MotorConstants.kIndexerMotorID);
   TalonFX m_kickerMotor = new TalonFX(Constants.MotorConstants.kKickerMotorID);
 
   public Hopper() {
+    OnboardLogger log = new OnboardLogger("Hopper");
+
+    log.registerMeasurement("Indexer/Voltage", () -> m_hopperMotor.getMotorVoltage().getValue(), Volts);
+    log.registerMeasurement("Indexer/SupplyCurrentA", () -> m_hopperMotor.getSupplyCurrent().getValue(), Amps);
+    log.registerMeasurement("Indexer/StatorCurrentA", () -> m_hopperMotor.getStatorCurrent().getValue(), Amps);
+    log.registerEnergy("Indexer/Energy",
+        () -> m_hopperMotor.getMotorVoltage().getValue(), () -> m_hopperMotor.getStatorCurrent().getValue());
+
+    log.registerMeasurement("Kicker/Voltage", () -> m_kickerMotor.getMotorVoltage().getValue(), Volts);
+    log.registerMeasurement("Kicker/SupplyCurrentA", () -> m_kickerMotor.getSupplyCurrent().getValue(), Amps);
+    log.registerMeasurement("Kicker/StatorCurrentA", () -> m_kickerMotor.getStatorCurrent().getValue(), Amps);
+    log.registerEnergy("Kicker/Energy",
+        () -> m_kickerMotor.getMotorVoltage().getValue(), () -> m_kickerMotor.getStatorCurrent().getValue());
   }
 
   @Override
   public void periodic() {
-    // Monitor motor state for jam detection and post-match analysis.
-    // A kicker velocity near zero while hopperSpeed is high suggests a ball jam.
+    // Velocity kept on SmartDashboard for live jam detection during a match (a kicker velocity
+    // near zero while hopperSpeed is high suggests a ball jam). Current/voltage/energy are
+    // logged via OnboardLogger instead — see the class Javadoc.
     SmartDashboard.putNumber("Hopper/IndexerVelocityRPS",    m_hopperMotor.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Hopper/IndexerStatorCurrentA", m_hopperMotor.getStatorCurrent().getValueAsDouble());
     SmartDashboard.putNumber("Hopper/KickerVelocityRPS",     m_kickerMotor.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Hopper/KickerStatorCurrentA",  m_kickerMotor.getStatorCurrent().getValueAsDouble());
 
     if (RobotBase.isSimulation()) {
       // Falcon 500 free speed ~100 RPS; seed CTRE sim state so telemetry reads realistic values.

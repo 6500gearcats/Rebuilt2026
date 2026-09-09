@@ -4,12 +4,16 @@
 
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
+import frc.robot.util.OnboardLogger;
 
 /**
  * Controls the ground intake mechanism, which consists of two independent motors:
@@ -23,12 +27,31 @@ import frc.robot.Constants.MotorConstants;
  * <p>Both motors operate in open-loop (duty-cycle percent output). There is no position
  * or velocity closed-loop on this subsystem — the driver holds the deploy at a fixed speed
  * while the intake is active.
+ *
+ * <p>Voltage, supply current, stator current, and accumulated energy for both motors are
+ * logged to the {@code .wpilog} file via {@link OnboardLogger} (registered once in the
+ * constructor) rather than {@code SmartDashboard}, so they don't add to NT4 bandwidth and
+ * are retained past a live session for post-match review in AdvantageScope.
  */
 public class Intake extends SubsystemBase {
   private final TalonFX m_intakeMotor = new TalonFX(MotorConstants.kIntakeMotorID);
   private final TalonFX m_intakeDeployMotor = new TalonFX(MotorConstants.kIntakeDeployMotorID);
 
-  public Intake() {}
+  public Intake() {
+    OnboardLogger log = new OnboardLogger("Intake");
+
+    log.registerMeasurement("Roller/Voltage", () -> m_intakeMotor.getMotorVoltage().getValue(), Volts);
+    log.registerMeasurement("Roller/SupplyCurrentA", () -> m_intakeMotor.getSupplyCurrent().getValue(), Amps);
+    log.registerMeasurement("Roller/StatorCurrentA", () -> m_intakeMotor.getStatorCurrent().getValue(), Amps);
+    log.registerEnergy("Roller/Energy",
+        () -> m_intakeMotor.getMotorVoltage().getValue(), () -> m_intakeMotor.getStatorCurrent().getValue());
+
+    log.registerMeasurement("Deploy/Voltage", () -> m_intakeDeployMotor.getMotorVoltage().getValue(), Volts);
+    log.registerMeasurement("Deploy/SupplyCurrentA", () -> m_intakeDeployMotor.getSupplyCurrent().getValue(), Amps);
+    log.registerMeasurement("Deploy/StatorCurrentA", () -> m_intakeDeployMotor.getStatorCurrent().getValue(), Amps);
+    log.registerEnergy("Deploy/Energy",
+        () -> m_intakeDeployMotor.getMotorVoltage().getValue(), () -> m_intakeDeployMotor.getStatorCurrent().getValue());
+  }
 
   /**
    * Publishes telemetry and seeds CTRE simulation state each loop.
@@ -39,10 +62,10 @@ public class Intake extends SubsystemBase {
    */
   @Override
   public void periodic() {
+    // Current is logged via OnboardLogger (registered in the constructor) instead of here —
+    // see the class Javadoc.
     SmartDashboard.putNumber("Intake/DeployPositionRot",   m_intakeDeployMotor.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Intake/RollerVelocityRPS",   m_intakeMotor.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Intake/DeployStatorCurrentA", m_intakeDeployMotor.getStatorCurrent().getValueAsDouble());
-    SmartDashboard.putNumber("Intake/RollerStatorCurrentA", m_intakeMotor.getStatorCurrent().getValueAsDouble());
 
     if (RobotBase.isSimulation()) {
       // Seed CTRE sim state so velocity/position signals read realistic values in sim telemetry.
