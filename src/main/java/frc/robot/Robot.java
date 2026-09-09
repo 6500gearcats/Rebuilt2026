@@ -44,6 +44,11 @@ public class Robot extends TimedRobot {
    *       to the operator laptop after each match.
    *   <li>{@link DataLogManager#logConsoleOutput} routes {@code System.out} into the same
    *       {@code .wpilog} so error messages appear in AdvantageScope's Console tab.
+   *   <li>The active AprilTag field layout is logged by name immediately after console
+   *       capture starts, so every {@code .wpilog} records which field map was used without
+   *       requiring a source read. See {@link Constants#FIELD_LAYOUT_SOURCE}'s Javadoc for
+   *       why this matters — two different field layouts were loaded simultaneously until
+   *       2026-09-09.
    *   <li>{@link PortForwarder} tunnels PhotonVision's HTTP dashboard (port 5800) through the
    *       robot radio so it remains accessible from the Driver Station laptop.
    *   <li>The health timer is started here so {@link #robotPeriodic()} can begin rate-limiting
@@ -53,6 +58,8 @@ public class Robot extends TimedRobot {
   public Robot() {
     DataLogManager.start();
     DataLogManager.logConsoleOutput(true);
+    System.out.println("[Constants] AprilTag field layout: " + Constants.FIELD_LAYOUT_SOURCE
+        + " (" + Constants.APRIL_TAG_FIELD_LAYOUT.getTags().size() + " tags)");
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);

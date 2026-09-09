@@ -38,8 +38,25 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
 
+  /**
+   * Which physical AprilTag field variant this robot's pose estimation and hub-targeting are
+   * built against. Exposed as its own constant (rather than inlined into
+   * {@link #APRIL_TAG_FIELD_LAYOUT}'s initializer) so {@link frc.robot.Robot} can log the
+   * active layout by name at startup — see the log line in {@code Robot()}.
+   *
+   * <p><b>This is the single field layout used everywhere in this codebase</b> —
+   * {@link VisionConstants#kTagLayout} is repointed at this same value. Found and fixed
+   * 2026-09-09: the two constants previously loaded two different field variants
+   * ({@code k2026RebuiltAndymark} here, {@code kDefaultField} in {@code VisionConstants}),
+   * so the robot localized against one map and aimed at a hub derived from the other — a
+   * constant offset that vision corrections could never detect or correct, because each half
+   * was internally self-consistent. See {@code plans/review_plan.md} R1-A1 for the full
+   * writeup.
+   */
+  public static final AprilTagFields FIELD_LAYOUT_SOURCE = AprilTagFields.k2026RebuiltAndymark;
+
   public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout
-      .loadField(AprilTagFields.k2026RebuiltAndymark);
+      .loadField(FIELD_LAYOUT_SOURCE);
 
   /** Selects the robot operating mode (real vs. simulation) at startup. */
   public static class RobotConstants {
@@ -228,8 +245,21 @@ public final class Constants {
     public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5),
         new Rotation3d(0, 0, 180));
 
-    // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    /**
+     * The layout of the AprilTags on the field — repointed at {@link Constants#APRIL_TAG_FIELD_LAYOUT}
+     * (2026-09-09) so vision pose estimation and hub-targeting agree on one field map. The
+     * constant name is kept as-is (rather than removed) because {@code PhotonVisionIO} and
+     * {@code PhotonVisionSimIO} both {@code import static} it by this name.
+     *
+     * <p><b>Previously</b> this loaded {@code AprilTagFields.kDefaultField} — a different,
+     * independent field variant from {@code APRIL_TAG_FIELD_LAYOUT}'s
+     * {@code k2026RebuiltAndymark}. That mismatch is preserved here only as history, not as a
+     * live option: running two field layouts simultaneously was the bug (see
+     * {@link Constants#FIELD_LAYOUT_SOURCE}'s Javadoc). If this robot ever needs to play on a
+     * field using the plain/default AndyMark layout instead, change
+     * {@link Constants#FIELD_LAYOUT_SOURCE}, not this line.
+     */
+    public static final AprilTagFieldLayout kTagLayout = Constants.APRIL_TAG_FIELD_LAYOUT;
 
     // The standard deviations of our vision estimated poses, which affect
     // correction rate
