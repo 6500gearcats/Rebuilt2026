@@ -4,10 +4,16 @@
 
 package frc.robot;
 
+import edu.wpi.first.hal.can.CANStatus;
 import edu.wpi.first.net.PortForwarder;
+import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.IntegerLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -33,6 +39,25 @@ public class Robot extends TimedRobot {
   private final RobotStateMachine m_RobotStateMachine;
   /** Rate-limits system-health SmartDashboard writes to 10 Hz to avoid NT4 flood. */
   private final Timer m_healthTimer = new Timer();
+
+  /**
+   * Power Distribution Hub/Panel — total/per-channel current, input voltage, temperature.
+   * Auto-detects CTRE PDP vs. REV PDH. Added 2026-09-09, see {@code plans/review_plan.md} R5-2.
+   *
+   * <p>Logged via {@link #m_robotLog} rather than {@code SmartDashboard}, alongside the other
+   * whole-robot signals added in the same pass (R5-3 through R5-5). Gives a ground-truth total
+   * current/energy figure to cross-check the sum of all 16 per-motor
+   * {@code OnboardLogger.registerEnergy} totals against — see {@code plans/logging_plan.md}.
+   */
+  private final PowerDistribution m_pdh = new PowerDistribution();
+
+  /** Timestamp of the previous {@link #robotPeriodic()} call — see R5-4. */
+  private double m_lastLoopStartSec = Timer.getFPGATimestamp();
+  /** Backs the {@code Robot/LoopTimeSec} signal registered in {@link #configureRobotLogging()}. */
+  private double m_lastLoopDurationSec = 0.0;
+
+  /** True once {@link #logMatchContextOnce()} has fired. See R5-3. */
+  private boolean m_matchContextLogged = false;
 
   /**
    * Robot constructor — runs once on power-on before any mode is enabled.
@@ -64,6 +89,85 @@ public class Robot extends TimedRobot {
     m_RobotStateMachine = RobotStateMachine.getInstance();
     PortForwarder.add(5800, "photonvision.local", 5800);
     m_healthTimer.start();
+    configureRobotLogging();
+  }
+
+  /**
+   * Registers whole-robot diagnostic signals (PDH, loop timing, brownout/CAN health) with a
+   * dedicated {@code OnboardLogger}. Added 2026-09-09 — see {@code plans/review_plan.md}
+   * R5-2, R5-4, R5-5. Unlike the 10 Hz {@code SmartDashboard} block in {@link #robotPeriodic()}
+   * (display-only, NT4), everything here goes to the durable {@code .wpilog} file every loop.
+   */
+  private void configureRobotLogging() {
+    OnboardLogger log = new OnboardLogger("Robot");
+
+    // R5-4: wall-clock time between successive robotPeriodic() invocations. Not a WPILib
+    // Tracer epoch — a plain field updated at the very top of robotPeriodic(), so it can't be
+    // confused with the "<Subsystem>.periodic() epoch also covers simulationPeriodic()" trap
+    // this session found earlier (plans/project_sim-loop-overruns memory).
+    log.registerDouble("LoopTimeSec", () -> m_lastLoopDurationSec);
+
+    // R5-2: PDH/PDP ground truth to cross-check the sum of all 16 per-motor
+    // OnboardLogger.registerEnergy totals against (plans/logging_plan.md).
+    log.registerDouble("PDH/TotalCurrentA", m_pdh::getTotalCurrent);
+    log.registerDouble("PDH/TotalPowerW", m_pdh::getTotalPower);
+    log.registerDouble("PDH/TotalEnergyJ", m_pdh::getTotalEnergy);
+    log.registerDouble("PDH/VoltageV", m_pdh::getVoltage);
+    log.registerDouble("PDH/TemperatureC", m_pdh::getTemperature);
+    for (int channel = 0; channel < m_pdh.getNumChannels(); channel++) {
+      final int ch = channel; // effectively-final capture for the lambda below
+      log.registerDouble("PDH/Channel" + ch + "CurrentA", () -> m_pdh.getCurrent(ch));
+    }
+
+    // R5-7 aggregate: independent sum of all 16 per-motor OnboardLogger.registerEnergy
+    // registrations, meant to be cross-checked against the PDH/PDP figures directly above —
+    // see OnboardLogger.getTotalEnergyJ()'s Javadoc for what a large persistent gap means.
+    log.registerDouble("EnergyJ", OnboardLogger::getTotalEnergyJ);
+    log.registerDouble("PowerW", OnboardLogger::getTotalPowerW);
+
+    // R5-5: brownout + full CAN health, not just percentBusUtilization (already on
+    // SmartDashboard at 10 Hz below) — busOffCount/txFullCount/receiveErrorCount/
+    // transmitErrorCount are the fields that actually diagnose a flaky bus. Battery voltage
+    // is duplicated here (vs. the SmartDashboard-only copy below) so it lands in the durable
+    // .wpilog, not just the live NT4 view.
+    log.registerBoolean("IsBrownedOut", RobotController::isBrownedOut);
+    log.registerDouble("BatteryVoltageV", RobotController::getBatteryVoltage);
+    log.registerDouble("CANBusUtilizationPct",
+        () -> RobotController.getCANStatus().percentBusUtilization * 100.0);
+    log.registerDouble("CANBusOffCount", () -> (double) RobotController.getCANStatus().busOffCount);
+    log.registerDouble("CANTxFullCount", () -> (double) RobotController.getCANStatus().txFullCount);
+    log.registerDouble("CANReceiveErrorCount",
+        () -> (double) RobotController.getCANStatus().receiveErrorCount);
+    log.registerDouble("CANTransmitErrorCount",
+        () -> (double) RobotController.getCANStatus().transmitErrorCount);
+  }
+
+  /**
+   * Logs match context (event name, match type/number, alliance, FMS-attached) exactly once,
+   * the first time the Driver Station is attached — so a {@code .wpilog} can be tied back to a
+   * specific match after an event. Called every loop from {@link #robotPeriodic()}; the
+   * {@link #m_matchContextLogged} guard makes every call after the first a no-op. Added
+   * 2026-09-09 — see {@code plans/review_plan.md} R5-3.
+   *
+   * <p>Uses direct {@link StringLogEntry}/{@link edu.wpi.first.util.datalog.IntegerLogEntry}
+   * writes rather than an {@code OnboardLogger} registration, for the same reason as
+   * {@code RobotContainer.configureCommandLogging()}: this is a one-time event, not continuous
+   * state a poll-every-loop supplier model fits well.
+   */
+  private void logMatchContextOnce() {
+    if (m_matchContextLogged || !DriverStation.isDSAttached()) {
+      return;
+    }
+    DataLog log = DataLogManager.getLog();
+    new StringLogEntry(log, "Robot/MatchContext/EventName").append(DriverStation.getEventName());
+    new StringLogEntry(log, "Robot/MatchContext/MatchType")
+        .append(DriverStation.getMatchType().toString());
+    new StringLogEntry(log, "Robot/MatchContext/Alliance")
+        .append(DriverStation.getAlliance().map(Alliance::toString).orElse("Unknown"));
+    new IntegerLogEntry(log, "Robot/MatchContext/MatchNumber").append(DriverStation.getMatchNumber());
+    new IntegerLogEntry(log, "Robot/MatchContext/ReplayNumber").append(DriverStation.getReplayNumber());
+    new BooleanLogEntry(log, "Robot/MatchContext/FMSAttached").append(DriverStation.isFMSAttached());
+    m_matchContextLogged = true;
   }
 
   /**
@@ -88,13 +192,23 @@ public class Robot extends TimedRobot {
    * transients (e.g., a current spike on ball contact). Until this call was added, every
    * value registered via {@code OnboardLogger} anywhere in the codebase was silently never
    * written — {@link OnboardLogger#logAll()} had no call site either.
+   *
+   * <p>Loop-duration measurement (feeds {@code Robot/LoopTimeSec}, registered in
+   * {@link #configureRobotLogging()}) happens first, before anything else this method does,
+   * so it captures the full wall-clock gap since the previous call — including any tail effect
+   * from the previous loop. {@link #logMatchContextOnce()} is a cheap no-op after its first
+   * successful call; see its own Javadoc.
    */
   @Override
   public void robotPeriodic() {
+    double now = Timer.getFPGATimestamp();
+    m_lastLoopDurationSec = now - m_lastLoopStartSec;
+    m_lastLoopStartSec = now;
     StatusSignalUtil.refreshAll();
     CommandScheduler.getInstance().run();
     m_RobotStateMachine.periodic();
     OnboardLogger.logAll();
+    logMatchContextOnce();
     if (m_healthTimer.advanceIfElapsed(0.1)) {
       SmartDashboard.putNumber("Robot/BatteryVoltageV", RobotController.getBatteryVoltage());
       SmartDashboard.putNumber("Robot/CANBusUtilizationPct",

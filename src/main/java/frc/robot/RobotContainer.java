@@ -21,6 +21,9 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import org.photonvision.simulation.SimCameraProperties;
 
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.StringLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -250,6 +253,7 @@ public class RobotContainer {
                 SmartDashboard.putData("Auto Chooser", autoChooser);
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 configureBindings();
+                configureCommandLogging();
                 // Publishes DriveState/* NT topics + per-module Mechanism2d widgets. See
                 // m_telemetry's field Javadoc for the odometry-thread timing note.
                 drivetrain.registerTelemetry(m_telemetry::telemeterize);
@@ -350,6 +354,41 @@ public class RobotContainer {
                 // Gunner POV: manual turret jog at 0.5 rot/s. Each press holds until released.
                 joystick2.pov(90).whileTrue(m_turret.jog(0.5));
                 joystick2.pov(270).whileTrue(m_turret.jog(-0.5));
+        }
+
+        /**
+         * Logs every command's initialize/finish/interrupt events to the {@code .wpilog} file,
+         * one command name per event per line. Added 2026-09-09 — see
+         * {@code plans/review_plan.md} R5-1.
+         *
+         * <h2>Why this instead of an {@link OnboardLogger} registration</h2>
+         * {@code OnboardLogger}'s model is a supplier polled once per {@link OnboardLogger#logAll()}
+         * call, which fits continuous state (a motor's voltage, say) but not discrete events
+         * that fire at arbitrary times between loops. {@link edu.wpi.first.util.datalog.StringLogEntry}
+         * supports {@code .append()} at any time — the CommandScheduler hook calls it directly
+         * when the event actually happens, not on the next poll.
+         *
+         * <h2>Why 3 separate channels, not 1 combined string</h2>
+         * {@code Commands/Initialized}, {@code Commands/Finished}, {@code Commands/Interrupted}
+         * each carry just the command name as the value. This makes each an independently
+         * plottable/filterable timeline in AdvantageScope, rather than one channel needing the
+         * event type parsed back out of a combined string.
+         *
+         * <h2>What this makes possible</h2>
+         * During autonomous path debugging (the still-open S-6 task in
+         * {@code plans/SIM_PROGRESS.md}), this shows exactly which {@code NamedCommand} fired at
+         * which waypoint, whether it finished on its own or was interrupted, and whether a
+         * {@code withTimeout} expired.
+         */
+        private void configureCommandLogging() {
+                DataLog log = DataLogManager.getLog();
+                StringLogEntry initialized = new StringLogEntry(log, "Commands/Initialized");
+                StringLogEntry finished = new StringLogEntry(log, "Commands/Finished");
+                StringLogEntry interrupted = new StringLogEntry(log, "Commands/Interrupted");
+
+                CommandScheduler.getInstance().onCommandInitialize(c -> initialized.append(c.getName()));
+                CommandScheduler.getInstance().onCommandFinish(c -> finished.append(c.getName()));
+                CommandScheduler.getInstance().onCommandInterrupt(c -> interrupted.append(c.getName()));
         }
 
         /**

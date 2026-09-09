@@ -59,6 +59,13 @@ import edu.wpi.first.wpilibj.Timer;
 public class OnboardLogger {
   private static final DataLog datalog = DataLogManager.getLog();
   private static final List<OnboardLogger> loggers = new ArrayList<>();
+  /**
+   * Every {@link #registerEnergy} call's mutable state array, across all {@code OnboardLogger}
+   * instances — backs the static {@link #getTotalEnergyJ()} / {@link #getTotalPowerW()}
+   * whole-robot aggregates. See {@link #registerEnergy(String, Supplier, Supplier, EnergyReset)}
+   * for what each array slot means.
+   */
+  private static final List<double[]> energyStates = new ArrayList<>();
 
   private final String name;
 
@@ -134,35 +141,126 @@ public class OnboardLogger {
   }
 
   /**
+   * When an accumulated-energy channel (see {@link #registerEnergy}) resets its running total
+   * to zero. Added 2026-09-09 per {@code plans/review_plan.md} R5-7 / decision D-4.
+   */
+  public enum EnergyReset {
+    /** Never resets — cumulative Joules since robot code start. The original (pre-2026-09-09,
+     *  pre-{@code EnergyReset}) behavior; use this for lifetime wear tracking. */
+    NEVER,
+    /** Resets to zero on every disabled -&gt; enabled transition, so each match's energy is
+     *  independently comparable. The default for {@link #registerEnergy(String, Supplier, Supplier)}. */
+    ON_ENABLE
+  }
+
+  /**
    * Registers an accumulated energy signal (Joules) for a motor, integrating
-   * voltage &times; current &times; elapsed time every {@link #logAll()} call.
+   * voltage &times; current &times; elapsed time every {@link #logAll()} call, resetting to
+   * zero on every disable-&gt;enable transition ({@link EnergyReset#ON_ENABLE}).
    *
-   * <p>The running total is Joules consumed since robot code start (process lifetime) — this
-   * class has no reset-on-enable mechanism, matching every other {@code OnboardLogger}
-   * registration. Log path: {@code <namespace>/<name>EnergyJ}.
-   *
-   * <p>Pass either stator or supply current depending on what the caller wants to measure
-   * (stator current reflects mechanical load; supply current reflects battery draw). Callers
-   * typically register this once per motor alongside {@link #registerMeasurement} calls for
-   * that motor's raw voltage and current.
+   * <p>Equivalent to {@code registerEnergy(name, voltage, current, EnergyReset.ON_ENABLE)}.
+   * Call the 4-argument overload directly for {@link EnergyReset#NEVER} (lifetime total).
    *
    * @param name    Signal name (before the {@code EnergyJ} suffix is appended).
    * @param voltage Supplier for the motor's voltage each loop.
    * @param current Supplier for the motor's current each loop.
    */
   public void registerEnergy(String name, Supplier<Voltage> voltage, Supplier<Current> current) {
+    registerEnergy(name, voltage, current, EnergyReset.ON_ENABLE);
+  }
+
+  /**
+   * Registers an accumulated energy signal (Joules) for a motor, integrating
+   * voltage &times; current &times; elapsed time every {@link #logAll()} call.
+   *
+   * <p>Pass either stator or supply current depending on what the caller wants to measure
+   * (stator current reflects mechanical load; supply current reflects battery draw). Callers
+   * typically register this once per motor alongside {@link #registerMeasurement} calls for
+   * that motor's raw voltage and current. Log path: {@code <namespace>/<name>EnergyJ}.
+   *
+   * <p><b>Reset semantics</b> ({@code reset} parameter, added 2026-09-09 — see
+   * {@code plans/review_plan.md} R5-7): with {@link EnergyReset#ON_ENABLE} (the default via
+   * the 3-argument overload), the total zeroes on every disabled-&gt;enabled transition, so
+   * each match's energy is independently comparable rather than an ever-growing
+   * since-boot figure. This also closes a latent gap in the original (pre-2026-09-09)
+   * behavior: without a reset, the accumulator kept integrating the whole time the robot sat
+   * disabled on the cart between matches — motor voltage/current are near zero then, so the
+   * contribution was small, but never guaranteed zero. {@link EnergyReset#NEVER} restores the
+   * original cumulative-since-boot behavior for lifetime wear tracking.
+   *
+   * @param name    Signal name (before the {@code EnergyJ} suffix is appended).
+   * @param voltage Supplier for the motor's voltage each loop.
+   * @param current Supplier for the motor's current each loop.
+   * @param reset   When the running total resets to zero.
+   */
+  public void registerEnergy(String name, Supplier<Voltage> voltage, Supplier<Current> current,
+      EnergyReset reset) {
     DoubleLogEntry entry = new DoubleLogEntry(datalog, this.name + "/" + name + "EnergyJ", "Joules");
-    // [0] = accumulated Joules, [1] = timestamp of the previous sample. A length-2 array is used
-    // (rather than two local doubles) because the lambda below must mutate this state across
-    // calls while only capturing effectively-final references.
-    double[] state = new double[] {0.0, Timer.getFPGATimestamp()};
+    // [0] = accumulated Joules, [1] = timestamp of the previous sample, [2] = 1.0 if the robot
+    // was enabled as of the previous sample else 0.0 (used to detect the disabled->enabled
+    // edge), [3] = instantaneous power (W) as of the last sample. A length-4 array is used
+    // (rather than local doubles/a boolean) because the lambda below must mutate this state
+    // across calls while only capturing effectively-final references — a small private holder
+    // class would read better if this grows further. [0] and [3] are also read directly by
+    // getTotalEnergyJ()/getTotalPowerW() via energyStates below (R5-7's whole-robot aggregate),
+    // which is why this array is shared into that static list rather than kept purely local.
+    double[] state = new double[] {0.0, Timer.getFPGATimestamp(), 0.0, 0.0};
+    energyStates.add(state);
     doubleEntries.add(new Pair<DoubleSupplier, DoubleLogEntry>(() -> {
       double now = Timer.getFPGATimestamp();
+      boolean wasEnabled = state[2] != 0.0;
+      boolean isEnabled = DriverStation.isEnabled();
+      if (reset == EnergyReset.ON_ENABLE && !wasEnabled && isEnabled) {
+        // Rising edge: zero both the total and the timestamp, so the first post-enable sample
+        // integrates against "now" rather than however long the robot sat disabled.
+        state[0] = 0.0;
+        state[1] = now;
+      }
+      state[2] = isEnabled ? 1.0 : 0.0;
       double dt = now - state[1];
       state[1] = now;
-      state[0] += voltage.get().in(Volts) * current.get().in(Amps) * dt;
+      double powerW = voltage.get().in(Volts) * current.get().in(Amps);
+      state[3] = powerW;
+      state[0] += powerW * dt;
       return state[0];
     }, entry));
+  }
+
+  /**
+   * Sums the current accumulated energy (Joules) across every {@link #registerEnergy}
+   * registration in the process, regardless of which {@code OnboardLogger} instance/namespace
+   * registered it. Added 2026-09-09 — see {@code plans/review_plan.md} R5-7.
+   *
+   * <p>Each registration keeps its own {@link EnergyReset} policy — this sum mixes whatever
+   * mix of {@code ON_ENABLE} and {@code NEVER} registrations happen to exist. As of this
+   * writing all 16 motor registrations in this codebase use the {@code ON_ENABLE} default, so
+   * the sum is a per-match whole-robot energy figure in practice.
+   *
+   * <p>Intended to be cross-checked against {@code PowerDistribution.getTotalEnergy()} — an
+   * independent, hardware-measured total. A large, persistent gap between the two means one of
+   * them is wrong (e.g., a motor whose energy registration was never wired up, or, on the PDH
+   * side, a device drawing power from a channel the PDH doesn't meter).
+   */
+  public static double getTotalEnergyJ() {
+    double total = 0.0;
+    for (double[] state : energyStates) {
+      total += state[0];
+    }
+    return total;
+  }
+
+  /**
+   * Sums the most recent instantaneous power (Watts) across every {@link #registerEnergy}
+   * registration in the process. See {@link #getTotalEnergyJ()} for the cross-check rationale
+   * and the same caveat about mixed {@link EnergyReset} policies (irrelevant here since power
+   * is instantaneous, not accumulated — this caveat only matters for the energy sum).
+   */
+  public static double getTotalPowerW() {
+    double total = 0.0;
+    for (double[] state : energyStates) {
+      total += state[3];
+    }
+    return total;
   }
 
   /**

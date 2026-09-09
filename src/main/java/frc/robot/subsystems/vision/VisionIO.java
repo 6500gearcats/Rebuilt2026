@@ -78,4 +78,22 @@ public interface VisionIO {
      * @return optional pose estimate
      */
     public Optional<VisionEstimate> getVisionEst();
+
+    /**
+     * Returns the number of fiducial targets in the most recent camera frame. Added
+     * 2026-09-09 for {@code Vision}'s per-camera diagnostic logging — see
+     * {@code plans/review_plan.md} R5-6.
+     *
+     * @return target count in the latest frame, 0 if none visible
+     */
+    public int getTagCount();
+
+    /**
+     * Returns the pose ambiguity of the best target in the most recent camera frame
+     * (PhotonVision convention: 0 = certain, 1 = completely ambiguous). Added 2026-09-09,
+     * see {@code plans/review_plan.md} R5-6.
+     *
+     * @return best-target ambiguity, or 0 if no target is visible
+     */
+    public double getBestTargetAmbiguity();
 }

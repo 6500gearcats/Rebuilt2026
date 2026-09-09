@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
+import frc.robot.util.OnboardLogger;
 
 /**
  * Fuses AprilTag pose estimates from one or more cameras into a
@@ -92,6 +93,14 @@ public class Vision extends SubsystemBase {
   private boolean isReplay = false;
   private int m_loopCount = 0;
 
+  /**
+   * Cumulative count of vision measurements rejected for being &gt;4 m from the current
+   * odometry estimate (see {@link #periodic()}). Added 2026-09-09 — see
+   * {@code plans/review_plan.md} R5-6. Cumulative since code start, not reset per-enable;
+   * this is a diagnostic trend counter, not a per-match total.
+   */
+  private int m_rejectedMeasurementCount = 0;
+
   public Field2d m_field = new Field2d();
 
   /**
@@ -133,6 +142,11 @@ public class Vision extends SubsystemBase {
         m_stateStndDev,
         m_visionStndDev);
 
+    // Vision/RejectedMeasurementCount is namespace-level, not per-camera; register it once
+    // here rather than inside the per-camera loop below.
+    OnboardLogger visionLog = new OnboardLogger("Vision");
+    visionLog.registerDouble("RejectedMeasurementCount", () -> (double) m_rejectedMeasurementCount);
+
     for (VisionIO visionIO : io) {
       if (visionIO.forPoseEstimation()) {
         m_visionOdometryCams.add(visionIO);
@@ -147,6 +161,10 @@ public class Vision extends SubsystemBase {
         }
         m_simCameras.add(cameraSim);
       }
+      // Per-camera diagnostics (R5-6): lets AdvantageScope distinguish which specific camera
+      // is losing tags or reporting high ambiguity, rather than one blended figure.
+      visionLog.registerDouble(visionIO.getName() + "/TagCount", () -> (double) visionIO.getTagCount());
+      visionLog.registerDouble(visionIO.getName() + "/Ambiguity", visionIO::getBestTargetAmbiguity);
     }
     if (sim != null) {
       setUpSim();
@@ -216,8 +234,13 @@ public class Vision extends SubsystemBase {
         double dist = currentEst.getTranslation().getDistance(e.getPose().getTranslation());
 
         // Reject detections more than 4 m from current odometry — guards against
-        // bad tag-ID detections or extreme lens distortion.
-        if (dist > 4.0) return;
+        // bad tag-ID detections or extreme lens distortion. Counted (not just silently
+        // dropped) so Vision/RejectedMeasurementCount can distinguish "vision is quiet"
+        // from "vision is being rejected constantly" — see plans/review_plan.md R5-6.
+        if (dist > 4.0) {
+          m_rejectedMeasurementCount++;
+          return;
+        }
 
         // Scale standard deviation by distance: farther detections are less precise.
         Matrix<N3, N1> stdDevs = VecBuilder.fill(

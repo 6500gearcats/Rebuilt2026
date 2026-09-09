@@ -231,6 +231,20 @@ public class PhotonVisionSimIO implements VisionIO {
     }
 
     @Override
+    public int getTagCount() {
+        return getLatestResult().getTargets().size();
+    }
+
+    @Override
+    public double getBestTargetAmbiguity() {
+        var result = getLatestResult();
+        if (!result.hasTargets()) {
+            return 0;
+        }
+        return result.getBestTarget().getPoseAmbiguity();
+    }
+
+    @Override
     public boolean hasChossenTarget(int fiducialID) {
         var result = getLatestResult();
         // Get a list of all of the targets that have been detected.
