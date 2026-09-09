@@ -19,7 +19,7 @@ Nine ordered stages. Stages 0–3 fix and improve the existing Rebuilt2026 code.
 | 3 | Pre-Integration Cleanup | LOW | ✅ Done | Stages 1–2 |
 | 4 | Hackbots Integration — Files & Compile | MEDIUM | ✅ Done | Stage 3 |
 | 5 | Hackbots Integration — State Machine Wire-Up | HIGH | ✅ Done | Stage 4 |
-| 6 | Hackbots Integration — RobotContainer & Auto | HIGH | ⬜ Next | Stage 5 |
+| 6 | Hackbots Integration — RobotContainer & Auto | HIGH | ✅ Done | Stage 5 |
 | 7 | Lead Compensation Enhancement | MEDIUM | ⬜ | Stage 6 verified |
 | 8 | Hardware Wiring, Tuning & Measurement | HARDWARE | ⬜ | Stages 4–7 |
 
@@ -100,6 +100,29 @@ The WPILib scheduler runs every 20ms. If any single loop cycle takes more than 2
 | M-5 | Cache `SmartDashboard.getNumber("Shoot Speed")` in `initialize()` | `UpToSpeedHopperShoot.java` | stage-2 |
 
 > **Implementation note — H-3/M-4:** `VisionEstimate` only exposes `getPose()` and `getTimestamp()` — it has no `targetsUsed()` accessor. Vision filtering uses distance between the vision pose estimate and current odometry estimate.
+
+> **Supersession/completeness notes (added 2026-09-09 after `audit_plan.md` review — see
+> `AUDIT_PROGRESS.md` R-1 for the full findings):** the table above is left as the historical
+> record of what Stage 2 did at the time, but four of its rows no longer describe the
+> current codebase as-is:
+> - **Flywheel/Turret telemetry row:** `Flywheel.java` was deleted in Stage 5. The telemetry
+>   in today's `ShooterIO`/`TurretIO` did not survive from this Stage 2 edit — it arrived
+>   independently via the Stage 4 Hackbots file copy. Stage 2's actual work on the old
+>   `Flywheel.java` no longer exists in any form.
+> - **H-4 row:** current `Turret.java` (the Stage 5 replacement) has zero `SmartDashboard`
+>   calls in `periodic()` — telemetry now flows through `TurretIOInputs`'s self-registered
+>   `OnboardLogger`, unrelated to and not rate-limited like the mechanism this row describes.
+> - **Hopper/Intake telemetry rows:** true but incomplete at the time — both had stator
+>   current only, no voltage or supply current, until `logging_plan.md` (2026-09-09) added
+>   the missing signals plus energy tracking for both subsystems.
+> - **M-5 row:** target file `UpToSpeedHopperShoot.java` was deleted in Stage 5, replaced by
+>   `ShootWhenReady.java`. Whether the caching behavior survived into the replacement was not
+>   checked by the audit.
+>
+> Separately, `OnboardLogger.logAll()` and `StatusSignalUtil.refreshAll()` — the two calls
+> that actually make bulk-registered telemetry reach the `.wpilog` file and stay
+> loop-rate-fresh — were both defined but never called anywhere in the codebase until fixed
+> in `logging_plan.md`. Neither gap is visible from this table; see `LOGGING_PROGRESS.md`.
 
 ---
 
