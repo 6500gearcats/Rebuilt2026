@@ -210,17 +210,32 @@ public class Turret extends SubsystemBase {
    * <p>The tolerance {@code params.deltaYaw} comes from the aim pipeline and can be tighter or
    * looser depending on how accurate the shot needs to be at the current distance.
    *
-   * <p>Used by {@link frc.robot.RobotStateMachine#isShootReady()} (via the {@code Shooter} tracked
-   * trigger), which gates the hopper in {@link frc.robot.commands.ShootWhenReady}.
+   * <p><b>Correction (2026-09-09):</b> this method has no current callers.
+   * {@link frc.robot.RobotStateMachine#isShootReady()} — which gates the hopper in
+   * {@link frc.robot.commands.ShootWhenReady} — checks only {@code Shooter}'s tracked state,
+   * not the turret's. The previous version of this Javadoc claimed otherwise; that was never
+   * true. Kept as public API for a future caller that wants turret-only readiness.
    *
    * @param params supplier of current aim parameters; called each time the trigger is evaluated
    */
   public Trigger tracked(Supplier<AimParams> params) {
-    return new Trigger(() -> {
-      double delta = inputs.position.minus(inputs.reference).baseUnitMagnitude();
-      double epsilon = params.get().deltaYaw.getMeasure().baseUnitMagnitude();
-      return Math.abs(delta) <= epsilon && tracking;
-    });
+    return new Trigger(() -> isTracked(params.get()));
+  }
+
+  /**
+   * Returns {@code true} when the turret is within {@code params.deltaYaw} of its position
+   * reference AND actively tracking (a {@link #track} command is running).
+   *
+   * <p>Extracted from {@link #tracked(Supplier)} on 2026-09-09 for symmetry with
+   * {@link frc.robot.subsystems.shooter.Shooter#isTracked}, even though this method
+   * currently has no live caller — see {@code plans/review_plan.md} R2-B3.
+   *
+   * @param params aim parameters to check the current mechanism state against
+   */
+  public boolean isTracked(AimParams params) {
+    double delta = inputs.position.minus(inputs.reference).baseUnitMagnitude();
+    double epsilon = params.deltaYaw.getMeasure().baseUnitMagnitude();
+    return Math.abs(delta) <= epsilon && tracking;
   }
 
   /**

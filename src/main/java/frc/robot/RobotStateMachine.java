@@ -42,14 +42,20 @@ import frc.robot.subsystems.vision.Vision;
  * load time (see {@link #instance}) so there is no thread-safety risk from lazy initialization.
  *
  * <h2>Aiming Pipeline</h2>
- * The full shot-computation chain runs on-demand via {@link #getAimParams()}:
+ * The full shot-computation chain runs exactly once per loop, from {@link #periodic()} via
+ * the private {@code computeAimParams()}, and the result is cached. {@link #getAimParams()}
+ * — the public entry point used by {@code Turret.track}, {@code Shooter.shoot}, and telemetry
+ * — is a plain field read of that cache, not a fresh computation. (Before 2026-09-09 this ran
+ * on every call instead; see {@link #getAimParams()}'s Javadoc for why that changed.)
  * <pre>
- *   getAimParams()
- *     → LeadCompensator.computeLeadTarget(hub, turretPose, fieldVelocity, m_tofAim)
- *         → m_tofAim.update(virtualTarget, turretPose, kZero)   [15-iter convergence]
- *         → AimParams { yaw, pitch, output, tof }
- *     → m_tofAim.update(virtualTarget, turretPose, kZero)       [final params]
- *     → AimParams (used by Turret.track and Shooter.shoot)
+ *   periodic() [once per loop]
+ *     → computeAimParams()
+ *         → LeadCompensator.computeLeadTarget(hub, turretPose, fieldVelocity, m_tofAim)
+ *             → m_tofAim.update(virtualTarget, turretPose, kZero)   [15-iter convergence]
+ *             → AimParams { yaw, pitch, output, tof }
+ *         → m_tofAim.update(virtualTarget, turretPose, kZero)       [final params]
+ *         → cached in m_cachedAimParams
+ *   getAimParams() → m_cachedAimParams  (used by Turret.track and Shooter.shoot)
  * </pre>
  *
  * <h2>Periodic Structure</h2>
@@ -88,6 +94,8 @@ public final class RobotStateMachine {
 
     private Pose2d turretPose = new Pose2d();
     private Pose3d m_lastLeadTarget = new Pose3d();
+    /** Cache for {@link #getAimParams()} — refreshed once per loop in {@link #periodic()}. */
+    private AimParams m_cachedAimParams = AimParams.impossible();
 
     private Vision m_vision;
     private final Shooter m_Shooter = new Shooter(
@@ -162,7 +170,41 @@ public final class RobotStateMachine {
      *         when no target is available, the distance is out of range, or the required angle
      *         violates {@code kScoringConstraints}
      */
+    /**
+     * Returns the cached result of the most recent aiming pipeline evaluation.
+     *
+     * <p>Found and fixed 2026-09-09 (see {@code plans/review_plan.md} R2-B1/B2): this used to
+     * run the full pipeline — {@link LeadCompensator} (up to 5 iterations) plus a final
+     * {@link ToFAim#update}, allocating {@link Pose3d}/{@link Translation2d}/{@link AimParams}
+     * throughout — on <em>every call</em>. While shooting, that meant roughly 10 identical
+     * evaluations per 20 ms loop: twice from {@code Turret.track()}, once from
+     * {@code Shooter.shoot()}, and (once {@link OnboardLogger#logAll()} was wired up the same
+     * day) seven more from {@link frc.robot.aiming.AimParams#setupLogging}'s telemetry
+     * suppliers. All ten computed the exact same numeric result.
+     *
+     * <p>The pipeline now runs exactly once per loop, in {@link #periodic()} right after
+     * {@link #turretPose} is recomputed — see {@link #computeAimParams()}. This does
+     * <b>not</b> introduce new staleness: {@code turretPose} was already refreshed only once
+     * per loop, in {@code periodic()}, which itself runs after {@code CommandScheduler.run()}
+     * in {@code Robot.robotPeriodic()} — so commands executing during the scheduler pass were
+     * already reading the previous loop's {@code turretPose} before this change. Caching
+     * merely stops recomputing the same numbers from the same stale input; it does not change
+     * what input is used.
+     *
+     * @return shot parameters; status is {@link frc.robot.aiming.AimParams.AimStatus#Impossible}
+     *         when no target is available, the distance is out of range, or the required angle
+     *         violates {@code kScoringConstraints}
+     */
     public AimParams getAimParams() {
+        return m_cachedAimParams;
+    }
+
+    /**
+     * Runs the full aiming pipeline. Called exactly once per loop from {@link #periodic()};
+     * all other code should call {@link #getAimParams()} instead, which reads the cached
+     * result. See {@link #getAimParams()}'s Javadoc for why this split exists.
+     */
+    private AimParams computeAimParams() {
         if (Tag_POSE2D == null) return AimParams.impossible();
         ChassisSpeeds fs = getFieldSpeeds();
         Translation2d velocity = (fs != null)
@@ -178,9 +220,16 @@ public final class RobotStateMachine {
     /**
      * Returns {@code true} when the shooter flywheel is at the target speed for the current
      * aim parameters. Convenience wrapper used by button bindings and SmartDashboard telemetry.
+     *
+     * <p>Calls {@link Shooter#isTracked(AimParams)} directly against the cached
+     * {@link #getAimParams()} result, rather than going through {@link Shooter#tracked}
+     * (which allocates a {@link edu.wpi.first.wpilibj2.command.button.Trigger} and a wrapping
+     * lambda). Since this method itself runs every loop via {@link StateManager#shootReady},
+     * that allocation would otherwise happen every loop too. Changed 2026-09-09 — see
+     * {@code plans/review_plan.md} R2-B3.
      */
     public boolean isShootReady() {
-        return m_Shooter.tracked(() -> getAimParams()).getAsBoolean();
+        return m_Shooter.isTracked(getAimParams());
     }
 
     /** Returns the driver's command controller (port 0). */
@@ -236,6 +285,10 @@ public final class RobotStateMachine {
         // then rotated with the robot. This gives the actual field position of the launch point.
         turretPose = new Pose2d(pose.getX() - 0.1524, pose.getY() + 0.0635, new Rotation2d(0))
                 .rotateAround(pose.getTranslation(), pose.getRotation());
+        // Must run after turretPose above — computeAimParams() reads it. Runs exactly once per
+        // loop here; see getAimParams()'s Javadoc for why this is cached rather than computed
+        // on every call.
+        m_cachedAimParams = computeAimParams();
 
         // --- Tier 2: display only, 10 Hz ---
         if (m_telemetryTimer.advanceIfElapsed(0.1)) {

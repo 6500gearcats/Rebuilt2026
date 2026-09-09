@@ -266,13 +266,27 @@ public class Shooter extends SubsystemBase {
    * @param params supplier of current aim parameters; polled each scheduler tick
    */
   public Trigger tracked(Supplier<AimParams> params) {
-    return new Trigger(() -> {
-      if (!active) {
-        return false;
-      }
-      AimParams realParams = params.get();
-      return shooterAtSpeed(realParams) && hoodAtPosition(realParams);
-    });
+    return new Trigger(() -> isTracked(params.get()));
+  }
+
+  /**
+   * Returns {@code true} when the shooter is active (a {@link #shoot} command is running)
+   * AND both the wheel speed and hood angle are within tolerance of {@code params}.
+   *
+   * <p>Extracted from {@link #tracked(Supplier)} on 2026-09-09 so
+   * {@link frc.robot.RobotStateMachine#isShootReady()} can call it directly with an
+   * already-computed {@link AimParams} instead of going through a freshly-allocated
+   * {@link Trigger} (and its wrapping lambda) on every call — see
+   * {@code plans/review_plan.md} R2-B3. {@link #tracked(Supplier)} above is now a thin
+   * wrapper over this method, for callers that want an actual bindable {@code Trigger}.
+   *
+   * @param params aim parameters to check the current mechanism state against
+   */
+  public boolean isTracked(AimParams params) {
+    if (!active) {
+      return false;
+    }
+    return shooterAtSpeed(params) && hoodAtPosition(params);
   }
 
   /**
