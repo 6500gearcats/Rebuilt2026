@@ -189,12 +189,16 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    // Rate-limit to every 4th loop (~12.5 Hz). Camera frames arrive at 30-60 FPS max;
-    // running pose estimation at 50 Hz wastes loop budget without improving accuracy.
+    // Counter is consumed by simulationPeriodic() to throttle frame rendering.
+    // This method itself deliberately runs at the full 50 Hz loop rate:
+    //   - estimator.update() integrates wheel-encoder deltas. Sampling it slower makes
+    //     the twist between samples larger and the arc approximation worse, most
+    //     noticeably while translating and rotating simultaneously.
+    //   - getLatestResult() keeps only the newest queued pipeline result and discards
+    //     the rest, so polling slower than the camera frame rate throws away usable
+    //     timestamped measurements that addVisionMeasurement() would have accepted.
+    // Polls that find no new frame are cheap; do not reintroduce a throttle here.
     m_loopCount++;
-    if (m_loopCount % 4 != 0) {
-      return;
-    }
 
     estimator.update(
         m_rotationSupplier.get(),
