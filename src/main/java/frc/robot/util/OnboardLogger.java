@@ -1,5 +1,8 @@
 package frc.robot.util;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Volts;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -14,6 +17,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
@@ -22,6 +27,7 @@ import edu.wpi.first.util.datalog.StructArrayLogEntry;
 import edu.wpi.first.util.datalog.StructLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Subsystem-scoped logger that writes structured data directly to the WPILib
@@ -125,6 +131,38 @@ public class OnboardLogger {
           }
           return supplier.get().in(unit);
         }, entry));
+  }
+
+  /**
+   * Registers an accumulated energy signal (Joules) for a motor, integrating
+   * voltage &times; current &times; elapsed time every {@link #logAll()} call.
+   *
+   * <p>The running total is Joules consumed since robot code start (process lifetime) — this
+   * class has no reset-on-enable mechanism, matching every other {@code OnboardLogger}
+   * registration. Log path: {@code <namespace>/<name>EnergyJ}.
+   *
+   * <p>Pass either stator or supply current depending on what the caller wants to measure
+   * (stator current reflects mechanical load; supply current reflects battery draw). Callers
+   * typically register this once per motor alongside {@link #registerMeasurement} calls for
+   * that motor's raw voltage and current.
+   *
+   * @param name    Signal name (before the {@code EnergyJ} suffix is appended).
+   * @param voltage Supplier for the motor's voltage each loop.
+   * @param current Supplier for the motor's current each loop.
+   */
+  public void registerEnergy(String name, Supplier<Voltage> voltage, Supplier<Current> current) {
+    DoubleLogEntry entry = new DoubleLogEntry(datalog, this.name + "/" + name + "EnergyJ", "Joules");
+    // [0] = accumulated Joules, [1] = timestamp of the previous sample. A length-2 array is used
+    // (rather than two local doubles) because the lambda below must mutate this state across
+    // calls while only capturing effectively-final references.
+    double[] state = new double[] {0.0, Timer.getFPGATimestamp()};
+    doubleEntries.add(new Pair<DoubleSupplier, DoubleLogEntry>(() -> {
+      double now = Timer.getFPGATimestamp();
+      double dt = now - state[1];
+      state[1] = now;
+      state[0] += voltage.get().in(Volts) * current.get().in(Amps) * dt;
+      return state[0];
+    }, entry));
   }
 
   /**

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.RobotStateMachine.RobotState;
+import frc.robot.util.OnboardLogger;
 
 /**
  * Top-level robot class. This is instantiated by the WPILib runtime once and is responsible for
@@ -59,16 +60,24 @@ public class Robot extends TimedRobot {
 
   /**
    * Runs every 20 ms regardless of mode. Drives the WPILib command scheduler and the robot
-   * state machine, then publishes system-health metrics at 10 Hz.
+   * state machine, publishes system-health metrics at 10 Hz, and flushes all
+   * {@link OnboardLogger} registrations to the {@code .wpilog} file.
    *
    * <p>Health metrics (battery voltage, CAN utilization, RSL state) are rate-limited to 10 Hz
    * because they are slow-moving signals; writing them every 20 ms would waste NT4 bandwidth
    * and contributed to loop overruns before Stage 0 optimizations.
+   *
+   * <p>{@link OnboardLogger#logAll()} is called every loop, unlike the health metrics above —
+   * motor voltage/current/energy are fast-moving signals where a 10 Hz sample would miss
+   * transients (e.g., a current spike on ball contact). Until this call was added, every
+   * value registered via {@code OnboardLogger} anywhere in the codebase was silently never
+   * written — {@link OnboardLogger#logAll()} had no call site.
    */
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     m_RobotStateMachine.periodic();
+    OnboardLogger.logAll();
     if (m_healthTimer.advanceIfElapsed(0.1)) {
       SmartDashboard.putNumber("Robot/BatteryVoltageV", RobotController.getBatteryVoltage());
       SmartDashboard.putNumber("Robot/CANBusUtilizationPct",
