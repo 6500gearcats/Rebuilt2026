@@ -267,3 +267,22 @@ Discovered while implementing this plan, not part of the original review:
 This list, plus the CAN ID collision found during the README rewrite (a separate plan), is
 the running argument for why "verify by doing the adjacent work carefully" keeps finding
 real bugs that a read-through alone would miss.
+
+- **AdvantageScope deprecation notice, reported by the user 2026-09-09 (not a code review
+  finding — external tooling lifecycle):** "The legacy numeric array format for structured
+  data is deprecated and will be removed in 2027." Two sources confirmed in this codebase:
+  - `Telemetry.java:63-64,120-121` — `fieldPub`/`fieldTypePub` publish robot pose as a raw
+    `double[3]` (x, y, rotation degrees) under `Pose/robotPose` with a `Pose/.type =
+    "Field2d"` marker. **This is pure redundancy** — the same class already publishes the
+    identical pose as a modern struct at `DriveState/Pose` (line 47/107,
+    `StructPublisher<Pose2d>`). Deleting the legacy pair loses no capability.
+  - `Vision.java:104` — `public Field2d m_field = new Field2d();`, a WPILib-built-in
+    `Sendable`. Its wire format is WPILib's own implementation detail, not something this
+    codebase controls directly; migrating it means either WPILib updates `Field2d` itself, or
+    this code stops relying on the `Field2d` widget and points AdvantageScope at a struct
+    topic instead (already available: `DriveState/Pose`).
+  - **Suggestion, not yet actioned:** fold `Telemetry.java`'s legacy-array deletion into a
+    future dead-code-style pass (same shape as R4) — it's a clean, zero-risk removal.
+    `Vision.m_field`/`Field2d` is lower priority: still useful for Shuffleboard/Elastic
+    driver-station widgets (a different audience than AdvantageScope), so leave it and just
+    treat `DriveState/Pose` as the AdvantageScope-side source of truth going forward.
