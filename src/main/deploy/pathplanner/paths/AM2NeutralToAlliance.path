@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.115,
-        "y": 2.544
+        "x": 6.171879518072289,
+        "y": 2.5816144578313254
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.323920138888889,
-        "y": 2.4707136863425934
+        "x": 4.380799656961178,
+        "y": 2.5083281441739187
       },
       "isLocked": false,
       "linkedName": "Neutral2"
     },
     {
       "anchor": {
-        "x": 1.964,
-        "y": 2.438
+        "x": 3.5929397590361445,
+        "y": 2.4832650602409636
       },
       "prevControl": {
-        "x": 3.8255020254629626,
-        "y": 2.4643754340277786
+        "x": 5.454441784499115,
+        "y": 2.509640494268742
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.7503966611479029,
-      "rotationDegrees": 106.751
+      "rotationDegrees": -141.40211991550308
     }
   ],
   "constraintZones": [],
@@ -47,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0.0,
-    "rotation": -157.28690739731707
+    "rotation": -140.01311375503587
   },
   "reversed": false,
   "folder": "Armageddon",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": 106.751
+    "rotation": -51.139482414131656
   },
   "useDefaultConstraints": true
 }

@@ -211,25 +211,25 @@ public class RobotContainer {
                                                 "White_Cam_1",
                                                 true,
                                                 new Translation3d(-0.3112, 0.2477, 0.3734),
-                                                new Rotation3d(0.0, 0.0, Math.PI / 2));
+                                                new Rotation3d(-Math.PI  /12, 0.0, Math.PI / 2));
 
                                 PhotonVisionIO frontCamWhite = new PhotonVisionIO(
                                                 "White_Cam_2",
                                                 true,
                                                 new Translation3d(-0.3683, 0.1715, 0.3734),
-                                                new Rotation3d(0.0, 0.0, Math.PI));
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
 
                                 PhotonVisionIO backCamTeal = new PhotonVisionIO(
                                                 "Teal_Cam_3",
                                                 true,
                                                 new Translation3d(-0.3683, -0.0445, 0.3734),
-                                                new Rotation3d(0.0, 0.0, Math.PI));
-
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
+                                                
                                 PhotonVisionIO frontCamTeal = new PhotonVisionIO(
                                                 "Teal_Cam_4",
                                                 true,
                                                 new Translation3d(-0.3112, -0.1207, 0.3734),
-                                                new Rotation3d(0.0, 0.0, -Math.PI / 2));
+                                                new Rotation3d(Math.PI / 12, 0.0, -Math.PI / 2));
                                 // LimelightIO m_ll = new LimelightIO(
                                 // "limelight-gcd",
                                 // true,
