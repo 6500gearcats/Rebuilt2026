@@ -4,7 +4,7 @@ Tracks execution of the audit plan. See `audit_plan.md` for method and full rati
 Read-only — no code changes in this pass.
 
 **Branch:** `leto`
-**Last updated:** 2026-09-09 (R-2 complete)
+**Last updated:** 2026-09-09 (R-3 complete)
 
 ---
 
@@ -20,7 +20,7 @@ Read-only — no code changes in this pass.
 |-------|---------------|--------|
 | R-1 | `Rebuilt2026_RefactorPlan.md` + `PROGRESS.md` + `ISSUES.md` | ✅ |
 | R-2 | `cleanup.md` + `CLEANUP_PROGRESS.md` | ✅ |
-| R-3 | `pkg_plan.md` + `PKG_PROGRESS.md` | ⬜ |
+| R-3 | `pkg_plan.md` + `PKG_PROGRESS.md` | ✅ |
 | R-4 | `sim_plan.md` + `SIM_PROGRESS.md` | ⬜ |
 | R-5 | `doc_plan.md` + `DOC_PROGRESS.md` | ⬜ |
 | R-6 | `logging_plan.md` + `LOGGING_PROGRESS.md` | ⬜ |
@@ -148,3 +148,40 @@ All five claims verified directly against current code. No discrepancies found.
 
 No stale claims, no contradictions, no regressions since the `cleanup-c1-c4` commit. This is
 the cleanest of the plans reviewed so far.
+
+---
+
+## R-3 Findings — Package Reorg Plan
+
+**The internal contradiction flagged going in is resolved: the actual reorg is 100% done —
+`PKG_PROGRESS.md` *understates* completion.** This is the opposite direction of Stage 2's
+problem (overclaiming), but still an inaccurate tracker.
+
+Every target file was found at its final path, and nowhere else — single canonical
+location each, no leftover duplicates at old paths:
+
+| File | Plan's final target | Actual current location | Verdict |
+|---|---|---|---|
+| `Telemetry.java` | `subsystems/drivetrain/` (via P-1 then P-8) | `subsystems/drivetrain/Telemetry.java` | ✅ |
+| `SysIDUtil.java` | `subsystems/drivetrain/` (via P-2 then P-8) | `subsystems/drivetrain/SysIDUtil.java` | ✅ |
+| `ShooterValuesSenable.java` | `subsystems/shooter/` (P-3) | `subsystems/shooter/ShooterValuesSenable.java` | ✅ |
+| `LocalizationConstants.java` | `subsystems/vision/` (P-4) | `subsystems/vision/LocalizationConstants.java` | ✅ |
+| `CommandSwerveDrivetrain.java` | `subsystems/drivetrain/` (P-8) | `subsystems/drivetrain/CommandSwerveDrivetrain.java` | ✅ |
+| `utility/` package | deleted (P-5) | zero matches anywhere in `src/` | ✅ |
+| `vision/` + `vision/localization/` packages | deleted (P-5) | zero matches anywhere in `src/` | ✅ |
+| `util/` package | unchanged — `OnboardLogger`, `StatusSignalUtil` stay | both present, nothing else added | ✅ |
+
+**Root cause of the tracker mismatch:** `git log` shows exactly one relevant commit,
+`a0c1f1b` — *"refactor: consolidate split packages into correct subsystem locations"* — not
+the two commits the plan's staged structure implies. Whoever did the work moved every file
+straight to its final destination in one pass (e.g., `Telemetry.java` went directly to
+`subsystems/drivetrain/`, skipping the intermediate `subsystems/` stop the plan describes
+as P-1). `PKG_PROGRESS.md` was then only updated for the sub-tasks whose wording matched
+that one commit most literally (P-5 "delete empty dirs," P-6 "update imports," P-7 "compile
+verify") — never marked for P-1–P-4 or P-8–P-10, even though the single commit fulfilled the
+intent of all of them at once. The tracker was written assuming a staged execution that
+didn't happen; the code doesn't have a documentation bug, the progress file does.
+
+No further work is needed on this plan's substance. Recommend the eventual fix-it plan just
+correct `PKG_PROGRESS.md` to mark P-1 through P-10 all ✅ under commit `a0c1f1b`, so the next
+person reading it doesn't waste time re-doing already-complete moves.
