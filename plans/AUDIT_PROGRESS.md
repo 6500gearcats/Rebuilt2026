@@ -4,7 +4,7 @@ Tracks execution of the audit plan. See `audit_plan.md` for method and full rati
 Read-only — no code changes in this pass.
 
 **Branch:** `leto`
-**Last updated:** 2026-09-09 (R-4 complete)
+**Last updated:** 2026-09-09 (R-5 complete)
 
 ---
 
@@ -22,7 +22,7 @@ Read-only — no code changes in this pass.
 | R-2 | `cleanup.md` + `CLEANUP_PROGRESS.md` | ✅ |
 | R-3 | `pkg_plan.md` + `PKG_PROGRESS.md` | ✅ |
 | R-4 | `sim_plan.md` + `SIM_PROGRESS.md` | ✅ |
-| R-5 | `doc_plan.md` + `DOC_PROGRESS.md` | ⬜ |
+| R-5 | `doc_plan.md` + `DOC_PROGRESS.md` | ✅ |
 | R-6 | `logging_plan.md` + `LOGGING_PROGRESS.md` | ⬜ |
 
 ---
@@ -215,3 +215,26 @@ the S2-2 question — vendordep is still pinned to `v2026.1.1-rc-3`, unchanged s
 **Recommend the eventual fix-it plan** add a note to `SIM_PROGRESS.md`'s S2-2 row recording
 the decision to keep the deprecated constructor, so a future reader doesn't attempt to "fix"
 something that was deliberately left as-is.
+
+---
+
+## R-5 Findings — Documentation Plan
+
+Spot-checked per the audit plan's own stated approach (Javadoc presence/absence is quick to
+confirm and low-consequence if something slipped, so full re-read of all ~20 touched files
+wasn't warranted). Sample spans all three priority tiers:
+
+| File | Tier | Verdict | Detail |
+|---|---|---|---|
+| `PhysicsAim.java` | D1-1 | ✅ | Class Javadoc explains the algorithm (binary search over descent speed, yaw sanity check, quadratic derivation) exactly as `doc_plan.md` specified |
+| `RunHopper.java` | D1-4 | ✅ | Documents both silent behaviors `doc_plan.md` flagged as critical — the 4-loop settle delay and the state/zone guard — with the same rationale given in the plan |
+| `Main.java` | D3-12 | ✅ | One-line class Javadoc as requested, nothing more (correctly minimal for this file) |
+| `AimMeasurement.java` | D2-4 | ✅ | Full field-level `@param` docs with units and cross-references to `ShooterConstants` tables and `LeadCompensator` |
+
+Combined with `ShooterIO.java`, `TurretIO.java`, `OnboardLogger.java`, `Intake.java`,
+`Hopper.java`, `CommandSwerveDrivetrain.java`, and `Vision.java` — all read in full earlier
+this session for unrelated reasons and all carrying the same tutorial-quality Javadoc this
+plan specified — coverage across the sample is 11 files, zero discrepancies. No stale
+claims (unlike Stage 2, nothing here targeted a file that was later deleted — this plan ran
+after the Hackbots integration settled, on the actual current architecture). No further
+verification recommended for this plan; treat it as reliable.
