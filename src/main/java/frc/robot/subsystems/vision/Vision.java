@@ -189,20 +189,13 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    m_loopCount++;
+    // In simulation every getState() call on the CTRE drivetrain contends with the
+    // 5ms Phoenix 6 sim notifier write-lock, stacking into 70ms+ overruns. Skip the
+    // entire periodic body in sim — the robot is visible in AdvantageScope via the
+    // DriveState/Pose struct that Telemetry publishes independently of this subsystem.
+    if (RobotBase.isSimulation()) return;
 
-    // In simulation, the CTRE 5ms notifier already tracks odometry via Phoenix 6.
-    // Running the Kalman filter on top causes loop overruns (35ms+) from lock contention
-    // with the CTRE sim thread. Instead, pin the estimator to the drivetrain ground-truth
-    // pose so getEstimatedPose() callers remain accurate, and update the field display.
-    if (RobotBase.isSimulation()) {
-      if (m_loopCount % 4 == 0 && m_poseSupplier != null) {
-        Pose2d groundTruth = m_poseSupplier.get();
-        estimator.resetPose(groundTruth);
-        m_field.setRobotPose(groundTruth);
-      }
-      return;
-    }
+    m_loopCount++;
 
     // Rate-limit to every 4th loop (~12.5 Hz). Camera frames arrive at 30-60 FPS max;
     // running pose estimation at 50 Hz wastes loop budget without improving accuracy.
