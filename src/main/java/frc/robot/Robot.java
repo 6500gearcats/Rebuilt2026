@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.RobotStateMachine.RobotState;
 import frc.robot.util.OnboardLogger;
+import frc.robot.util.StatusSignalUtil;
 
 /**
  * Top-level robot class. This is instantiated by the WPILib runtime once and is responsible for
@@ -59,22 +60,31 @@ public class Robot extends TimedRobot {
   }
 
   /**
-   * Runs every 20 ms regardless of mode. Drives the WPILib command scheduler and the robot
-   * state machine, publishes system-health metrics at 10 Hz, and flushes all
-   * {@link OnboardLogger} registrations to the {@code .wpilog} file.
+   * Runs every 20 ms regardless of mode. Refreshes all bulk-registered CTRE status signals,
+   * drives the WPILib command scheduler and the robot state machine, publishes system-health
+   * metrics at 10 Hz, and flushes all {@link OnboardLogger} registrations to the
+   * {@code .wpilog} file.
    *
    * <p>Health metrics (battery voltage, CAN utilization, RSL state) are rate-limited to 10 Hz
    * because they are slow-moving signals; writing them every 20 ms would waste NT4 bandwidth
    * and contributed to loop overruns before Stage 0 optimizations.
    *
+   * <p>{@link StatusSignalUtil#refreshAll()} is called first, before the scheduler runs any
+   * subsystem code, per its own documented contract. Until this call was added, it had no call
+   * site anywhere in the codebase — every signal registered via
+   * {@link StatusSignalUtil#registerRioSignals} (all of Shooter's and Turret's voltage/current/
+   * temperature reads, used for control-loop math as well as logging) only updated at whatever
+   * slow default background rate CTRE assigns each signal, not at the 50 Hz loop rate.
+   *
    * <p>{@link OnboardLogger#logAll()} is called every loop, unlike the health metrics above —
    * motor voltage/current/energy are fast-moving signals where a 10 Hz sample would miss
    * transients (e.g., a current spike on ball contact). Until this call was added, every
    * value registered via {@code OnboardLogger} anywhere in the codebase was silently never
-   * written — {@link OnboardLogger#logAll()} had no call site.
+   * written — {@link OnboardLogger#logAll()} had no call site either.
    */
   @Override
   public void robotPeriodic() {
+    StatusSignalUtil.refreshAll();
     CommandScheduler.getInstance().run();
     m_RobotStateMachine.periodic();
     OnboardLogger.logAll();

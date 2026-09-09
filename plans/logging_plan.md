@@ -178,6 +178,17 @@ instances doesn't reintroduce loop-timing issues — `StatusSignal` reads are in
 CTRE's internal odometry-thread writes, but this session already found one real lock-
 contention issue (`getState()` vs. the sim notifier) so re-check rather than assume.
 
+**Third instance of the L-0 bug pattern, found while implementing this task:**
+`StatusSignalUtil.refreshAll()` — the method that actually issues the bulk CAN refresh for
+every signal registered via `registerRioSignals()` — was also never called anywhere in the
+codebase. This meant `ShooterIOHardware`'s and `TurretIOHardware`'s existing `getX(false)`
+reads (used for control-loop math, not just logging) only updated at whatever slow default
+background rate CTRE assigns each signal, not at the 50 Hz loop rate. Fixed by adding
+`StatusSignalUtil.refreshAll()` to the top of `Robot.robotPeriodic()`, before
+`CommandScheduler.run()`, per the utility's own documented contract. This is a correctness
+fix beyond the scope of "logging," found only because implementing L-6 required reading
+this class closely enough to notice.
+
 ---
 
 ## Commit Strategy
