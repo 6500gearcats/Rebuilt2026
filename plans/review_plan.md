@@ -286,12 +286,22 @@ or accept it and document it explicitly.
 `RobotStateMachine.isShootReady()` is `return m_Shooter.tracked(() -> getAimParams()).getAsBoolean();`
 and `Shooter.tracked()` does `return new Trigger(...)`.
 
+### Scope correction (found during implementation)
+
+`grep -rn "\.tracked(\|isTracked("` shows `Turret.tracked()` has **zero callers anywhere** —
+only `Shooter.tracked()` is actually invoked, exactly once, from `isShootReady()`. So the
+live allocation this task removes is entirely in `Shooter`; the `Turret` half is preventative
+symmetry (keeps both classes matching the same pattern, ready if `Turret.tracked()` is ever
+wired up) rather than a measured performance fix. Recorded so nobody re-discovers this as a
+surprise later.
+
 ### Fix
 
 Extract the predicate from `Shooter.tracked()` into a plain
 `boolean isTracked(AimParams params)` method; have `tracked()` wrap that in a `Trigger` for
 binding use, and have `isShootReady()` call `isTracked(getAimParams())` directly with no
-allocation. Same treatment applies to `Turret.tracked()`.
+allocation. Apply the same extraction to `Turret.tracked()` for symmetry, even though it has
+no current callers.
 
 ### Verification
 Compile; confirm `StateManager.shootReady` (the one genuinely-bound `Trigger`) still works —

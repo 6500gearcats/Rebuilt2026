@@ -11,7 +11,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -142,15 +141,9 @@ public class RobotContainer {
         SysIDUtil m_turretSysID = new SysIDUtil();
         SysIDUtil m_flywheelSysID = new SysIDUtil();
 
-        // Vision
-        PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
 
         private final StateManager m_stateManager;
-
-        SlewRateLimiter filterXLimiter = new SlewRateLimiter(20);
-        SlewRateLimiter filterYLimiter = new SlewRateLimiter(20);
-        SlewRateLimiter filterRotLimiter = new SlewRateLimiter(20);
 
         /**
          * Constructs the container: instantiates all subsystems, registers PathPlanner named commands,
@@ -242,8 +235,15 @@ public class RobotContainer {
                 NamedCommands.registerCommand("BopBop",
                                 new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
-                NamedCommands.registerCommand("SpeedUp", Commands.none()); // TODO Stage 6
-                SmartDashboard.putNumber("Shoot Speed", 0);
+                // Implemented 2026-09-09 (plans/review_plan.md R4-C13) — was Commands.none(),
+                // a silent no-op, despite being actively used by ProjectHailMaryRight.auto in
+                // a `deadline` block alongside the PHM1 path and Intake, immediately before the
+                // first ShootFuel3s. The intent is clearly to warm up the flywheel while
+                // driving/intaking so ShootFuel3s's own AimPrep doesn't have to spin up from
+                // cold inside its 3s window. Reuses exactly what AimPrep does for the shooter
+                // half (Shooter.shoot against the live aim pipeline) without the turret-tracking
+                // or hopper-feed halves — pure warm-up.
+                NamedCommands.registerCommand("SpeedUp", m_shooter.shoot(m_stateManager::aimParams));
 
                 autoChooser = AutoBuilder.buildAutoChooser("testAuto");
 

@@ -29,6 +29,13 @@ import frc.robot.subsystems.hopper.Hopper;
  *       of a scoring window. The guard does NOT apply in the neutral zone or opponent zone,
  *       because the robot may be collecting game pieces there regardless of scoring state.
  * </ol>
+ *
+ * <p>TODO(unused 2026-09-09): no call sites anywhere in the codebase — reachable only via
+ * {@link StaggerHopper}, which is itself unreferenced. Kept per
+ * {@code plans/REVIEW_PROGRESS.md} decision D-3. The current gunner left-bumper "feed" binding
+ * goes through {@code ShootWhenReady} instead, not this class. Evaluate both this and
+ * {@code StaggerHopper} together for deletion if still unreferenced next time this is
+ * revisited.
  */
 public class RunHopper extends Command {
   private Hopper m_hopper;

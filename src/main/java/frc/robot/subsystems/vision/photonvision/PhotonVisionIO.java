@@ -11,16 +11,10 @@ import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionEstimate;
 import frc.robot.subsystems.vision.VisionIO;
 
@@ -242,42 +236,6 @@ public class PhotonVisionIO implements VisionIO {
         }
 
         return false;
-    }
-
-    /**
-     * The standard deviations of the estimated pose from
-     * {@link #getEstimatedGlobalPose()}, for use
-     * with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
-     * SwerveDrivePoseEstimator}.
-     * This should only be used when there are targets visible.
-     *
-     * @param estimatedPose The estimated pose to guess standard deviations for.
-     */
-    public Matrix<N3, N1> getEstimationStdDevs(Pose2d estimatedPose) {
-        var estStdDevs = VisionConstants.kSingleTagStdDevs;
-        var targets = getLatestResult().getTargets();
-        int numTags = 0;
-        double avgDist = 0;
-        for (var tgt : targets) {
-            var tagPose = kTagLayout.getTagPose(tgt.getFiducialId());
-            if (tagPose.isEmpty())
-                continue;
-            numTags++;
-            avgDist += tagPose.get().toPose2d().getTranslation().getDistance(estimatedPose.getTranslation());
-        }
-        if (numTags == 0)
-            return estStdDevs;
-        avgDist /= numTags;
-        // Decrease std devs if multiple targets are visible
-        if (numTags > 1)
-            estStdDevs = VisionConstants.kMultiTagStdDevs;
-        // Increase std devs based on (average) distance
-        if (numTags == 1 && avgDist > 4)
-            estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        else
-            estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
-
-        return estStdDevs;
     }
 
     /**

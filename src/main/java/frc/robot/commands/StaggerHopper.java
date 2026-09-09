@@ -18,6 +18,13 @@ import frc.robot.subsystems.hopper.Hopper;
  *
  * <p>Typical usage: called repeatedly by a while-true trigger on the gunner controller to
  * shoot multiple notes in sequence during teleop.
+ *
+ * <p>TODO(unused 2026-09-09): no call sites anywhere in the codebase — not bound to any
+ * button, not referenced by any command group. Kept per {@code plans/REVIEW_PROGRESS.md}
+ * decision D-3 in case it's staged for a teleop binding not yet written. Evaluate for
+ * deletion if still unreferenced next time this is revisited. Only reachable via
+ * {@link RunHopper}, which is itself unreferenced elsewhere — the two should be adopted or
+ * dropped together.
  */
 public class StaggerHopper extends SequentialCommandGroup {
   /**

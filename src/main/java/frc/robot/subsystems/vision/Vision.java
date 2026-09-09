@@ -25,8 +25,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -95,16 +93,6 @@ public class Vision extends SubsystemBase {
   private int m_loopCount = 0;
 
   public Field2d m_field = new Field2d();
-
-  private final StructPublisher<Pose2d> gccPub = NetworkTableInstance.getDefault()
-      .getTable("StateMachine")
-      .getStructTopic("GCC", Pose2d.struct)
-      .publish();
-
-  private final StructPublisher<Pose2d> gcdPub = NetworkTableInstance.getDefault()
-      .getTable("StateMachine")
-      .getStructTopic("GCD", Pose2d.struct)
-      .publish();
 
   /**
    * Creates a vision subsystem with live camera IO.
@@ -238,12 +226,6 @@ public class Vision extends SubsystemBase {
             Units.degreesToRadians(10 + dist * 5));
         estimator.addVisionMeasurement(e.getPose(), e.getTimestamp(), stdDevs);
       });
-
-      if (visionIO.getName().contains("gcc")) {
-        est.ifPresent(e -> gccPub.set(e.getPose()));
-      } else if (visionIO.getName().contains("gcd")) {
-        est.ifPresent(e -> gcdPub.set(e.getPose()));
-      }
     }
 
     if (RobotBase.isSimulation() && m_poseSupplier != null) {

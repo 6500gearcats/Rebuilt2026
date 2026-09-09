@@ -384,11 +384,6 @@ public final class RobotStateMachine {
         return HubPose;
     }
 
-    /** Returns the last computed turret pose in field coordinates. */
-    public Pose2d getTurretPose() {
-        return turretPose;
-    }
-
     /**
      * Returns the robot's current field-relative chassis speeds, or {@code null} if the
      * drivetrain has not yet been bound via {@link #bindDrivetrain(CommandSwerveDrivetrain)}.
@@ -432,15 +427,6 @@ public final class RobotStateMachine {
     }
 
     /**
-     * Returns a supplier that is {@code true} when the robot is more than 4.2 m from the hub.
-     * Used as a Trigger condition to gate shooting commands — shots closer than 4.2 m risk
-     * hitting the hub rim at a too-steep angle with the current shooter geometry.
-     */
-    public BooleanSupplier isFarEnough() {
-        return () -> distToTag() > 4.2;
-    }
-
-    /**
      * Returns {@code true} when the robot's shooter face is pointed within 20° of the hub.
      *
      * <p>The shooter is mounted on the <em>back</em> of the robot, so the facing direction is
@@ -456,15 +442,6 @@ public final class RobotStateMachine {
         double tolerance = Math.toRadians(20);
 
         return Math.abs(delta) < tolerance;
-    }
-
-    /**
-     * Sets the current field zone override.
-     *
-     * @param currentZone new field zone
-     */
-    public void setCurrentZone(FieldZone currentZone) {
-        this.currentZone = currentZone;
     }
 
     /**
@@ -798,15 +775,6 @@ public final class RobotStateMachine {
         update(next);
     }
 
-    /** Toggles between ACTIVE and INACTIVE. Convenience wrapper for operator button bindings. */
-    public void switchState() {
-        if (getState() == RobotState.ACTIVE) {
-            setState(RobotState.INACTIVE);
-        } else {
-            setState(RobotState.ACTIVE);
-        }
-    }
-
     /**
      * Applies the requested state transition.
      *
@@ -863,34 +831,16 @@ public final class RobotStateMachine {
         }
     }
 
-    /**
-     * Returns {@code true} when the robot is physically inside a trench run.
-     *
-     * <p>The four trench regions are defined by field coordinates (meters, origin at blue
-     * alliance wall corner):
-     * <ul>
-     *   <li>Blue trench top: x ∈ [3.7, 5.3], y ∈ [6.5, 8.3]
-     *   <li>Blue trench bottom: x ∈ [3.7, 5.3], y ∈ [0, 1.8]
-     *   <li>Red trench top: x ∈ [10.9, 12.8], y ∈ [6.5, 8.3]
-     *   <li>Red trench bottom: x ∈ [10.9, 12.8], y ∈ [0, 1.8]
-     * </ul>
-     * Used by the flywheel to limit hood angle while passing under the trench bar.
-     */
-    public boolean underTrench() {
-        double xPose = pose.getX();
-        double yPose = pose.getY();
-        if (xPose > 3.7 && xPose < 5.3 && yPose > 6.5 && yPose < 8.3) {
-            return true;
-        } else if (xPose > 3.7 && xPose < 5.3 && yPose < 1.8 && yPose > 0) {
-            return true;
-        } else if (xPose > 10.9 && xPose < 12.8 && yPose > 6.5 && yPose < 8.3) {
-            return true;
-        } else if (xPose > 10.9 && xPose < 12.8 && yPose < 1.8 && yPose > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    // Removed 2026-09-09 (plans/review_plan.md R4-C7): underTrench() had zero callers.
+    // Its Javadoc claimed "used by the flywheel to limit hood angle while passing under the
+    // trench bar," but Flywheel.java was deleted in Stage 5 and nothing replaced that caller.
+    // Preserving the field geometry it encoded, in case trench-limiting behavior is rebuilt
+    // for the current Shooter/hood mechanism — field coordinates in meters, origin at the
+    // blue alliance wall corner:
+    //   Blue trench top:    x in [3.7, 5.3], y in [6.5, 8.3]
+    //   Blue trench bottom: x in [3.7, 5.3], y in [0, 1.8]
+    //   Red trench top:     x in [10.9, 12.8], y in [6.5, 8.3]
+    //   Red trench bottom:  x in [10.9, 12.8], y in [0, 1.8]
 
     /** Returns the cached game-specific message string (may be empty before FMS connects). */
     public String getGameData() {

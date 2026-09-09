@@ -83,19 +83,17 @@ preventative symmetry, not a measured fix. Its Javadoc also incorrectly claimed
 
 ---
 
-## Stage R3 — Side-effect getters
+## Stage R3 — Side-effect getters — ⏭ **Deferred 2026-09-09 / james**
 
-**Paused here 2026-09-09 pending user input before starting.** Consider deferring if the
-competition schedule is tight — this is hygiene, not an active failure, and R3-B4 in
-particular touches FMS-timing-dependent LED/scoring-window behavior that is genuinely hard
-to verify off-field (needs a simulated or real match clock run through a full window
-schedule). R1 (correctness) and R2 (performance regression fix) are both done, compiled, and
-pushed regardless of what's decided here.
+Reason: hygiene, not an active failure; R3-B4 touches FMS-timing-dependent LED/scoring-window
+behavior that is genuinely hard to verify off-field. Revisit after competition, or sooner if
+the schedule allows. R1 and R2 landed regardless — this defer does not block R4 onward, none
+of which depend on R3.
 
 | Task | Description | Severity | Status | Commit |
 |------|-------------|----------|--------|--------|
-| R3-B4 | Split `getState()` into `updateStateMachine()` (mutating, called once from `periodic()`) + a pure `getState()` | MED | ⬜ | |
-| R3-B5 | De-duplicate `refreshPoseFromVision()` (currently 2–3× per loop) | LOW | ⬜ | |
+| R3-B4 | Split `getState()` into `updateStateMachine()` (mutating, called once from `periodic()`) + a pure `getState()` | MED | ⏭ deferred | |
+| R3-B5 | De-duplicate `refreshPoseFromVision()` (currently 2–3× per loop) | LOW | ⏭ deferred | |
 
 ---
 

@@ -21,6 +21,12 @@ import edu.wpi.first.wpilibj2.command.Command;
  * {@link #end(boolean)} zeroes <em>both</em> left and right. This is intentional — on some
  * controllers a previous command or button binding may have set the right motor. Zeroing
  * both in {@code end()} guarantees the controller is quiet regardless of prior state.
+ *
+ * <p>TODO(unused 2026-09-09): no call sites anywhere in the codebase. The current gunner
+ * left-trigger rumble binding in {@code RobotContainer.configureBindings()} sets rumble
+ * directly via a {@code RunCommand} rather than using this class. Kept per
+ * {@code plans/REVIEW_PROGRESS.md} decision D-3. Evaluate for deletion if still unreferenced
+ * next time this is revisited.
  */
 public class ControllerRumble extends Command {
 
