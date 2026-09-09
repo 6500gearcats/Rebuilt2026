@@ -48,8 +48,11 @@ import frc.robot.aiming.AimMeasurement;
  * </ul>
  */
 public final class ShooterConstants {
-  // CAN IDs — placeholder values unique in simulation; reassign in Stage 8-1
-  protected static final int kMotor1Id = 30;
+  // CAN IDs — placeholder values unique in simulation; reassign in Stage 8-1.
+  // kMotor1Id = 36 (not 30) because TunerConstants2's Pigeon2 IMU already owns CAN ID 30 —
+  // caught during the README rewrite audit (2026-09-09); the original 30-35 assignment
+  // only checked against the swerve drive/steer motor range (0-7), not the Pigeon.
+  protected static final int kMotor1Id = 36;
   protected static final int kMotor2Id = 31;
 
   /**
