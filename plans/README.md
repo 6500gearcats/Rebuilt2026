@@ -30,6 +30,12 @@ real drift found in this repo's own plans.
 | [`fixit_plan.md`](fixit_plan.md) + [`FIXIT_PROGRESS.md`](FIXIT_PROGRESS.md) | Corrected the three tracker inaccuracies the audit found. |
 | [`readme_plan.md`](readme_plan.md) + [`README_PROGRESS.md`](README_PROGRESS.md) | Extracted and rewrote the stale architecture reference (formerly this file) into the repository root `README.md`. |
 
+## Open work
+
+| File | Covers |
+|---|---|
+| [`review_plan.md`](review_plan.md) + [`REVIEW_PROGRESS.md`](REVIEW_PROGRESS.md) | **Not started.** Remediation for the full-codebase review (2026-09-09): 3 correctness bugs (mismatched AprilTag layouts, wrong pose-estimator kinematics, `Telemetry` never instantiated), aim-pipeline caching, dead-code sweep, logging additions, and unit tests. Has 5 open decision points requiring a human call before work begins. |
+
 ---
 
 ## Naming convention
