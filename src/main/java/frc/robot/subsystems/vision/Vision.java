@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -31,7 +32,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 
 /**
@@ -109,20 +109,36 @@ public class Vision extends SubsystemBase {
   /**
    * Creates a vision subsystem with live camera IO.
    *
+   * @param kinematics                   drivetrain swerve kinematics — must reflect the real
+   *                                      module locations. Found and fixed 2026-09-09: this
+   *                                      previously came from {@code Constants.DriveConstants
+   *                                      .kDriveKinematics}, an unrelated legacy REV MAXSwerve
+   *                                      configuration with modules at ±12.75", while the real
+   *                                      CTRE drivetrain (see {@code TunerConstants2}) places
+   *                                      them at ±13.5" — a ~6% track-width error that
+   *                                      corrupted odometry propagation between vision
+   *                                      updates. Callers should pass
+   *                                      {@code new SwerveDriveKinematics(drivetrain.getModuleLocations())}
+   *                                      so this can never drift from the drivetrain again.
    * @param rotationSupplier             drivetrain rotation supplier
    * @param swerveModulePositionSupplier drivetrain module positions
    * @param poseSupplier                 drivetrain pose supplier
    * @param io                           vision IO instances
    */
-  public Vision(Supplier<Rotation2d> rotationSupplier,
+  public Vision(SwerveDriveKinematics kinematics, Supplier<Rotation2d> rotationSupplier,
       Supplier<SwerveModulePosition[]> swerveModulePositionSupplier, Supplier<Pose2d> poseSupplier, VisionIO... io) {
 
     this.io = io;
     this.m_rotationSupplier = rotationSupplier;
     this.m_swerveModulePositionSupplier = swerveModulePositionSupplier;
     this.m_poseSupplier = poseSupplier;
+    // Logged once at construction so a track-width mismatch (the 2026-09-09 bug) is visible
+    // in every .wpilog without requiring a source read — compare against the drivetrain's
+    // own module locations printed by CTRE/RobotContainer if this ever looks wrong again.
+    System.out.println("[Vision] Pose estimator kinematics module locations: "
+        + java.util.Arrays.toString(kinematics.getModules()));
     estimator = new SwerveDrivePoseEstimator(
-        DriveConstants.kDriveKinematics,
+        kinematics,
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get(),
         new Pose2d(),

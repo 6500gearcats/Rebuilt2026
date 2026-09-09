@@ -15,6 +15,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -166,6 +167,7 @@ public class RobotContainer {
                                                 new Translation3d(0.254, 0.254, 0.2032),
                                                 new Rotation3d(0, Math.toRadians(62), Math.toRadians(42)));
                                 m_vision = new Vision(
+                                                new SwerveDriveKinematics(drivetrain.getModuleLocations()),
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
@@ -184,6 +186,7 @@ public class RobotContainer {
                                                 new Translation3d(0.1, 0, 0.5),
                                                 new Rotation3d(0, Math.toRadians(-15), 0));
                                 m_vision = new Vision(
+                                                new SwerveDriveKinematics(drivetrain.getModuleLocations()),
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
