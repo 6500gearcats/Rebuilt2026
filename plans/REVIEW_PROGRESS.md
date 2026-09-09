@@ -4,7 +4,8 @@ Tracks execution of `review_plan.md`. See that file for evidence, fix detail, an
 verification steps for every task below.
 
 **Branch:** `leto`
-**Last updated:** 2026-09-09 (all 5 decisions resolved; no tasks started — R1 is ready to begin)
+**Last updated:** 2026-09-09 (Stages R1 and R2 complete — 4 commits, all compiled clean;
+paused before R3 pending user input, see note at that stage)
 
 ---
 
@@ -45,12 +46,17 @@ decided — an undocumented reversal is exactly what went wrong with `SIM_PROGRE
 
 | Task | Description | Severity | Status | Commit |
 |------|-------------|----------|--------|--------|
-| R1-A1 | Point all consumers at `k2026RebuiltAndymark`; document the `kDefaultField` alternative in a comment (D-1) | HIGH | ⬜ ready | |
-| R1-A2 | Fix `Vision`'s `SwerveDrivePoseEstimator` kinematics (12.75" assumed vs 13.5" actual) | HIGH | ⬜ ready | |
-| R1-A3 | **Wire** `Telemetry` up (D-2); correct `README.md` + `configureLogging()` Javadoc | MED | ⬜ ready | |
+| R1-A1 | Point all consumers at `k2026RebuiltAndymark`; document the `kDefaultField` alternative in a comment (D-1) | HIGH | ✅ | `923c17a` |
+| R1-A2 | Fix `Vision`'s `SwerveDrivePoseEstimator` kinematics (12.75" assumed vs 13.5" actual) | HIGH | ✅ | `7b1a934` |
+| R1-A3 | **Wire** `Telemetry` up (D-2); correct `README.md` + `configureLogging()` Javadoc | MED | ✅ | `e1b988d` |
 
 **R1-A3 carries a documentation-correction obligation regardless of D-2's outcome** — the
 `DriveState/Pose` instruction in `README.md` is wrong today and was published 2026-09-09.
+
+**Stage R1 complete as of `e1b988d`.** One follow-up is not yet closed: R1-A3's loop-timing
+concern (CTRE calls the telemetry consumer from its 100 Hz odometry thread, not the 50 Hz
+robot loop) is documented in code but **not empirically verified** — needs one sim run
+checking Tracer output for overruns or NT4 flood. Flagging here so it isn't lost.
 
 ---
 
@@ -58,21 +64,33 @@ decided — an undocumented reversal is exactly what went wrong with `SIM_PROGRE
 
 | Task | Description | Severity | Status | Commit |
 |------|-------------|----------|--------|--------|
-| R2-B1/B2 | Cache `getAimParams()` once per loop in `RobotStateMachine` | HIGH | ⬜ | |
-| R2-B3 | Remove per-call `Trigger` allocation in `isShootReady()` / `Shooter.tracked()` / `Turret.tracked()` | LOW | ⬜ | |
+| R2-B1/B2 | Cache `getAimParams()` once per loop in `RobotStateMachine` | HIGH | ✅ | `5163617` |
+| R2-B3 | Remove per-call `Trigger` allocation in `isShootReady()` / `Shooter.tracked()` / `Turret.tracked()` | LOW | ✅ | `5163617` |
 
-**Open question inside R2-B1** (decide during implementation, record the answer here): the
-cache refreshes in `RobotStateMachine.periodic()`, which runs *after* `CommandScheduler.run()`
-in `Robot.robotPeriodic()`. Commands would therefore read a value one loop (20 ms) stale —
-~10 cm of travel at 5 m/s. Either accept and document it, or move the refresh ahead of
-`CommandScheduler.run()`.
+**Open question resolved during implementation:** the caching does **not** introduce new
+staleness. `turretPose` (the input to `computeAimParams()`) was already refreshed only once
+per loop in `periodic()`, which itself runs after `CommandScheduler.run()` — so commands
+executing during the scheduler pass were already reading the previous loop's `turretPose`
+before this change. The cache refresh stayed in its natural spot in `periodic()`; nothing
+moved in `Robot.robotPeriodic()`.
+
+**Scope correction found during implementation:** `Turret.tracked()` has zero callers
+anywhere (only `Shooter.tracked()` is invoked, via `isShootReady()`). Its extraction is
+preventative symmetry, not a measured fix. Its Javadoc also incorrectly claimed
+`isShootReady()` used it — corrected.
+
+**Stage R2 complete as of `5163617`.**
 
 ---
 
 ## Stage R3 — Side-effect getters
 
-**Consider deferring if the competition schedule is tight** — hygiene, not active failure,
-and it touches FMS-timing-dependent behavior that is hard to verify off-field.
+**Paused here 2026-09-09 pending user input before starting.** Consider deferring if the
+competition schedule is tight — this is hygiene, not an active failure, and R3-B4 in
+particular touches FMS-timing-dependent LED/scoring-window behavior that is genuinely hard
+to verify off-field (needs a simulated or real match clock run through a full window
+schedule). R1 (correctness) and R2 (performance regression fix) are both done, compiled, and
+pushed regardless of what's decided here.
 
 | Task | Description | Severity | Status | Commit |
 |------|-------------|----------|--------|--------|
