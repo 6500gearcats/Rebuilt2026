@@ -189,16 +189,9 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    // In simulation every getState() call on the CTRE drivetrain contends with the
-    // 5ms Phoenix 6 sim notifier write-lock, stacking into 70ms+ overruns. Skip the
-    // entire periodic body in sim — the robot is visible in AdvantageScope via the
-    // DriveState/Pose struct that Telemetry publishes independently of this subsystem.
-    if (RobotBase.isSimulation()) return;
-
-    m_loopCount++;
-
     // Rate-limit to every 4th loop (~12.5 Hz). Camera frames arrive at 30-60 FPS max;
     // running pose estimation at 50 Hz wastes loop budget without improving accuracy.
+    m_loopCount++;
     if (m_loopCount % 4 != 0) {
       return;
     }
@@ -233,7 +226,11 @@ public class Vision extends SubsystemBase {
       }
     }
 
-    m_field.setRobotPose(estimator.getEstimatedPosition());
+    if (RobotBase.isSimulation() && m_poseSupplier != null) {
+      m_field.setRobotPose(m_poseSupplier.get());
+    } else {
+      m_field.setRobotPose(estimator.getEstimatedPosition());
+    }
   }
 
   /**
