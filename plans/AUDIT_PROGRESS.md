@@ -4,7 +4,7 @@ Tracks execution of the audit plan. See `audit_plan.md` for method and full rati
 Read-only — no code changes in this pass.
 
 **Branch:** `leto`
-**Last updated:** 2026-09-09 (R-1 complete)
+**Last updated:** 2026-09-09 (R-2 complete)
 
 ---
 
@@ -19,7 +19,7 @@ Read-only — no code changes in this pass.
 | Stage | Plan reviewed | Status |
 |-------|---------------|--------|
 | R-1 | `Rebuilt2026_RefactorPlan.md` + `PROGRESS.md` + `ISSUES.md` | ✅ |
-| R-2 | `cleanup.md` + `CLEANUP_PROGRESS.md` | ⬜ |
+| R-2 | `cleanup.md` + `CLEANUP_PROGRESS.md` | ✅ |
 | R-3 | `pkg_plan.md` + `PKG_PROGRESS.md` | ⬜ |
 | R-4 | `sim_plan.md` + `SIM_PROGRESS.md` | ⬜ |
 | R-5 | `doc_plan.md` + `DOC_PROGRESS.md` | ⬜ |
@@ -130,3 +130,21 @@ The user's concern about Stage 2 is confirmed: "✅ Done" overstates what's actu
 today. Recommend the eventual fix-it plan (a) add supersession cross-references to every
 per-stage table, not just Appendix B, and (b) update the master plan's top-level status
 table to mark Stage 6 done, since `PROGRESS.md` and current code both confirm it shipped.
+
+---
+
+## R-2 Findings — Cleanup Plan
+
+All five claims verified directly against current code. No discrepancies found.
+
+| ID | Claim | Verdict | Detail |
+|---|---|---|---|
+| C-1 | Remove dead `targetPose` field, `targetPosePublisher`, `getTargetPose()` | ✅ | Zero matches for any of the three in `RobotStateMachine.java` |
+| C1-5 | Fix `isFacingHub()` to read live pose instead of dead `targetPose` | ✅ | `isFacingHub()` (line 397) reads `HubPose`, which is genuinely live — computed at line 324 from `Tag_POSE2D.toPose2d().transformBy(...)` with the same 0.5842 m offset the cleanup plan specified. Not a rename to another dead field. |
+| C-2 | Delete dead `getBestPoseTarget()`, remove unused `import java.util.Optional` | ✅ | Zero matches for either in `RobotStateMachine.java` |
+| C-3 | Remove unused `SwerveRequest.SwerveDriveBrake brake` / `PointWheelsAt point` fields | ✅ | Zero matches in `RobotContainer.java` (only an unrelated prose comment containing the word "brake") |
+| C-4 | Remove unused `LedCANdle m_candle` field + import | ✅ | Zero matches in `RobotContainer.java` |
+| C-5 | SysID stubs deferred to Stage 8 | ✅ (by design) | Correctly still `⬜` — no hardware yet, nothing to verify |
+
+No stale claims, no contradictions, no regressions since the `cleanup-c1-c4` commit. This is
+the cleanest of the plans reviewed so far.
