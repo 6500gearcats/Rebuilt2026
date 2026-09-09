@@ -79,9 +79,13 @@ public class PhotonVisionSimIO implements VisionIO {
         // updated.
         cameraSim = new PhotonCameraSim(new PhotonCamera(cameraName), cameraProp);
 
-        // Enable the raw and processed streams. These are enabled by default.
-        cameraSim.enableRawStream(true);
-        cameraSim.enableProcessedStream(true);
+        // Raw/processed MJPEG streams disabled. Each enabled stream makes PhotonCameraSim
+        // allocate and encode a 640x480 frame on every sim update, inside the robot loop.
+        // They are only useful for eyeballing the synthetic camera view in a browser and
+        // are not needed for pose-estimation testing. Re-enable temporarily if you want
+        // to see what the simulated camera sees.
+        cameraSim.enableRawStream(false);
+        cameraSim.enableProcessedStream(false);
 
         // Wireframe disabled — it is extremely resource-intensive and tanks loop timing.
         cameraSim.enableDrawWireframe(false);

@@ -234,8 +234,18 @@ public class Vision extends SubsystemBase {
   }
 
   /**
-   * Runs every 20 ms in simulation only. Advances the PhotonVision simulation by one step,
+   * Runs in simulation only. Advances the PhotonVision simulation by one step,
    * using the drivetrain's ground-truth pose from {@code m_poseSupplier}.
+   *
+   * <p><b>Loop-timing note:</b> {@code CommandScheduler.run()} calls this method immediately
+   * after {@link #periodic()} and records a <em>single</em> watchdog epoch covering both, labelled
+   * {@code "Vision.periodic()"}. Time spent rendering synthetic camera frames here is therefore
+   * reported against {@code periodic()} in loop-overrun traces — do not chase that method when
+   * this one is the actual cost. This work does not exist on the real robot, where PhotonVision
+   * runs on a coprocessor.
+   *
+   * <p>Throttled to every 4th loop (~12.5 Hz) to match the {@link #periodic()} consumption rate;
+   * rendering frames faster than they are read is wasted work.
    *
    * <p>For cameras mounted on the turret, the camera transform is updated by the current turret
    * rotation before the simulation frame is computed. The rotation is currently hardcoded to 5°
@@ -245,6 +255,10 @@ public class Vision extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     if (isReplay) {
+      return;
+    }
+    // m_loopCount is incremented by periodic(), which the scheduler runs first.
+    if (m_loopCount % 4 != 0) {
       return;
     }
     if (m_turretCamSims.size() > 0) {
