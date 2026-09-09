@@ -3,6 +3,10 @@
 **Team:** GearCats | **Season:** 2026 FIRST Robotics Competition
 **Game:** Reefscape | **Framework:** WPILib Command-Based (Java 17)
 
+> Writing or updating a `plans/*_plan.md` + `*_PROGRESS.md` pair? See
+> [`PLANNING_GUIDE.md`](PLANNING_GUIDE.md) first — process guidance on keeping plan trackers
+> in sync with the code, based on real drift found in this repo's own plans.
+
 ---
 
 ## Table of Contents
