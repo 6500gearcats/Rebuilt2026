@@ -3,7 +3,7 @@
 Tracks execution of simulation improvement work. See `sim_plan.md` for full rationale.
 
 **Branch:** `leto`  
-**Last updated:** 2026-09-08
+**Last updated:** 2026-09-09 (S-2 corrected — see below)
 
 ---
 
@@ -27,17 +27,26 @@ Tracks execution of simulation improvement work. See `sim_plan.md` for full rati
 
 ## S-2 — Fix PhotonVision API Deprecations
 
-Started with 7 `[removal]` warnings. Fixed 5; 2 remain due to PhotonVision RC API state.
+Started with 7 `[removal]` warnings. Fixed 3; 1 was reverted by a later deliberate decision
+(see S2-2 correction below); 2 remain blocked on PhotonVision RC API state — see S2-5.
 
 | Task | Description | Status | Commit |
 |------|-------------|--------|--------|
 | S2-1 | Map all deprecation sites across both files | ✅ | — |
-| S2-2 | Replace deprecated 3-arg constructor with 2-arg (strategy removed from ctor) | ✅ | sim-s2 |
+| S2-2 | Replace deprecated 3-arg constructor with 2-arg (strategy removed from ctor) | ⚠️ **Reverted by decision, not a bug** | sim-s2, decision undated |
 | S2-3 | Replace `getLatestResult()` with `getAllUnreadResults()` + cache | ✅ | sim-s2 |
 | S2-4 | Replace `estimator.update(result)` with 4-arg overload | ✅ | sim-s2 |
-| S2-5 | Zero warnings | ⬜ blocked — in v2026.1.1-rc-3 ALL update() overloads are deprecated; no non-deprecated replacement exists yet in this RC. Revisit when PhotonVision publishes a stable v2026 release. |
+| S2-5 | Zero warnings | ⬜ blocked — in v2026.1.1-rc-3 ALL update() overloads are deprecated; no non-deprecated replacement exists yet in this RC. Revisit when PhotonVision publishes a stable v2026 release. **This blocker is independent of S2-2 — fixing S2-2 would not reduce the warning count.** |
 
-**Net result:** 7 → 2 warnings. Remaining 2 are `update()` calls — both files, one site each.
+> **S2-2 correction (2026-09-09):** this row originally read as a completed migration. Per
+> `audit_plan.md` / `AUDIT_PROGRESS.md` R-4, current `PhotonVisionIO.java` and
+> `PhotonVisionSimIO.java` both still call the original 3-arg
+> `PhotonPoseEstimator(layout, strategy, transform)` constructor, not the 2-arg form this
+> row describes. Confirmed with the user: the 3-arg constructor was deliberately kept after
+> this entry was written, superseding whatever `sim-s2` originally did — not a regression or
+> an incomplete fix. Do not attempt to re-migrate this without checking with the team first.
+
+**Net result:** 7 → 2 warnings, both `update()` calls (one site per file), tracked as S2-5.
 
 ---
 
@@ -89,7 +98,7 @@ Started with 7 `[removal]` warnings. Fixed 5; 2 remain due to PhotonVision RC AP
 | Stage | Files | Status |
 |-------|-------|--------|
 | S-1 | `limelight/` (deleted), `VisionEstimate.java` | ✅ |
-| S-2 | `PhotonVisionIO.java`, `PhotonVisionSimIO.java` | ⚠️ partial (2 warnings remain, RC blocker) |
+| S-2 | `PhotonVisionIO.java`, `PhotonVisionSimIO.java` | ⚠️ partial — 2 warnings remain (RC blocker); constructor migration (S2-2) deliberately reverted, see note above |
 | S-3 | `ShooterIOSim.java` | ✅ |
 | S-4 | `Hopper.java` | ✅ |
 | S-5 | `Intake.java` | ✅ |
