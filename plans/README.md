@@ -29,12 +29,15 @@ real drift found in this repo's own plans.
 | [`audit_plan.md`](audit_plan.md) + [`AUDIT_PROGRESS.md`](AUDIT_PROGRESS.md) | Verified every plan above against current code — found and documented three tracker/code sync issues. |
 | [`fixit_plan.md`](fixit_plan.md) + [`FIXIT_PROGRESS.md`](FIXIT_PROGRESS.md) | Corrected the three tracker inaccuracies the audit found. |
 | [`readme_plan.md`](readme_plan.md) + [`README_PROGRESS.md`](README_PROGRESS.md) | Extracted and rewrote the stale architecture reference (formerly this file) into the repository root `README.md`. |
+| [`review_plan.md`](review_plan.md) + [`REVIEW_PROGRESS.md`](REVIEW_PROGRESS.md) | Remediation for a full-codebase review (2026-09-09): 3 correctness bugs (mismatched AprilTag layouts, wrong pose-estimator kinematics, `Telemetry` never instantiated), aim-pipeline caching, a dead-code sweep, 7 logging additions, and 16 unit tests. Stages R1/R2/R4/R5/R6 done; R3 deferred by decision. See "Open work" below for what's left. |
 
 ## Open work
 
-| File | Covers |
-|---|---|
-| [`review_plan.md`](review_plan.md) + [`REVIEW_PROGRESS.md`](REVIEW_PROGRESS.md) | **Not started.** Remediation for the full-codebase review (2026-09-09): 3 correctness bugs (mismatched AprilTag layouts, wrong pose-estimator kinematics, `Telemetry` never instantiated), aim-pipeline caching, dead-code sweep, logging additions, and unit tests. Has 5 open decision points requiring a human call before work begins. |
+| Item | Where | What's needed |
+|---|---|---|
+| D-6 — `FieldZone`/`checkZone()` Y-boundary swap | `plans/REVIEW_PROGRESS.md` decision log | A human with the field diagram/CAD — the enum Javadoc and the code's actual return values are exactly swapped for `NEUTRAL_TOP`/`NEUTRAL_BOTTOM`; not resolvable from code alone |
+| R1-A3 loop-timing verification | `plans/REVIEW_PROGRESS.md`, Stage R1 note | One sim run watching for overrun/NT4-flood warnings, now that `Telemetry.registerTelemetry` is wired to CTRE's 100 Hz odometry thread |
+| Stage R3 (side-effect getters) | `plans/review_plan.md` | Deferred by decision — hygiene, not an active failure; revisit after competition or sooner if the schedule allows |
 
 ---
 
