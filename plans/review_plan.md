@@ -24,18 +24,22 @@ drift.
 
 ---
 
-## ⚠ Decision points — resolve before starting the affected task
+## ✅ Decision points — all resolved 2026-09-09
 
-These need a human call. Do not guess; record the answer in `REVIEW_PROGRESS.md`'s decision
-log with the date and who decided.
+Answers recorded in `REVIEW_PROGRESS.md`'s decision log. Summarized here because they change
+the shape of several tasks below.
 
-| # | Task | Question | Why it can't be inferred from code |
-|---|---|---|---|
-| D-1 | R1-A1 | Which AprilTag layout is authoritative — `k2026RebuiltAndymark` or `kDefaultField`? | Depends on which physical field variant the team competes on. Both are currently loaded; the code can't tell which is intended. **Also confirm the PhotonVision coprocessor's own configured layout matches** — that's a third source of truth living outside this repo. |
-| D-2 | R1-A3 | Wire `Telemetry` up, or delete it? | Wiring restores `DriveState/*` topics (module states, targets, speeds, odometry frequency — useful in AdvantageScope). Deleting removes ~130 lines of unused code. Either is defensible; the current half-state is not. |
-| D-3 | R4 | Are `StaggerHopper` / `ControllerRumble` / `RunHopper` intended for future use, or genuinely abandoned? | All three are complete, documented, working commands with zero call sites. They may be staged for teleop bindings not yet written. |
-| D-4 | R5-E7 | Should accumulated energy reset per-enable, per-match, or stay cumulative since boot? | Product decision about how the numbers get read. Affects `OnboardLogger.registerEnergy`'s contract. |
-| D-5 | R4 | Keep `SysIDUtil` placeholders? | `cleanup.md` C-5 already decided "keep, deferred to Stage 8." Reconfirm rather than re-litigate. |
+| # | Task | Decision |
+|---|---|---|
+| D-1 | R1-A1 | **Use `k2026RebuiltAndymark`** for all consumers. Do **not** delete the `kDefaultField` alternative — preserve it as a documented comment. See R1-A1 for the exact interpretation, which is flagged for correction if wrong. |
+| D-2 | R1-A3 | **Wire `Telemetry` up** (not delete). Also fix the `DriveState/Pose` documentation error introduced 2026-09-09. |
+| D-3 | R4 C-2, C-3 | **Keep** `StaggerHopper` / `ControllerRumble` / `RunHopper`. Mark each with a TODO to evaluate and delete if still unused later. |
+| D-4 | R5-7 | **Per-enable reset, configurable.** Default `ON_ENABLE`, policy selectable per registration. |
+| D-5 | R4 | **Keep `SysIDUtil`** placeholders — reconfirms `cleanup.md` C-5 (Stage 8). |
+
+One open question remains inside **R1-A1** — whether "don't delete the other" means a
+documented comment (assumed) or a second live constant. It is called out inline in that task
+and is a one-line change either way.
 
 ---
 
@@ -62,21 +66,41 @@ halves are internally self-consistent, so the error is a **constant offset** —
 corrects it, and it will not appear as jitter or drift. It looks like "our math is right and
 we still miss."
 
-### Fix
+### Fix — **D-1 decided: use `k2026RebuiltAndymark`; do not delete the alternative**
 
-1. Resolve **D-1** first.
-2. Delete one constant. Keep a single `public static final AprilTagFieldLayout` (suggest
-   keeping it in `Constants` at top level, since both vision and the state machine need it).
-3. Update all consumers listed above to reference the surviving constant.
-4. Add a one-time startup log line recording which layout is loaded (name + tag count), so
-   the answer is visible in every `.wpilog` rather than requiring a source read.
+1. `Constants.APRIL_TAG_FIELD_LAYOUT` keeps `k2026RebuiltAndymark` and becomes the single
+   authoritative layout.
+2. **Repoint** `VisionConstants.kTagLayout` at that same layout — keep the constant *name*
+   (four files import it, including two `import static` sites in `PhotonVisionIO` /
+   `PhotonVisionSimIO`, so removing the name would churn imports for no benefit). Simplest
+   form:
+   ```java
+   // Single source of truth — see Constants.APRIL_TAG_FIELD_LAYOUT.
+   public static final AprilTagFieldLayout kTagLayout = Constants.APRIL_TAG_FIELD_LAYOUT;
+   ```
+3. **Preserve the alternative as documentation, not as a live constant.** Add an adjacent
+   comment recording that this previously loaded `AprilTagFields.kDefaultField`, that the two
+   layouts differ in tag placement, and that running them simultaneously produced a
+   systematic aim offset. Keep the `kDefaultField` name visible in the comment so the option
+   is discoverable if the team ever plays a different field variant.
+4. Add a one-time startup log line recording the loaded layout (name + tag count) so the
+   answer is visible in every `.wpilog` rather than requiring a source read.
+
+> **Interpretation of "don't delete the other" — flag if this is not what was meant.** The
+> alternative survives as a documented comment rather than as a second live constant, on the
+> grounds that two simultaneously-loaded layouts is the bug being fixed. If the intent was to
+> keep a second *compiling* constant (e.g. `kTagLayoutDefaultField`) for quick switching,
+> say so — that is a one-line change to this task.
 
 ### Verification
 
-- `grep -rn "AprilTagFields\." src/` returns exactly **one** call site.
+- `grep -rn "AprilTagFields\." src/` returns exactly **one** live call site (the Andymark
+  load); any other occurrence is inside a comment.
 - Startup log shows the expected layout name.
-- On hardware: place the robot a measured distance from the hub, compare
-  `Robot/DistToHubM` against the tape measure. A layout mismatch shows up here.
+- **Separately confirm the PhotonVision coprocessor's own configured field layout matches** —
+  that is a third source of truth living outside this repo, and this fix does not touch it.
+- On hardware: place the robot a measured distance from the hub, compare `Robot/DistToHubM`
+  against the tape measure. A layout mismatch shows up here.
 
 ---
 
@@ -155,27 +179,41 @@ This is the fourth instance of this exact pattern in one session, after
 What actually publishes pose today: `StateMachine/RobotPose` and `StateMachine/TurretPose`
 (10 Hz, `RobotStateMachine.periodic()`), and `SmartDashboard/Field` (`Vision.m_field`).
 
-### Fix
+### Fix — **D-2 decided: wire it up**
 
-Resolve **D-2**, then:
+1. Construct `Telemetry` in `RobotContainer` (it takes `maxSpeed` — pass the existing
+   `MaxSpeed` field) and register it with the drivetrain:
+   ```java
+   private final Telemetry logger = new Telemetry(MaxSpeed);
+   // ...in the constructor, after drivetrain exists:
+   drivetrain.registerTelemetry(logger::telemeterize);
+   ```
+   **Confirm `registerTelemetry`'s exact signature against Phoenix 6 26.1.0 before writing
+   it** — CTRE's `SwerveDrivetrain` exposes it as a `Consumer<SwerveDriveState>` sink, but
+   verify rather than assume (sources are extractable from the Gradle cache; this session
+   already did that for `SwerveDrivetrain.getModuleLocations()`).
 
-- **If wiring up:** construct `Telemetry` in `RobotContainer` and register it —
-  `drivetrain.registerTelemetry(telemetry::telemeterize)`. Confirm the CTRE
-  `registerTelemetry` signature against Phoenix 6 26.1.0 before writing it. Note this adds
-  per-loop NT publishing; consider whether it should be rate-limited given the loop-overrun
-  history (Stage 0).
-- **If deleting:** remove `Telemetry.java`, its 4 `Mechanism2d` widgets, and the
-  `SmartDashboard.putData("Module N", …)` calls in its constructor.
+2. **Assess the loop-timing cost before declaring this done.** `telemeterize()` publishes 7
+   NT topics plus 4 `Mechanism2d` widget updates. CTRE invokes the registered telemetry sink
+   from its **odometry thread** (250 Hz on CAN FD), *not* the 50 Hz robot loop — so this may
+   publish far more often than expected. Measure, and rate-limit inside `telemeterize()` if
+   the cost is material. This codebase has a documented history of NT-flood-induced overruns
+   (Stage 0, `ISSUES.md` C-2).
 
-Then, in **both** cases:
-- Correct `README.md` → point at `StateMachine/RobotPose` (or whatever survives).
-- Correct the `configureLogging()` Javadoc claim in `CommandSwerveDrivetrain`.
+3. **Correct the two documentation errors this finding caused** (obligatory regardless):
+   - `README.md`, *Building & Deploying* — the instruction to drag `DriveState/Pose` into
+     AdvantageScope. Once `Telemetry` is wired this becomes true, but verify it empirically
+     before leaving the text as-is; if wiring is deferred, point at `StateMachine/RobotPose`.
+   - `CommandSwerveDrivetrain.configureLogging()` Javadoc — currently claims kinematic state
+     "was published, by `Telemetry`," which was never true.
 
 ### Verification
 
-- Launch sim, connect AdvantageScope, confirm the topic named in `README.md` actually exists
-  in the NT tree. **Do not mark this task done on a compile alone** — the whole finding is
-  that the code compiled fine while publishing nothing.
+- Launch sim, connect AdvantageScope, confirm `DriveState/Pose` **exists and updates**.
+- Confirm the 4 `Module N` `Mechanism2d` widgets appear.
+- Re-check loop timing in the sim Tracer after wiring — see step 2.
+- **Do not mark this task done on a compile alone.** The entire finding is that this code
+  compiled cleanly for weeks while publishing nothing.
 
 ---
 
@@ -305,14 +343,23 @@ Refresh once in `periodic()`; make `getPose()` a plain field read. Lower value t
 
 # Stage R4 — Dead code sweep
 
-**Risk: LOW.** Purely subtractive. Model this on `cleanup.md`, which audited clean.
-Resolve **D-3** and **D-5** first.
+**Risk: LOW.** Mostly subtractive. Model this on `cleanup.md`, which audited clean.
+
+**D-3 decided:** the three unreferenced commands stay. **D-5 decided:** `SysIDUtil`
+placeholders stay (reconfirms `cleanup.md` C-5).
+
+Use a consistent, greppable TODO form for everything being kept-but-flagged, so a future
+sweep can find them all at once:
+
+```java
+// TODO(unused 2026-09-09): no call sites. Evaluate for deletion if still unreferenced.
+```
 
 | # | Item | Location | Notes |
 |---|---|---|---|
-| C-1 | `Telemetry` | `subsystems/drivetrain/Telemetry.java` | Only if D-2 chose deletion; otherwise handled in R1-A3 |
-| C-2 | `StaggerHopper`, `ControllerRumble` | `commands/` | Zero call sites. Gated on D-3 |
-| C-3 | `RunHopper` | `commands/RunHopper.java` | Only referenced by `StaggerHopper` — transitively dead. Gated on D-3 |
+| C-1 | `Telemetry` | `subsystems/drivetrain/Telemetry.java` | ⏭ **Not deleted** — D-2 chose to wire it up; handled in R1-A3 |
+| C-2 | `StaggerHopper`, `ControllerRumble` | `commands/` | ⚠ **Annotate, do not delete** (D-3). Add the TODO above to each class Javadoc |
+| C-3 | `RunHopper` | `commands/RunHopper.java` | ⚠ **Annotate, do not delete** (D-3). Its TODO should note it is reachable *only* via `StaggerHopper`, which is itself unreferenced — so both must be adopted together or dropped together |
 | C-4 | `ShooterValuesSenable` | `subsystems/shooter/` | Zero call sites |
 | C-5 | `getEstimationStdDevs()` | `PhotonVisionIO`, `PhotonVisionSimIO` | Zero callers in both. Deleting also orphans `VisionConstants.kSingleTagStdDevs` / `kMultiTagStdDevs` and their "measure in Stage 8" TODO — **decide whether to wire it up instead**, since `Vision.periodic()` currently computes its own inline std devs |
 | C-6 | `gccPub` / `gcdPub` | `Vision.java` | Gated on camera names containing `"gcc"`/`"gcd"` — Limelight-era names. Current cameras: `Thrifty_cam_1`, `Thrifty_cam_2`, `photonvision`. Never fire |
@@ -324,9 +371,19 @@ Resolve **D-3** and **D-5** first.
 | C-12 | `kRobotToCam` | `Constants.VisionConstants` | Zero usages **and** contains a latent bug: `new Rotation3d(0, 0, 180)` — `Rotation3d` takes **radians**; 180 rad ≈ 28.6 revolutions. Delete it, or fix to `Math.PI` if a camera transform is wanted later. Leaving it as-is is the worst option |
 | C-13 | `NamedCommands("SpeedUp")` = `Commands.none()` | `RobotContainer` | Any auto path referencing `SpeedUp` silently does nothing. Either implement or remove the registration **and** confirm no `.auto` file references it |
 
+### Kept deliberately — annotate, do not delete
+
+| Item | Reason |
+|---|---|
+| `SysIDUtil` × 2 in `RobotContainer` | D-5 / `cleanup.md` C-5 — Stage 8 hardware characterization placeholders |
+| `StaggerHopper`, `ControllerRumble`, `RunHopper` | D-3 — may be adopted for teleop bindings; TODO-flagged instead |
+| `VisionConstants.kTagLayout` | Repointed, not removed — see R1-A1 |
+| `Telemetry` | Wired up instead — see R1-A3 |
+
 ### Verification
 Compile; `grep` each removed symbol to confirm zero remaining references; confirm no new
-"unused" warnings appear in the IDE diagnostics.
+"unused" warnings appear in the IDE diagnostics; `grep -rn "TODO(unused 2026-09-09)"` returns
+exactly the items the D-3/D-5 decisions chose to keep.
 
 ---
 
@@ -385,12 +442,64 @@ Tag count, best-target ambiguity, and a **rejected-measurement counter** in `Vis
 **Why:** the >4 m rejection filter currently discards silently. Without a counter you cannot
 distinguish "vision is quiet" from "vision is being rejected constantly."
 
-## R5-7 — Energy reset semantics + aggregate  (gated on **D-4**)
-Add reset-on-enable (or per-match) to `OnboardLogger.registerEnergy`, and a summed
-whole-robot energy/power total across all 16 motors.
+## R5-7 — Energy reset semantics + aggregate
 
-**Why:** cumulative-since-boot totals are not comparable between matches; an aggregate gives
-a per-match battery budget.
+**D-4 decided: per-enable reset, and yes — it can and should be configurable.**
+
+### Design
+
+Add a public enum and an overload to `OnboardLogger`, so the policy is selectable per
+registration with a sensible default:
+
+```java
+/** When an accumulated-energy channel resets to zero. */
+public enum EnergyReset {
+  /** Never — cumulative Joules since robot code start. The pre-2026-09-09 behavior. */
+  NEVER,
+  /** Zero on every disabled -> enabled transition. Default: makes matches comparable. */
+  ON_ENABLE
+}
+
+/** Defaults to {@link EnergyReset#ON_ENABLE}. */
+public void registerEnergy(String name, Supplier<Voltage> v, Supplier<Current> i) {
+  registerEnergy(name, v, i, EnergyReset.ON_ENABLE);
+}
+
+public void registerEnergy(String name, Supplier<Voltage> v, Supplier<Current> i,
+                           EnergyReset reset) { ... }
+```
+
+All 16 existing call sites keep working unchanged and silently pick up per-enable behavior;
+anything wanting lifetime totals passes `NEVER` explicitly.
+
+### Implementation notes
+
+- **Edge detection:** track `wasEnabled` in the accumulator's captured state; on
+  `!wasEnabled && DriverStation.isEnabled()`, zero the Joule total. The existing
+  `double[] {joules, lastTimestamp}` holder grows to carry the flag — at that point a small
+  private static class would read better than a widening array.
+- **Reset `lastTimestamp` too**, not just the total. Otherwise the first sample after a long
+  disable integrates one enormous `dt`.
+- **This incidentally fixes a latent bug.** Today the accumulator integrates continuously
+  while disabled. Motor voltage/current are near zero then, so the contribution is small —
+  but it is not guaranteed zero, and any residual reading accrues for the entire time the
+  robot sits disabled on the cart. Per-enable reset makes that structurally impossible.
+
+### Optional companion (proposal — confirm before building)
+
+Log **both** channels per motor: `<name>EnergyJ` (per-enable, the useful one) and
+`<name>EnergyTotalJ` (lifetime, for wear tracking across a practice day). That doubles the
+energy channel count to 32, so weigh against log size before adopting.
+
+### Aggregate
+
+Sum across all 16 motors for a whole-robot `Robot/EnergyJ` and instantaneous `Robot/PowerW`.
+Best implemented **after R5-2** (`PowerDistribution`), so the summed per-motor figure can be
+cross-checked against the PDH's independently measured total — if those two disagree badly,
+one of them is wrong, and that is worth knowing.
+
+**Why this task at all:** cumulative-since-boot totals are not comparable between matches;
+an aggregate gives a per-match battery budget.
 
 ### Verification (all of R5)
 Run sim, pull the `.wpilog`, open in AdvantageScope, confirm each new topic exists **and

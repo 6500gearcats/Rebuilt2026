@@ -4,7 +4,7 @@ Tracks execution of `review_plan.md`. See that file for evidence, fix detail, an
 verification steps for every task below.
 
 **Branch:** `leto`
-**Last updated:** 2026-09-09 (plan written; no tasks started)
+**Last updated:** 2026-09-09 (all 5 decisions resolved; no tasks started — R1 is ready to begin)
 
 ---
 
@@ -24,11 +24,18 @@ decided — an undocumented reversal is exactly what went wrong with `SIM_PROGRE
 
 | # | Gates | Question | Decision | Date / by |
 |---|---|---|---|---|
-| D-1 | R1-A1 | Which AprilTag layout is authoritative — `k2026RebuiltAndymark` or `kDefaultField`? Also: does the PhotonVision coprocessor's own configured layout match? | ⏸ *pending* | |
-| D-2 | R1-A3 | Wire `Telemetry` up, or delete it? | ⏸ *pending* | |
-| D-3 | R4 C-2, C-3 | Are `StaggerHopper` / `ControllerRumble` / `RunHopper` staged for future bindings, or abandoned? | ⏸ *pending* | |
-| D-4 | R5-7 | Energy reset semantics — per-enable, per-match, or cumulative since boot? | ⏸ *pending* | |
-| D-5 | R4 | Keep `SysIDUtil` placeholders? (`cleanup.md` C-5 already said keep for Stage 8 — reconfirm only) | ⏸ *pending* | |
+| D-1 | R1-A1 | Which AprilTag layout is authoritative — `k2026RebuiltAndymark` or `kDefaultField`? Also: does the PhotonVision coprocessor's own configured layout match? | ✅ **Use `k2026RebuiltAndymark`.** All consumers reference it. Do **not** delete the `kDefaultField` alternative — leave it in place, documented in a comment explaining what it is and why it isn't used. | 2026-09-09 / james |
+| D-2 | R1-A3 | Wire `Telemetry` up, or delete it? | ✅ **Wire it up.** Also fix the wrong `DriveState/Pose` instruction introduced in the earlier `README.md` + `configureLogging()` Javadoc commits. | 2026-09-09 / james |
+| D-3 | R4 C-2, C-3 | Are `StaggerHopper` / `ControllerRumble` / `RunHopper` staged for future bindings, or abandoned? | ✅ **Leave in place for now.** Mark each with a `TODO` noting it is currently unreferenced and should be evaluated and deleted if it stays unused. | 2026-09-09 / james |
+| D-4 | R5-7 | Energy reset semantics — per-enable, per-match, or cumulative since boot? | ✅ **Per-enable, and make it configurable.** Per-enable is the default; the reset policy is selectable per registration. | 2026-09-09 / james |
+| D-5 | R4 | Keep `SysIDUtil` placeholders? (`cleanup.md` C-5 already said keep for Stage 8 — reconfirm only) | ✅ **Keep for now.** Reconfirms `cleanup.md` C-5. | 2026-09-09 / james |
+
+> **Interpretation note on D-1 — flag if wrong.** "Don't delete the other" is being implemented
+> as: keep the `VisionConstants.kTagLayout` *constant* (four files import it, so removing the
+> name would churn imports), repoint its value at the Andymark layout so every consumer
+> agrees, and document the previous `kDefaultField` value in an adjacent comment explaining
+> what it was and why it changed. Net effect: one authoritative layout at runtime, the
+> alternative preserved as documentation rather than as a second live constant.
 
 ---
 
@@ -38,9 +45,9 @@ decided — an undocumented reversal is exactly what went wrong with `SIM_PROGRE
 
 | Task | Description | Severity | Status | Commit |
 |------|-------------|----------|--------|--------|
-| R1-A1 | Unify the two AprilTag field layouts (`APRIL_TAG_FIELD_LAYOUT` vs `VisionConstants.kTagLayout`) | HIGH | ⏸ blocked on D-1 | |
-| R1-A2 | Fix `Vision`'s `SwerveDrivePoseEstimator` kinematics (12.75" assumed vs 13.5" actual) | HIGH | ⬜ | |
-| R1-A3 | Wire or delete `Telemetry`; correct `README.md` + `configureLogging()` Javadoc | MED | ⏸ blocked on D-2 | |
+| R1-A1 | Point all consumers at `k2026RebuiltAndymark`; document the `kDefaultField` alternative in a comment (D-1) | HIGH | ⬜ ready | |
+| R1-A2 | Fix `Vision`'s `SwerveDrivePoseEstimator` kinematics (12.75" assumed vs 13.5" actual) | HIGH | ⬜ ready | |
+| R1-A3 | **Wire** `Telemetry` up (D-2); correct `README.md` + `configureLogging()` Javadoc | MED | ⬜ ready | |
 
 **R1-A3 carries a documentation-correction obligation regardless of D-2's outcome** — the
 `DriveState/Pose` instruction in `README.md` is wrong today and was published 2026-09-09.
@@ -78,9 +85,9 @@ and it touches FMS-timing-dependent behavior that is hard to verify off-field.
 
 | Task | Item | Status | Commit |
 |------|------|--------|--------|
-| C-1 | `Telemetry` (only if D-2 = delete) | ⏸ blocked on D-2 | |
-| C-2 | `StaggerHopper`, `ControllerRumble` | ⏸ blocked on D-3 | |
-| C-3 | `RunHopper` (transitively dead via `StaggerHopper`) | ⏸ blocked on D-3 | |
+| C-1 | `Telemetry` | ⏭ **not deleted** — D-2 chose to wire it up instead; handled in R1-A3 | |
+| C-2 | `StaggerHopper`, `ControllerRumble` — **add TODO, do not delete** (D-3) | ⬜ ready | |
+| C-3 | `RunHopper` — **add TODO, do not delete** (D-3). Note it is reachable only via `StaggerHopper`, itself unreferenced | ⬜ ready | |
 | C-4 | `ShooterValuesSenable` | ⬜ | |
 | C-5 | `getEstimationStdDevs()` ×2 — **or** wire it up instead of deleting | ⬜ | |
 | C-6 | `Vision.gccPub` / `gcdPub` (Limelight-era camera names) | ⬜ | |
@@ -106,7 +113,7 @@ and it touches FMS-timing-dependent behavior that is hard to verify off-field.
 | R5-4 | Loop timing to `.wpilog` | high | ⬜ | |
 | R5-5 | Robot health — brownout, battery to `.wpilog`, full `CANStatus` error counters | med | ⬜ | |
 | R5-6 | Vision diagnostics — tag count, ambiguity, rejected-measurement counter | med | ⬜ | |
-| R5-7 | Energy reset semantics + whole-robot aggregate | med | ⏸ blocked on D-4 | |
+| R5-7 | Energy reset — **configurable policy, default per-enable** (D-4) — plus whole-robot aggregate | med | ⬜ ready | |
 
 ---
 
