@@ -4,7 +4,7 @@ Tracks execution of the audit plan. See `audit_plan.md` for method and full rati
 Read-only — no code changes in this pass.
 
 **Branch:** `leto`
-**Last updated:** 2026-09-09 (R-5 complete)
+**Last updated:** 2026-09-09 (audit complete — all 6 stages)
 
 ---
 
@@ -23,7 +23,7 @@ Read-only — no code changes in this pass.
 | R-3 | `pkg_plan.md` + `PKG_PROGRESS.md` | ✅ |
 | R-4 | `sim_plan.md` + `SIM_PROGRESS.md` | ✅ |
 | R-5 | `doc_plan.md` + `DOC_PROGRESS.md` | ✅ |
-| R-6 | `logging_plan.md` + `LOGGING_PROGRESS.md` | ⬜ |
+| R-6 | `logging_plan.md` + `LOGGING_PROGRESS.md` | ✅ |
 
 ---
 
@@ -238,3 +238,56 @@ plan specified — coverage across the sample is 11 files, zero discrepancies. N
 claims (unlike Stage 2, nothing here targeted a file that was later deleted — this plan ran
 after the Hackbots integration settled, on the actual current architecture). No further
 verification recommended for this plan; treat it as reliable.
+
+---
+
+## R-6 Findings — Logging Plan
+
+Confirmation pass, as planned — this plan was authored and executed earlier in this same
+session with a compile check after every stage, so the check here is re-grepping the exact
+call sites rather than re-auditing from scratch.
+
+| Check | Result |
+|---|---|
+| `StatusSignalUtil.refreshAll()` called in `Robot.robotPeriodic()`, before `CommandScheduler.run()` | ✅ — `Robot.java:87-88`, correct order |
+| `OnboardLogger.logAll()` called in `Robot.robotPeriodic()` | ✅ — `Robot.java:90` |
+| `registerEnergy(` call sites | ✅ — 10 source-code sites: 3 in `ShooterIO.java` (shooter1/shooter2/hood), 1 in `TurretIO.java`, 2 in `Intake.java` (roller/deploy), 2 in `Hopper.java` (indexer/kicker), 2 in `CommandSwerveDrivetrain.java` inside the per-module loop — the last two execute 4× at runtime (once per module), giving 8 actual registrations. Total: 3+1+2+2+8 = 16, matching the plan's target motor count exactly. |
+| Full compile | ✅ — `BUILD SUCCESSFUL` |
+
+Nothing has regressed since this plan's own final commit (`ce1a8eb`/`3a99289`). No
+discrepancies found.
+
+---
+
+## Audit Complete — Overall Summary
+
+All six plan/progress pairs reviewed. No code changes made in this pass — read-only
+verification throughout.
+
+| Stage | Plan | Result |
+|---|---|---|
+| R-1 | Master plan + `ISSUES.md` | Mixed — Stage 0 solid; **Stage 2 confirmed overstated**, as the user suspected; one stale cross-file status contradiction (Stage 6) resolved in the plan's favor |
+| R-2 | Cleanup plan | Clean — all 5 claims verified, no issues |
+| R-3 | Package reorg plan | Substance complete, but the **progress tracker understates it** — opposite direction from Stage 2 |
+| R-4 | Simulation plan | Mostly clean — one claim (S-2) doesn't match code, but per the user that's a deliberate later decision never recorded in the tracker |
+| R-5 | Documentation plan | Clean — most reliable plan reviewed, ran after the architecture had settled |
+| R-6 | Logging plan (this session) | Clean — confirmation pass only, nothing regressed |
+
+**Pattern across all six:** every inaccuracy found traces to a tracker not being updated
+after a later event — a file deletion (Stage 2), a combined/shortcut commit (R-3), or a
+deliberate reversal (R-4) — rather than to the underlying code being wrong. The code itself
+held up well everywhere it was checked. The recurring risk is trusting a status table
+without cross-referencing the code or, in Stage 2's case, without noticing the target file
+no longer exists.
+
+### Recommended fix-it plan scope (not written yet — for the next plan)
+
+1. **`Rebuilt2026_RefactorPlan.md`** — add supersession notes to the Stage 1 and Stage 2
+   per-stage tables (Appendix B already has some of these; the stage-level tables don't).
+   Update the top-level status table to mark Stage 6 done.
+2. **`PKG_PROGRESS.md`** — mark P-1 through P-10 all ✅ under commit `a0c1f1b`.
+3. **`SIM_PROGRESS.md`** — annotate S2-2 with the decision to keep the deprecated
+   `PhotonPoseEstimator` 3-arg constructor, so it reads as a decision, not a completed
+   migration.
+4. No changes needed for `cleanup.md`/`CLEANUP_PROGRESS.md`, `doc_plan.md`/
+   `DOC_PROGRESS.md`, or `logging_plan.md`/`LOGGING_PROGRESS.md`.
