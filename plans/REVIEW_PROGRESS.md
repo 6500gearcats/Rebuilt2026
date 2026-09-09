@@ -4,8 +4,8 @@ Tracks execution of `review_plan.md`. See that file for evidence, fix detail, an
 verification steps for every task below.
 
 **Branch:** `leto`
-**Last updated:** 2026-09-09 (Stages R1 and R2 complete — 4 commits, all compiled clean;
-paused before R3 pending user input, see note at that stage)
+**Last updated:** 2026-09-09 (Stages R1, R2, R4, R5, R6 complete. R3 deferred by decision.
+Plan substantively done pending D-6 and the R1-A3 loop-timing verification below.)
 
 ---
 
@@ -30,6 +30,7 @@ decided — an undocumented reversal is exactly what went wrong with `SIM_PROGRE
 | D-3 | R4 C-2, C-3 | Are `StaggerHopper` / `ControllerRumble` / `RunHopper` staged for future bindings, or abandoned? | ✅ **Leave in place for now.** Mark each with a `TODO` noting it is currently unreferenced and should be evaluated and deleted if it stays unused. | 2026-09-09 / james |
 | D-4 | R5-7 | Energy reset semantics — per-enable, per-match, or cumulative since boot? | ✅ **Per-enable, and make it configurable.** Per-enable is the default; the reset policy is selectable per registration. | 2026-09-09 / james |
 | D-5 | R4 | Keep `SysIDUtil` placeholders? (`cleanup.md` C-5 already said keep for Stage 8 — reconfirm only) | ✅ **Keep for now.** Reconfirms `cleanup.md` C-5. | 2026-09-09 / james |
+| D-6 | `RobotStateMachine.checkZone()` / `FieldZone` enum | Is `checkZone()`'s Y-boundary logic wrong, or is the `FieldZone` enum's Javadoc wrong? They're exactly swapped (`y > 4.2` returns `NEUTRAL_BOTTOM` but the enum documents that range as `NEUTRAL_TOP`, and vice versa) | ⏸ *pending* — found 2026-09-09 while writing R6-4; needs the real field diagram/orientation to resolve, not inferable from code | |
 
 > **Interpretation note on D-1 — flag if wrong.** "Don't delete the other" is being implemented
 > as: keep the `VisionConstants.kTagLayout` *constant* (four files import it, so removing the
@@ -140,31 +141,60 @@ removed.
 
 ---
 
-## Stage R5 — Logging additions
+## Stage R5 — Logging additions — ✅ Complete as of `a5d32d4`
 
-**Do after R2**, so new suppliers aren't layered on an uncached pipeline.
+Every API used (`PowerDistribution`, `DriverStation` match-context methods,
+`RobotController.getCANStatus()`/`CANStatus` fields, `CommandScheduler.onCommand*` hooks,
+`PhotonTrackedTarget.getPoseAmbiguity()`, `IntegerLogEntry`/`BooleanLogEntry` constructors)
+was verified against WPILib/Phoenix6/PhotonLib sources before use, not assumed.
 
 | Task | Addition | Value | Status | Commit |
 |------|----------|-------|--------|--------|
-| R5-1 | Command lifecycle hooks (`onCommandInitialize` / `Finish` / `Interrupt`) | ★ highest | ⬜ | |
-| R5-2 | `PowerDistribution` — total/per-channel current, voltage, temperature | high | ⬜ | |
-| R5-3 | Match context — event, match type/number, alliance, FMS attached (one-shot) | high | ⬜ | |
-| R5-4 | Loop timing to `.wpilog` | high | ⬜ | |
-| R5-5 | Robot health — brownout, battery to `.wpilog`, full `CANStatus` error counters | med | ⬜ | |
-| R5-6 | Vision diagnostics — tag count, ambiguity, rejected-measurement counter | med | ⬜ | |
-| R5-7 | Energy reset — **configurable policy, default per-enable** (D-4) — plus whole-robot aggregate | med | ⬜ ready | |
+| R5-1 | Command lifecycle hooks — 3 `StringLogEntry` channels (Initialized/Finished/Interrupted), direct `DataLog` writes (not `OnboardLogger` — discrete events don't fit its poll model) | ★ highest | ✅ | `a5d32d4` |
+| R5-2 | `PowerDistribution` — total/per-channel current, total power/energy, voltage, temperature, via a new `"Robot"` `OnboardLogger` | high | ✅ | `a5d32d4` |
+| R5-3 | Match context — event/match type/number/replay/alliance/FMS-attached, one-shot on first DS attach via a guard flag | high | ✅ | `a5d32d4` |
+| R5-4 | `Robot/LoopTimeSec` — wall-clock delta between successive `robotPeriodic()` calls, measured first thing in the method | high | ✅ | `a5d32d4` |
+| R5-5 | Brownout, battery voltage (now in `.wpilog` too, not just 10 Hz SmartDashboard), full `CANStatus` (`busOffCount`/`txFullCount`/`receiveErrorCount`/`transmitErrorCount`) | med | ✅ | `a5d32d4` |
+| R5-6 | Vision diagnostics — added `getTagCount()`/`getBestTargetAmbiguity()` to `VisionIO`, implemented in both implementers; per-camera logging + cumulative `Vision/RejectedMeasurementCount` | med | ✅ | `a5d32d4` |
+| R5-7 | `OnboardLogger.EnergyReset` enum (`NEVER`/`ON_ENABLE`), 4-arg overload, 3-arg defaults to `ON_ENABLE` — all 16 existing call sites pick this up unchanged. Static `getTotalEnergyJ()`/`getTotalPowerW()` aggregate across every registration process-wide, wired to `Robot/EnergyJ`/`Robot/PowerW` for cross-check against the PDH's independent total | med | ✅ | `a5d32d4` |
+
+**R5-4 note:** explicitly documented as a plain field measurement, not a WPILib Tracer epoch —
+avoids repeating the "`<Subsystem>.periodic()` epoch also covers `simulationPeriodic()`"
+confusion this session hit earlier (see the `project_sim-loop-overruns` memory).
 
 ---
 
-## Stage R6 — Tests
+## Stage R6 — Tests — ✅ Complete
+
+16 tests across 4 files, all passing. Every expected value was hand-traced against the
+actual algorithm *before* being written as an assertion, then verified empirically by
+running the suite — not derived from what the code happened to return.
 
 | Task | Target | Status | Commit |
 |------|--------|--------|--------|
-| R6-1 | `Turret.findCC()` — wrap-around edge cases (seam already exists, never used) | ⬜ | |
-| R6-2 | `ToFAim.update()` — convergence, out-of-range, constraint violation | ⬜ | |
-| R6-3 | `LeadCompensator.computeLeadTarget()` — zero velocity, lead direction, impossible inner strategy | ⬜ | |
-| R6-4 | `RobotStateMachine.checkZone()` — zone boundaries, both alliances | ⬜ | |
-| R6-5 | Delete/rename empty `AlignTest.java` (named after a deleted command) | ⬜ | |
+| R6-1 | `Turret.findCC()` — 6 tests: no-wrap, small adjustment, wrap positive/negative, clamp-when-unreachable, exact-0.5-boundary | ✅ | |
+| R6-2 | `ToFAim.update()` — 3 tests: stationary direct lookup, out-of-range distance clamped then constraint-rejected, in-range shot still constraint-rejected | ✅ | |
+| R6-3 | `LeadCompensator.computeLeadTarget()` — 3 tests: zero velocity, lead shift opposite travel direction, impossible inner strategy breaks cleanly | ✅ | |
+| R6-4 | `RobotStateMachine.checkZone()` — 4 tests: Blue/Red alliance boundaries, neutral-zone Y bands. Required `HAL.initialize()` + `DriverStationSim` (both verified against WPILib 2026.2.1 sources) since the singleton reads live `DriverStation.getAlliance()` | ✅ | |
+| R6-5 | Deleted empty `AlignTest.java` (named after `AlignTurretToHub`, deleted Stage 5) | ✅ | |
+
+### Real finding, surfaced while writing R6-4 — needs a human decision
+
+`checkZone()`'s Y-boundary code and the `FieldZone` enum's own Javadoc **directly
+contradict each other**:
+
+| Y value | `checkZone()` returns | Enum Javadoc says this range means |
+|---|---|---|
+| `y > 4.2` | `NEUTRAL_BOTTOM` | `NEUTRAL_TOP` |
+| `y < 3.8` | `NEUTRAL_TOP` | `NEUTRAL_BOTTOM` |
+
+Exactly swapped. This can't be resolved from code alone — it requires knowing the actual
+field orientation (which physical side is "top" on the field diagram this was written
+against). The test (`RobotStateMachineTest.neutralZoneYBoundaries_currentBehaviorTopBottomSwappedVsEnumJavadoc`)
+deliberately asserts what the code does today, not what's "correct" — its job is to
+characterize existing behavior, and its name and Javadoc say so explicitly. **Needs a
+decision: is `checkZone()`'s logic wrong, or is the enum's Javadoc wrong?** Whoever has the
+field diagram/CAD in front of them can settle this in under a minute; I can't from here.
 
 ---
 
@@ -172,12 +202,17 @@ removed.
 
 | Stage | Tasks | Status |
 |-------|-------|--------|
-| R1 — Correctness | 3 | ⬜ |
-| R2 — Aim caching | 2 | ⬜ |
-| R3 — Side-effect getters | 2 | ⬜ |
-| R4 — Dead code | 13 | ⬜ |
-| R5 — Logging | 7 | ⬜ |
-| R6 — Tests | 5 | ⬜ |
+| R1 — Correctness | 3 | ✅ |
+| R2 — Aim caching | 2 | ✅ |
+| R3 — Side-effect getters | 2 | ⏭ Deferred |
+| R4 — Dead code | 13 | ✅ |
+| R5 — Logging | 7 | ✅ |
+| R6 — Tests | 5 | ✅ |
+
+**Open items remaining:** D-6 (the `FieldZone`/`checkZone()` swap — needs a human with the
+field diagram) and the R1-A3 loop-timing empirical verification (one sim run watching for
+overruns). Both are called out in their respective sections above; neither blocks anything
+else in this plan.
 
 ---
 
@@ -199,6 +234,21 @@ Recorded here so the history is legible rather than implied.
 
 ## Findings during execution
 
-*(Append anything discovered while implementing that wasn't in the original review — the
-CAN ID collision found during the README rewrite is the model for this: a real bug surfaced
-by doing adjacent work carefully.)*
+Discovered while implementing this plan, not part of the original review:
+
+- **R4-C10 scope expansion** — six entire `Constants.java` nested classes were dead
+  (`DriveConstants`, `ModuleConstants`, `OIConstants`, `AutoConstants`, `NeoMotorConstants`,
+  `GyroConstants`), not just the specific fields originally catalogued.
+- **`AutoConstants` never executed, ever** — its `RobotConfig`-loading safety net (credited
+  as Stage 0's M-3 fix) never ran because nothing referenced the containing class. Corrected
+  the earlier `AUDIT_PROGRESS.md` R-1 verification of M-3, which had only checked that code
+  text matched the claim, not that the code path was reachable.
+- **R4-C13 scope correction** — `ProjectHailMaryRight.auto` actually references `SpeedUp`,
+  contradicting the original review's assumption. It was `Commands.none()`; implemented as a
+  real flywheel warm-up.
+- **D-6 — `FieldZone`/`checkZone()` swap** (see above) — found while writing R6-4. Needs a
+  human decision; can't be resolved from code alone.
+
+This list, plus the CAN ID collision found during the README rewrite (a separate plan), is
+the running argument for why "verify by doing the adjacent work carefully" keeps finding
+real bugs that a read-through alone would miss.
