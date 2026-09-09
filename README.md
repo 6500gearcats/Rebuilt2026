@@ -435,7 +435,10 @@ $env:JAVA_HOME = "C:\Users\Public\wpilib\2026\jdk"
 Simulation opens the WPILib sim GUI, which includes the simulated Driver Station (enable
 mode, joystick assignment) — see the **Joysticks** panel to assign a physical controller to
 a port. AdvantageScope, connected to `localhost`, is the recommended tool for live plots and
-field visualization; drag `DriveState/Pose` into a 2D field view to see the robot.
+field visualization; drag `DriveState/Pose` into a 2D field view to see the robot. (This
+topic is published by `subsystems/drivetrain/Telemetry.java`, wired up in `RobotContainer`
+as of 2026-09-09 — before that fix this instruction did not work, because the class existed
+but was never instantiated. See `plans/review_plan.md` R1-A3 if this ever regresses.)
 
 ---
 

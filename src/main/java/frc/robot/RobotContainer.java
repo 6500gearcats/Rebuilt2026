@@ -43,6 +43,7 @@ import frc.robot.commands.ShootWhenReady;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.Telemetry;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
@@ -107,6 +108,24 @@ public class RobotContainer {
         private final XboxController m_gunner;
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+        /**
+         * Publishes drivetrain kinematic state ({@code DriveState/*} NT topics + 4 per-module
+         * {@code Mechanism2d} widgets). Wired 2026-09-09 — was previously constructed nowhere,
+         * so none of its topics existed despite the class compiling cleanly. See
+         * {@code plans/review_plan.md} R1-A3.
+         *
+         * <p><b>Timing note, not yet empirically verified:</b> CTRE calls the registered
+         * telemetry consumer synchronously from its own odometry thread (100 Hz on this
+         * roboRIO CAN 2.0 bus — see {@code TunerConstants2.kCANBus}, not a CANivore/CAN FD
+         * bus), not from the 50 Hz robot loop. That means {@link Telemetry#telemeterize}
+         * runs about 2x as often as expected and on a different thread than
+         * {@code robotPeriodic()}. If sim or hardware testing shows loop overruns or NT4
+         * flood correlated with this, rate-limit inside {@code telemeterize()} rather than
+         * here — see the loop-overrun history in Stage 0 of
+         * {@code plans/Rebuilt2026_RefactorPlan.md}.
+         */
+        private final Telemetry m_telemetry = new Telemetry(MaxSpeed);
 
         private final Hopper hopper = new Hopper();
 
@@ -231,6 +250,9 @@ public class RobotContainer {
                 SmartDashboard.putData("Auto Chooser", autoChooser);
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 configureBindings();
+                // Publishes DriveState/* NT topics + per-module Mechanism2d widgets. See
+                // m_telemetry's field Javadoc for the odometry-thread timing note.
+                drivetrain.registerTelemetry(m_telemetry::telemeterize);
                 robotStateMachine.bindVision(m_vision);
                 robotStateMachine.bindDrivetrain(drivetrain);
                 setRobotOrientation();

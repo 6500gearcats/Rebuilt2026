@@ -278,9 +278,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * {@link com.ctre.phoenix6.swerve.SwerveDrivetrain#getModules()}'s own documented order
      * (and the constructor argument order in {@link frc.robot.generated.TunerConstants2}).
      *
-     * <p>Before this method existed, the drivetrain had zero per-motor electrical telemetry —
-     * only kinematic state (pose, speeds, module states) was published, by {@link Telemetry}.
-     * All swerve devices are on the roboRIO CAN bus (see {@code TunerConstants2.kCANBus}'s
+     * <p>Before this method existed, the drivetrain had zero per-motor electrical telemetry.
+     * Kinematic state (pose, speeds, module states) was <em>intended</em> to be published by
+     * {@link Telemetry}, but that class was never actually instantiated anywhere in the
+     * codebase until 2026-09-09 (see {@code plans/review_plan.md} R1-A3) — so until then,
+     * kinematic state was not published either, despite the code compiling cleanly. All
+     * swerve devices are on the roboRIO CAN bus (see {@code TunerConstants2.kCANBus}'s
      * default name), so signals are registered with {@link StatusSignalUtil#registerRioSignals}
      * rather than the CANivore list.
      */
