@@ -18,6 +18,7 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -64,6 +65,8 @@ public final class RobotStateMachine {
 
     private Pose2d targetPose = new Pose2d();
 
+    private final Field2d aimTargetField = new Field2d();
+
     private ShotSolution shotSolution = ShotSolution.empty();
 
     private Pose2d pose = new Pose2d();
@@ -101,6 +104,7 @@ public final class RobotStateMachine {
 
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+        SmartDashboard.putData("Aim Target Poses", aimTargetField);
     }
 
     public Flywheel getFlywheel() {
@@ -174,6 +178,17 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("distToTag2", distToTag());
         SmartDashboard.putBoolean("isFacing", isFacingHub());
         updateTargetPose();
+
+        aimTargetField.getObject("Hub").setPose(HubPose);
+        aimTargetField.getObject("Motion Compensated Hub").setPose(targetPose);
+
+        SmartDashboard.putNumber("Hub X (m)", HubPose.getX());
+        SmartDashboard.putNumber("Hub Y (m)", HubPose.getY());
+        SmartDashboard.putNumber("Hub Heading (deg)", HubPose.getRotation().getDegrees());
+        SmartDashboard.putNumber("Motion Compensated Hub X (m)", targetPose.getX());
+        SmartDashboard.putNumber("Motion Compensated Hub Y (m)", targetPose.getY());
+        SmartDashboard.putNumber("Motion Compensated Hub Heading (deg)",
+                targetPose.getRotation().getDegrees());
     }
 
     private void newPostedValue() {
