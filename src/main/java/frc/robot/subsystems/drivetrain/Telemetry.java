@@ -6,11 +6,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -21,6 +19,15 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 
 /**
  * Publishes drivetrain telemetry to NetworkTables and SmartDashboard.
+ *
+ * <p>Until 2026-09-09 this class also published robot pose a second time under
+ * {@code Pose/robotPose} as a raw {@code double[3]} (x, y, rotation degrees) with a
+ * {@code Pose/.type = "Field2d"} marker — the legacy numeric-array structured-data format
+ * AdvantageScope has deprecated for removal in 2027. That publisher was pure redundancy:
+ * {@link #drivePose} above already publishes the identical pose as a modern
+ * {@code Pose2d.struct} under {@code DriveState/Pose}, which is what AdvantageScope should
+ * be pointed at. Removed rather than migrated, since nothing needed the legacy topic. See
+ * {@code plans/REVIEW_PROGRESS.md}'s "Findings during execution" section.
  */
 public class Telemetry {
         private final double MaxSpeed;
@@ -58,11 +65,6 @@ public class Telemetry {
         private final DoublePublisher driveOdometryFrequency = driveStateTable.getDoubleTopic("OdometryFrequency")
                         .publish();
 
-        /* Robot pose for field positioning */
-        private final NetworkTable table = inst.getTable("Pose");
-        private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
-        private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
-
         /* Mechanisms to represent the swerve module states */
         private final Mechanism2d[] m_moduleMechanisms = new Mechanism2d[] {
                         new Mechanism2d(1, 1),
@@ -97,8 +99,6 @@ public class Telemetry {
                                                         new Color8Bit(Color.kWhite))),
         };
 
-        private final double[] m_poseArray = new double[3];
-
         /**
          * Accept the swerve drive state and telemeterize it to SmartDashboard.
          */
@@ -111,14 +111,6 @@ public class Telemetry {
                 driveModulePositions.set(state.ModulePositions);
                 driveTimestamp.set(state.Timestamp);
                 driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
-
-                m_poseArray[0] = state.Pose.getX();
-                m_poseArray[1] = state.Pose.getY();
-                m_poseArray[2] = state.Pose.getRotation().getDegrees();
-
-                /* Telemeterize the pose to a Field2d */
-                fieldTypePub.set("Field2d");
-                fieldPub.set(m_poseArray);
 
                 /* Telemeterize each module state to a Mechanism2d */
                 for (int i = 0; i < 4; ++i) {

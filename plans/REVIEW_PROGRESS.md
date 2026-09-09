@@ -281,8 +281,9 @@ real bugs that a read-through alone would miss.
     codebase controls directly; migrating it means either WPILib updates `Field2d` itself, or
     this code stops relying on the `Field2d` widget and points AdvantageScope at a struct
     topic instead (already available: `DriveState/Pose`).
-  - **Suggestion, not yet actioned:** fold `Telemetry.java`'s legacy-array deletion into a
-    future dead-code-style pass (same shape as R4) — it's a clean, zero-risk removal.
-    `Vision.m_field`/`Field2d` is lower priority: still useful for Shuffleboard/Elastic
-    driver-station widgets (a different audience than AdvantageScope), so leave it and just
-    treat `DriveState/Pose` as the AdvantageScope-side source of truth going forward.
+  - **`Telemetry.java`'s legacy pair actioned same day:** deleted `fieldPub`/`fieldTypePub`/
+    `m_poseArray` and the `Pose` `NetworkTable` handle that only existed for them. Zero
+    capability lost — `drivePose`/`DriveState/Pose` already covered the same data. Compiles
+    clean, all 17 tests still pass. `Vision.m_field`/`Field2d` intentionally left alone —
+    still useful for Shuffleboard/Elastic driver-station widgets (a different audience than
+    AdvantageScope); `DriveState/Pose` remains the AdvantageScope-side source of truth.
