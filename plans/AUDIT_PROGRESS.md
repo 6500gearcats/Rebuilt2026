@@ -39,6 +39,17 @@ Read-only — no code changes in this pass.
 | H-7 | Eager singleton | `RobotStateMachine.java:71` — `private static final RobotStateMachine instance = new RobotStateMachine();` |
 | M-3 | `RobotConfig` error message | `Constants.java:191-199` — matches claim almost verbatim |
 
+> **Correction (2026-09-09, found during `review_plan.md` R4):** the M-3 verification above
+> checked that the code *text* matched the claimed fix — it did not check whether that code
+> ever *runs*. It doesn't: `Constants.AutoConstants` (where the fix lived) had zero external
+> references anywhere in the codebase, and Java only executes a class's static initializer on
+> first reference. That try/catch never fired, not once. `Constants.AutoConstants` was
+> deleted in `review_plan.md` R4-C10; the actually-reachable equivalent fix lives in
+> `CommandSwerveDrivetrain.configureAutoBuilder()`, confirmed to run because it's called from
+> the drivetrain's own constructor. M-3's fix is real — just never at the location this audit
+> checked. **Lesson for future audits:** matching code text to a claim is necessary but not
+> sufficient; also check the containing class/method is actually reachable.
+
 Stage 0 is real and holding up. C-3 and C-4 not independently re-checked this pass (low
 risk — same file/pattern as C-2, and C-4's target `AlignTurretToHub.java` was deleted in
 Stage 5 regardless).

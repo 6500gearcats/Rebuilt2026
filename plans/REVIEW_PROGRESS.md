@@ -97,23 +97,46 @@ of which depend on R3.
 
 ---
 
-## Stage R4 — Dead code sweep
+## Stage R4 — Dead code sweep — ✅ Complete as of `efc9f05`
 
 | Task | Item | Status | Commit |
 |------|------|--------|--------|
 | C-1 | `Telemetry` | ⏭ **not deleted** — D-2 chose to wire it up instead; handled in R1-A3 | |
-| C-2 | `StaggerHopper`, `ControllerRumble` — **add TODO, do not delete** (D-3) | ⬜ ready | |
-| C-3 | `RunHopper` — **add TODO, do not delete** (D-3). Note it is reachable only via `StaggerHopper`, itself unreferenced | ⬜ ready | |
-| C-4 | `ShooterValuesSenable` | ⬜ | |
-| C-5 | `getEstimationStdDevs()` ×2 — **or** wire it up instead of deleting | ⬜ | |
-| C-6 | `Vision.gccPub` / `gcdPub` (Limelight-era camera names) | ⬜ | |
-| C-7 | `RobotStateMachine`: `getTurretPose()`, `isFarEnough()`, `setCurrentZone()`, `switchState()`, `underTrench()` — **preserve `underTrench()`'s field geometry in a comment first** | ⬜ | |
-| C-8 | `RobotContainer.photonVisionIO` (permanently null) | ⬜ | |
-| C-9 | `RobotContainer` × 3 `SlewRateLimiter` | ⬜ | |
-| C-10 | `Constants`: `kTiltPitch`, `NeoMotorConstants`, `AutoConstants.config`, `DriveConstants` CAN IDs — **not `kDriveKinematics` until R1-A2 lands** | ⬜ | |
-| C-11 | `SmartDashboard.putNumber("Shoot Speed", 0)` | ⬜ | |
-| C-12 | `kRobotToCam` — delete, or fix the radians/degrees bug (`Rotation3d(0,0,180)`) | ⬜ | |
-| C-13 | `NamedCommands("SpeedUp")` stub — implement or remove + confirm no `.auto` references it | ⬜ | |
+| C-2 | `StaggerHopper`, `ControllerRumble` — TODO added, kept (D-3) | ✅ | `efc9f05` |
+| C-3 | `RunHopper` — TODO added, kept (D-3) | ✅ | `efc9f05` |
+| C-4 | `ShooterValuesSenable` — deleted | ✅ | `efc9f05` |
+| C-5 | `getEstimationStdDevs()` ×2 + orphaned `kSingleTagStdDevs`/`kMultiTagStdDevs` — deleted | ✅ | `efc9f05` |
+| C-6 | `Vision.gccPub` / `gcdPub` — deleted | ✅ | `efc9f05` |
+| C-7 | 5 dead `RobotStateMachine` methods — deleted; `underTrench()` geometry preserved in a comment | ✅ | `efc9f05` |
+| C-8 | `RobotContainer.photonVisionIO` — deleted | ✅ | `efc9f05` |
+| C-9 | `RobotContainer` × 3 `SlewRateLimiter` — deleted | ✅ | `efc9f05` |
+| C-10 | **Expanded during verification** — deleted 6 entire nested classes (`DriveConstants`, `ModuleConstants`, `OIConstants`, `AutoConstants`, `NeoMotorConstants`, `GyroConstants`), all zero external references, not just the originally-catalogued subset | ✅ | `efc9f05` |
+| C-11 | `SmartDashboard.putNumber("Shoot Speed", 0)` — deleted | ✅ | `efc9f05` |
+| C-12 | `kRobotToCam` — deleted (was unused, and had the radians/degrees bug) | ✅ | `efc9f05` |
+| C-13 | **Corrected during verification** — `ProjectHailMaryRight.auto` *does* reference `SpeedUp`. Implemented as `m_shooter.shoot(m_stateManager::aimParams)` rather than removed | ✅ | `efc9f05` |
+
+### Two findings during execution, beyond the original review
+
+**AutoConstants never executed, ever.** Deleting it (part of C-10's scope expansion) surfaced
+that this class held its own independent "load `RobotConfig` safely, report failure"
+implementation — the exact fix `ISSUES.md`/the master plan record as **M-3, done in Stage
+0**. But nothing in the codebase ever referenced the `AutoConstants` class, and Java only
+runs a class's static initializer on first reference — so that try/catch never ran, not
+once, in this robot's entire operating history. The actually-reachable equivalent lives in
+`CommandSwerveDrivetrain.configureAutoBuilder()`. M-3's fix is real; the master plan's
+tracker just pointed at the wrong (dead) copy of it.
+
+**This is also a correction to this session's own earlier audit.** `AUDIT_PROGRESS.md` R-1
+verified M-3 as "✅ Verified" by confirming the code text matched the claimed fix — it did
+not check whether that code path was ever reachable. Text-matches-claim and
+code-path-executes are different questions; this pass only checked the first. Noted in
+`AUDIT_PROGRESS.md` directly.
+
+**`SpeedUp` was a real auto-behavior gap, not dead code.** `ProjectHailMaryRight.auto` runs
+it in a `deadline` block with the `PHM1` path and `Intake`, immediately before the first
+`ShootFuel3s` — clearly meant to warm up the flywheel while driving/intaking. As
+`Commands.none()`, that auto has been shooting cold every time it runs. Implemented, not
+removed.
 
 ---
 
