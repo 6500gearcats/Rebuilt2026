@@ -278,7 +278,7 @@ public final class RobotStateMachine {
         // distance is shorter. Lateral velocity is left for turret aiming.
         double effectiveDistance = distance;
         double tof = getTOF(distance);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 20; i++) {
             tof = getTOF(effectiveDistance);
             effectiveDistance = Math.max(0.0, distance - radialVelocity * tof);
         }
