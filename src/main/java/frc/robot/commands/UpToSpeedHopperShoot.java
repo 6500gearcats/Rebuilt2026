@@ -36,15 +36,15 @@ public class UpToSpeedHopperShoot extends Command {
     }
     // TEMPORARY TEST OVERRIDE: run the hopper regardless of turret alignment,
     // distance, or flywheel-speed readiness. Restore the gates below after testing.
-    // if (SmartDashboard.getBoolean("Aligned", true)) {
-    //   if (stateMachine.isFarEnough()) {
-    //     if (m_Flywheel.isUpToSpeed()) {
-    //       m_Hopper.startAllMotors(-1, 1);
-    //     }
-    //   } else {
-    //     m_Hopper.startAllMotors(-1, 1);
-    //   }
-    // }
+    if (SmartDashboard.getBoolean("Aligned", true)) {
+      if (stateMachine.isFarEnough()) {
+        if (m_Flywheel.isUpToSpeed()) {
+          m_Hopper.startAllMotors(-1, 1);
+        }
+      } else {
+        m_Hopper.startAllMotors(-1, 1);
+      }
+    }
     m_Hopper.startAllMotors(-1, 1);
 
   }
