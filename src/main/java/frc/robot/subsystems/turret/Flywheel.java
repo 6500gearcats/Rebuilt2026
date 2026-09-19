@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
@@ -18,6 +19,7 @@ import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -53,7 +55,8 @@ public class Flywheel extends SubsystemBase {
 
   public Flywheel(RobotStateMachine robotStateMachine) {
     this.robotStateMachine = robotStateMachine;
-    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6));
+    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6))
+        .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
 
     // // set slot 0 gains
     // var slot0Configs = talonFXConfigs.Slot0;
@@ -98,13 +101,14 @@ public class Flywheel extends SubsystemBase {
                                       * && robotStateMachine.checkZone() ==
                                       * FieldZone.ALLIANCE
                                       */) {
-      double distance = robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation());
+      double distance = robotStateMachine.getTurretPose().getTranslation()
+          .getDistance(robotStateMachine.getHubPose().getTranslation());
       ChassisSpeeds speeds = robotStateMachine.getFieldSpeeds();
       Pose2d best = robotStateMachine.getHubPose();
       Pose2d targetPose = new Pose2d(
-        best.getX() + ((-speeds.vxMetersPerSecond ) * robotStateMachine.getTOF(distance)),
-        best.getY() + (-speeds.vyMetersPerSecond * robotStateMachine.getTOF(distance)),
-      new Rotation2d());
+          best.getX() + ((-speeds.vxMetersPerSecond) * robotStateMachine.getTOF(distance)),
+          best.getY() + (-speeds.vyMetersPerSecond * robotStateMachine.getTOF(distance)),
+          new Rotation2d());
 
       setSpeed(RangeFinder.getShotVelocity(
           robotStateMachine.getTurretPose().getTranslation()
