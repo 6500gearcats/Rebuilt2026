@@ -40,6 +40,7 @@ public class Hood extends SubsystemBase {
     // Set the position to 0 rotations for initial use
 //    m_encoder.setPosition(0);
 
+
   }
   @Override
   public void periodic() {
