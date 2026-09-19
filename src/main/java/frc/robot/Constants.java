@@ -240,6 +240,11 @@ public final class Constants {
 
   public static class TurretConstants {
     public static final double kHoodManualSpeed = 0.1;
+    public static final double kHoodEncoderZeroRotations = 50.010 / 360.0;
+    public static final double kHoodMinPositionRotations = 0.0;
+    public static final double kHoodMaxPositionRotations = (172.002 - 50.010) / 360.0;
+    public static final double kHoodEncoderDiscontinuityPointRotations =
+        ((kHoodMinPositionRotations + kHoodMaxPositionRotations) / 2.0) + 0.5;
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
     public static final Transform2d ROBOT_TO_TURRET_BASE = new Transform2d(
