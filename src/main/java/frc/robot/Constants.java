@@ -224,8 +224,13 @@ public final class Constants {
 
   public static class MotorConstants {
     public static final int kTurretYawMotorID = 12;
-    public static final int kShooterMotorRightID = 13;
-    public static final int kShooterMotorLeftID = 14;
+    // top
+    public static final int kShooterMotorTopID = 13;
+    // bottom
+    public static final int kShooterMotorBottomID = 14;
+    public static final int kTurretEncoderID = 15;
+    public static final int kTurretHoodID = 16;
+    public static final int kTurretHoodEncoderID = 17;
 
     public static final int kIntakeMotorID = 20;
     public static final int kIntakeDeployMotorID = 21;
@@ -234,6 +239,12 @@ public final class Constants {
   }
 
   public static class TurretConstants {
+    public static final double kHoodManualSpeed = 0.1;
+    public static final double kHoodEncoderZeroRotations = 50.010 / 360.0;
+    public static final double kHoodMinPositionRotations = 0.0;
+    public static final double kHoodMaxPositionRotations = (172.002 - 50.010) / 360.0;
+    public static final double kHoodEncoderDiscontinuityPointRotations =
+        ((kHoodMinPositionRotations + kHoodMaxPositionRotations) / 2.0) + 0.5;
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
     public static final Transform2d ROBOT_TO_TURRET_BASE = new Transform2d(
