@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -58,6 +59,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
+import frc.robot.subsystems.turret.Hood;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
@@ -107,6 +109,8 @@ public class RobotContainer {
         private final SendableChooser<Command> autoChooser;
 
         private final Flywheel m_flywheel;
+
+//        private final Hood m_hood = new Hood();
 
         private boolean toggleIntake = false;
 
@@ -359,6 +363,17 @@ public class RobotContainer {
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+
+//                new JoystickButton(m_gunner, XboxController.Button.kY.value)
+//                                .whileTrue(new StartEndCommand(
+//                                                () -> m_hood.setSpeed(Constants.TurretConstants.kHoodManualSpeed),
+//                                                m_hood::stop,
+//                                                m_hood));
+//                new JoystickButton(m_gunner, XboxController.Button.kA.value)
+//                                .whileTrue(new StartEndCommand(
+//                                                () -> m_hood.setSpeed(-Constants.TurretConstants.kHoodManualSpeed),
+//                                                m_hood::stop,
+//                                                m_hood));
         }
 
         public void testBindings() {

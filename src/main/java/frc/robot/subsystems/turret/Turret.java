@@ -7,6 +7,7 @@ package frc.robot.subsystems.turret;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -21,6 +22,7 @@ import frc.robot.RobotStateMachine;
 public class Turret extends SubsystemBase {
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
+  private final CANcoder m_encoder = new CANcoder(Constants.MotorConstants.kTurretEncoderID);
   private PositionVoltage m_request;
   private final DigitalInput m_switch = new DigitalInput(4);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
@@ -77,9 +79,12 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
+    double absolutePositionRotations = getAbsolutePositionRotations();
     SmartDashboard.putBoolean("switch on or off", m_switch.get());
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
+    SmartDashboard.putNumber("Turret Absolute Position (rotations)", absolutePositionRotations);
+    SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * 360.0);
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
 
     if (toZeroPos) {
@@ -120,6 +125,16 @@ public class Turret extends SubsystemBase {
    */
   public double getMotorPosition() {
     return m_motor.getPosition().getValueAsDouble();
+  }
+
+  /** Returns the raw absolute turret encoder position in rotations. */
+  public double getAbsolutePositionRotations() {
+    return m_encoder.getAbsolutePosition().getValueAsDouble();
+  }
+
+  /** Returns the raw absolute turret encoder position in degrees. */
+  public double getAbsolutePositionDegrees() {
+    return getAbsolutePositionRotations() * 360.0;
   }
 
   public void zeroMotorPosition() {

@@ -239,6 +239,7 @@ public final class Constants {
   }
 
   public static class TurretConstants {
+    public static final double kHoodManualSpeed = 0.1;
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
     public static final Transform2d ROBOT_TO_TURRET_BASE = new Transform2d(
