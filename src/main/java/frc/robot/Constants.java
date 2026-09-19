@@ -225,9 +225,9 @@ public final class Constants {
   public static class MotorConstants {
     public static final int kTurretYawMotorID = 12;
     // top
-    public static final int kShooterMotorRightID = 13;
+    public static final int kShooterMotorTopID = 13;
     // bottom
-    public static final int kShooterMotorLeftID = 14;
+    public static final int kShooterMotorBottomID = 14;
     public static final int kTurretEncoderID = 15;
     public static final int kTurretHoodID = 16;
     public static final int kTurretHoodEncoderID = 17;

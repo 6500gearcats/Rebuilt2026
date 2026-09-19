@@ -110,7 +110,7 @@ public class RobotContainer {
 
         private final Flywheel m_flywheel;
 
-//        private final Hood m_hood = new Hood();
+        private final Hood m_hood = new Hood();
 
         private boolean toggleIntake = false;
 
@@ -211,53 +211,38 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO backCamWhite = new PhotonVisionIO(
-                                                "White_Cam_1",
+                                PhotonVisionIO right_cam = new PhotonVisionIO(
+                                                "right",
                                                 true,
                                                 new Translation3d(-0.3112, 0.2477, 0.3734),
-                                                new Rotation3d(0.0, 0.0, Math.PI / 2));
+                                                new Rotation3d(0.0, -Math.PI / 6, -Math.PI / 2));
 
-                                PhotonVisionIO frontCamWhite = new PhotonVisionIO(
-                                                "White_Cam_2",
+                                PhotonVisionIO back_left = new PhotonVisionIO(
+                                                "back_left",
                                                 true,
                                                 new Translation3d(-0.3683, 0.1715, 0.3734),
                                                 new Rotation3d(0.0, -Math.PI / 6, Math.PI));
 
-                                PhotonVisionIO backCamTeal = new PhotonVisionIO(
-                                                "Teal_Cam_3",
+                                PhotonVisionIO back_right = new PhotonVisionIO(
+                                                "back_right",
                                                 true,
                                                 new Translation3d(-0.3683, -0.0445, 0.3734),
-                                                new Rotation3d(0.0, 0.0, Math.PI));
+                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI));
 
-                                PhotonVisionIO frontCamTeal = new PhotonVisionIO(
-                                                "Teal_Cam_4",
+                                PhotonVisionIO left_cam = new PhotonVisionIO(
+                                                "left",
                                                 true,
                                                 new Translation3d(-0.3112, -0.1207, 0.3734),
-                                                new Rotation3d(0.0, 0.0, -Math.PI / 2));
-                                // LimelightIO m_ll = new LimelightIO(
-                                // "limelight-gcd",
-                                // true,
-                                // drivetrain.rotationSupplier(),
-                                // drivetrain.getAngularVel(),
-                                // false);
-
-                                // LimelightIO m_ll2 = new LimelightIO(
-                                // "limelight-gcc",
-                                // true,
-                                // drivetrain.rotationSupplier(),
-                                // drivetrain.getAngularVel(),
-                                // false);
+                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI / 2));
 
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
                                                 drivetrain.modulePositionsSupplier(),
                                                 drivetrain.poseSupplier(),
-                                                backCamWhite,
-                                                backCamTeal,
-                                                frontCamWhite,
-                                                frontCamTeal
-                                // m_ll,
-                                // m_ll2
+                                                right_cam,
+                                                back_right,
+                                                back_left,
+                                                left_cam
                                 );
                                 m_turret.goToZero();
                                 break;
@@ -364,16 +349,16 @@ public class RobotContainer {
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
 
-//                new JoystickButton(m_gunner, XboxController.Button.kY.value)
-//                                .whileTrue(new StartEndCommand(
-//                                                () -> m_hood.setSpeed(Constants.TurretConstants.kHoodManualSpeed),
-//                                                m_hood::stop,
-//                                                m_hood));
-//                new JoystickButton(m_gunner, XboxController.Button.kA.value)
-//                                .whileTrue(new StartEndCommand(
-//                                                () -> m_hood.setSpeed(-Constants.TurretConstants.kHoodManualSpeed),
-//                                                m_hood::stop,
-//                                                m_hood));
+                new JoystickButton(m_gunner, XboxController.Button.kY.value)
+                                .whileTrue(new StartEndCommand(
+                                                () -> m_hood.setSpeed(Constants.TurretConstants.kHoodManualSpeed),
+                                                m_hood::stop,
+                                                m_hood));
+                new JoystickButton(m_gunner, XboxController.Button.kA.value)
+                                .whileTrue(new StartEndCommand(
+                                                () -> m_hood.setSpeed(-Constants.TurretConstants.kHoodManualSpeed),
+                                                m_hood::stop,
+                                                m_hood));
         }
 
         public void testBindings() {

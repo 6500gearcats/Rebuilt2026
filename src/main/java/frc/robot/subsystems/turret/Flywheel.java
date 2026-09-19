@@ -4,19 +4,11 @@
 
 package frc.robot.subsystems.turret;
 
-import java.util.function.DoubleSupplier;
-import java.util.logging.Logger;
-
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
-import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -31,14 +23,13 @@ import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
 import frc.robot.utility.RangeFinder;
 import frc.robot.Constants.MotorConstants;
-import frc.robot.RobotStateMachine.FieldZone;
 
 /**
  * Flywheel subsystem that controls the shooter motors.
  */
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
-  TalonFX m_motor = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
+  TalonFX m_topMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
@@ -46,7 +37,7 @@ public class Flywheel extends SubsystemBase {
   private double speedMultiplier = 0;
   public double rotationMultiplier = 0;
   private double reqSpeed;
-  TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorRightID);
+  TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
   private RobotStateMachine robotStateMachine;
 
   TalonFXConfiguration talonFXConfigs;
@@ -72,16 +63,16 @@ public class Flywheel extends SubsystemBase {
 
     // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.3087; // Add 0.25 V output to overcome static friction
+    slot0Configs.kS = 0.1087; // Add 0.25 V output to overcome static friction
     slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V output
     slot0Configs.kP = 0.3; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0.00005;
 
-    m_motor.getConfigurator().apply(talonFXConfigs);
-    m_motor2.getConfigurator().apply(talonFXConfigs);
-    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Aligned));
+    m_topMotor.getConfigurator().apply(talonFXConfigs);
+    m_bottomMotor.getConfigurator().apply(talonFXConfigs);
+    m_bottomMotor.setControl(new Follower(MotorConstants.kShooterMotorTopID, MotorAlignmentValue.Aligned));
   }
 
   @Override
@@ -115,7 +106,7 @@ public class Flywheel extends SubsystemBase {
               .getDistance(targetPose.getTranslation())));
     }
 
-    SmartDashboard.putNumber("Left Motor Speed", m_motor.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("Left Motor Speed", m_topMotor.getVelocity().getValueAsDouble());
     SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
     SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
 
@@ -148,7 +139,7 @@ public class Flywheel extends SubsystemBase {
         speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
         reqSpeed = speedValue;
       }
-      m_motor.setControl(m_request.withVelocity(speedValue));
+      m_topMotor.setControl(m_request.withVelocity(speedValue));
     }
   }
 
@@ -156,7 +147,7 @@ public class Flywheel extends SubsystemBase {
    * Gets Speed in RPS
    */
   public double getSpeed() {
-    return m_motor.getVelocity().getValueAsDouble();
+    return m_topMotor.getVelocity().getValueAsDouble();
   }
 
   public double getReqSpeed() {
@@ -168,8 +159,8 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void stopMotor() {
-    m_motor.set(0);
-    m_motor2.set(0);
+    m_topMotor.set(0);
+    m_bottomMotor.set(0);
   }
 
   public void incrementMultiplierUp() {
@@ -181,7 +172,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void setControl(ControlRequest req) {
-    m_motor.setControl(req);
+    m_topMotor.setControl(req);
     // m_motor2.setControl(req);
   }
 
