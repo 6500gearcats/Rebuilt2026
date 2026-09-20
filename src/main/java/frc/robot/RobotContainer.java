@@ -212,28 +212,28 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO right_cam = new PhotonVisionIO(
+                                 PhotonVisionIO right_cam = new PhotonVisionIO(
                                                 "right",
                                                 true,
-                                                new Translation3d(-0.3112, 0.2477, 0.3734),
+                                                new Translation3d(-0.3079, -0.1871, 0.22),
                                                 new Rotation3d(0.0, -Math.PI / 6, -Math.PI / 2));
 
                                 PhotonVisionIO back_left = new PhotonVisionIO(
                                                 "back_left",
                                                 true,
-                                                new Translation3d(-0.3683, 0.1715, 0.3734),
+                                                new Translation3d(-0.3279, -0.1421, 0.29),
                                                 new Rotation3d(0.0, -Math.PI / 6, Math.PI));
 
                                 PhotonVisionIO back_right = new PhotonVisionIO(
                                                 "back_right",
                                                 true,
-                                                new Translation3d(-0.3683, -0.0445, 0.3734),
+                                                new Translation3d(-0.3279, 0.2779, 0.29),
                                                 new Rotation3d(0.0, -Math.PI / 6, Math.PI));
 
                                 PhotonVisionIO left_cam = new PhotonVisionIO(
                                                 "left",
                                                 true,
-                                                new Translation3d(-0.3112, -0.1207, 0.3734),
+                                                new Translation3d(-0.3079, 0.3229, 0.22),
                                                 new Rotation3d(0.0, -Math.PI / 6, Math.PI / 2));
 
                                 m_vision = new Vision(
