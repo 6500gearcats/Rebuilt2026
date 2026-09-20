@@ -45,7 +45,8 @@ public class MoveTurret extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    SmartDashboard.putNumber("Controller speed", speedSupplier.getAsDouble());
+    // Disabled high-rate SmartDashboard telemetry: reported the operator's turret speed request.
+    // SmartDashboard.putNumber("Controller speed", speedSupplier.getAsDouble());
     m_turret.setSpeed(speedSupplier.getAsDouble());
   }
 

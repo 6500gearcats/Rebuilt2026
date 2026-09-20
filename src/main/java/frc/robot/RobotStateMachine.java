@@ -96,8 +96,9 @@ public final class RobotStateMachine {
         m_Flywheel = new Flywheel(this);
         m_Turret = new Turret(this);
 
-        SmartDashboard.putString("RobotState", state.toString());
-        SmartDashboard.putString("FieldZone", currentZone.toString());
+        // Disabled SmartDashboard telemetry: initialized the robot-state and field-zone displays.
+        // SmartDashboard.putString("RobotState", state.toString());
+        // SmartDashboard.putString("FieldZone", currentZone.toString());
     }
 
     public Flywheel getFlywheel() {
@@ -137,9 +138,10 @@ public final class RobotStateMachine {
     public void periodic() {
         reqShooterSpeed = m_Flywheel.getReqSpeed();
         shooterSpeed = m_Flywheel.getSpeed();
-        SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
-        SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
-        SmartDashboard.putBoolean("ductTapeCorrections", ductTapeCorrection);
+        // Disabled high-rate SmartDashboard telemetry: reported controller connections and correction mode.
+        // SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
+        // SmartDashboard.putBoolean("Gunner Connected", m_gunner.isConnected());
+        // SmartDashboard.putBoolean("ductTapeCorrections", ductTapeCorrection);
         gameData = DriverStation.getGameSpecificMessage();
         alliance = getAlliance();
         checkAlliance();
@@ -162,14 +164,17 @@ public final class RobotStateMachine {
         // Rotation2d.fromDegrees(m_Turret.getConvertedTurretPosition())));
 
         turretPosePublisher.set(turretPose);
-        SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
+        // Disabled high-rate SmartDashboard telemetry: reported the current field-switch indicator color.
+        // SmartDashboard.putString("Yall we're switching", exampleColor.toHexString());
         newPostedValue();
-        SmartDashboard.putString("RobotState", state.toString());
-        SmartDashboard.putString("FieldZone", currentZone.toString());
-        SmartDashboard.putBoolean("IsActive", isActive());
-        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-        SmartDashboard.putNumber("distToTag2", distToTag());
-        SmartDashboard.putBoolean("isFacing", isFacingHub());
+        // Disabled high-rate SmartDashboard telemetry: reported state, zone, match time, hub distance,
+        // and whether the robot was active and facing the hub.
+        // SmartDashboard.putString("RobotState", state.toString());
+        // SmartDashboard.putString("FieldZone", currentZone.toString());
+        // SmartDashboard.putBoolean("IsActive", isActive());
+        // SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+        // SmartDashboard.putNumber("distToTag2", distToTag());
+        // SmartDashboard.putBoolean("isFacing", isFacingHub());
         updateTargetPose();
     }
 
@@ -229,8 +234,9 @@ public final class RobotStateMachine {
             return;
         }
 
-        SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
+        // Disabled high-rate SmartDashboard telemetry: reported field-relative X/Y velocity used for lead.
+        // SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
+        // SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
         double distance = getTurretPose().getTranslation().getDistance(HubPose.getTranslation());
         double shotVelocity = RangeFinder.getShotVelocity(distance);
@@ -269,7 +275,8 @@ public final class RobotStateMachine {
                 best.getY() + (-speeds.vyMetersPerSecond * getTOF(distance)),
                 new Rotation2d());
         targetPosePublisher.set(targetPose);
-        SmartDashboard.putNumber("distance", distance);
+        // Disabled high-rate SmartDashboard telemetry: reported the motion-compensated hub distance.
+        // SmartDashboard.putNumber("distance", distance);
 
         // @formatter:off
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -454,7 +461,8 @@ public final class RobotStateMachine {
 
         // Sets the live countdown (prevents dropping below 0)
         double timeUntilSwitch = Math.max(0, matchTime - nextTargetTime);
-        SmartDashboard.putNumber("Time Until Switch", timeUntilSwitch);
+        // Disabled high-rate SmartDashboard telemetry: reported the countdown to the next active-state switch.
+        // SmartDashboard.putNumber("Time Until Switch", timeUntilSwitch);
 
         // 2. Main State Machine
         if (gameData.contains("R")) {

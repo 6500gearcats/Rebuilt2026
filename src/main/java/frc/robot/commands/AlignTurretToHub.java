@@ -40,10 +40,11 @@ public class AlignTurretToHub extends Command {
     Pose2d currPose = m_StateMachine.getTurretPose();
     Translation2d errorFromPrev = prevPose.minus(currPose).getTranslation();
     double errorFromPrevRot = prevTurretRot - m_turret.getConvertedTurretPosition();
-    SmartDashboard.putNumber("errorFromPrev.getX", errorFromPrev.getX());
-    SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
-    SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
-    SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
+    // Disabled high-rate SmartDashboard telemetry: reported pose and turret deltas from the prior cycle.
+    // SmartDashboard.putNumber("errorFromPrev.getX", errorFromPrev.getX());
+    // SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
+    // SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
+    // SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
 
     Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
@@ -52,12 +53,14 @@ public class AlignTurretToHub extends Command {
     Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation();
 
     Pose2d newTurretPose = new Pose2d(m_StateMachine.getTurretPose().getTranslation(), turretAndRobot);
-    SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
-    SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_targetPose.getTranslation()));
+    // Disabled high-rate SmartDashboard telemetry: reported combined heading and distance to the target.
+    // SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
+    // SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_targetPose.getTranslation()));
 
     Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); // angle of x and y difference
                                                                                      // minue rotation between tag/robot
-    SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
+    // Disabled high-rate SmartDashboard telemetry: reported angular error before turret correction.
+    // SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
 
     double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
     newError = (Math.abs(newError) - 180) * Math.signum(newError); // (newError / Math.abs(newError)); Signum handles
@@ -78,7 +81,8 @@ public class AlignTurretToHub extends Command {
     }
     SmartDashboard.putBoolean("Aligned", true);
 
-    SmartDashboard.putNumber("tunring_pos_setpoint", newError);
+    // Disabled high-rate SmartDashboard telemetry: reported the clamped turret position setpoint.
+    // SmartDashboard.putNumber("tunring_pos_setpoint", newError);
   }
 
   // Called once the command ends or is interrupted.

@@ -75,14 +75,16 @@ public class Turret extends SubsystemBase {
       stop();
     }
 
-    SmartDashboard.putNumber("Turret Feedback Position (rotations)", getMotorPosition());
-    SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
-    SmartDashboard.putNumber("Turret Absolute Position (rotations)", absolutePositionRotations);
-    SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * 360.0);
-    SmartDashboard.putBoolean("Turret Encoder Connected", encoderConnected);
-    SmartDashboard.putBoolean("Turret At Left Limit", isAtLeftLimit(absolutePositionRotations));
-    SmartDashboard.putBoolean("Turret At Right Limit", isAtRightLimit(absolutePositionRotations));
-    SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
+    // Disabled high-rate SmartDashboard telemetry: reported turret motor/encoder positions,
+    // encoder connectivity, software-limit state, and robot heading.
+    // SmartDashboard.putNumber("Turret Feedback Position (rotations)", getMotorPosition());
+    // SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
+    // SmartDashboard.putNumber("Turret Absolute Position (rotations)", absolutePositionRotations);
+    // SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * 360.0);
+    // SmartDashboard.putBoolean("Turret Encoder Connected", encoderConnected);
+    // SmartDashboard.putBoolean("Turret At Left Limit", isAtLeftLimit(absolutePositionRotations));
+    // SmartDashboard.putBoolean("Turret At Right Limit", isAtRightLimit(absolutePositionRotations));
+    // SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
   }
 
   public void setSpeed(double speed) {
@@ -142,7 +144,8 @@ public class Turret extends SubsystemBase {
         deg,
         Constants.TurretConstants.kTurretMinAngleDegrees,
         Constants.TurretConstants.kTurretMaxAngleDegrees);
-    SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
+    // Disabled SmartDashboard telemetry: reported the requested turret setpoint in motor rotations.
+    // SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }
 

@@ -37,7 +37,8 @@ public class Robot extends TimedRobot {
     // DataLogManager.start();
     DataLogManager.start();
     addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
-    SmartDashboard.putNumber("AutoTime", autoTimer.get());
+    // Disabled SmartDashboard telemetry: initialized the displayed autonomous timer.
+    // SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
@@ -80,12 +81,14 @@ public class Robot extends TimedRobot {
 
     autoTimer.reset();
     autoTimer.start();
-    SmartDashboard.putNumber("AutoTime", autoTimer.get());
+    // Disabled SmartDashboard telemetry: reset the displayed autonomous timer at auto start.
+    // SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
   public void autonomousPeriodic() {
-    SmartDashboard.putNumber("AutoTime", autoTimer.get());
+    // Disabled high-rate SmartDashboard telemetry: reported elapsed autonomous time.
+    // SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override

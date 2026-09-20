@@ -401,10 +401,12 @@ public class PhotonVisionIO implements VisionIO {
 
             estimatedPose.ifPresent(estimate -> {
                 if (shouldRejectEstimate(estimate)) {
-                    SmartDashboard.putBoolean("CamPoseRejected" + m_camera.getName(),true);
+                    // Disabled high-rate SmartDashboard telemetry: reported rejected camera-pose estimates.
+                    // SmartDashboard.putBoolean("CamPoseRejected" + m_camera.getName(), true);
                     return;
                 }
-                SmartDashboard.putBoolean("CamPoseRejected" + m_camera.getName(),false);
+                // Disabled high-rate SmartDashboard telemetry: reported accepted camera-pose estimates.
+                // SmartDashboard.putBoolean("CamPoseRejected" + m_camera.getName(), false);
 
                 Matrix<N3, N1> stdDevs =
                         getEstimationStdDevs(
@@ -424,7 +426,8 @@ public class PhotonVisionIO implements VisionIO {
 
     private void publishCameraPose(Pose2d pose) {
         m_field.setRobotPose(pose);
-        SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
+        // The Field2d was registered in the constructor; setRobotPose updates it without republishing it.
+        // SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
     }
 
     private static final class VisionCamera {

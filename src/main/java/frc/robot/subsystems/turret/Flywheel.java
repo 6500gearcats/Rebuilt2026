@@ -29,7 +29,7 @@ import frc.robot.Constants.MotorConstants;
  */
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
-  TalonFX m_topMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
+  TalonFX m_topMotor = new TalonFX(MotorConstants.kShooterMotorTopID);
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
@@ -37,7 +37,7 @@ public class Flywheel extends SubsystemBase {
   private double speedMultiplier = 0;
   public double rotationMultiplier = 0;
   private double reqSpeed;
-  TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
+  TalonFX m_bottomMotor = new TalonFX(MotorConstants.kShooterMotorBottomID);
   private RobotStateMachine robotStateMachine;
 
   TalonFXConfiguration talonFXConfigs;
@@ -106,18 +106,19 @@ public class Flywheel extends SubsystemBase {
               .getDistance(targetPose.getTranslation())));
     }
 
-    SmartDashboard.putNumber("Left Motor Speed", m_topMotor.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
-    SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
-
-    SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
-    SmartDashboard.putNumber("reqSpeed", reqSpeed);
-    SmartDashboard.putNumber("actSpeed", getSpeed());
-    SmartDashboard.putBoolean("isUnderTrench", robotStateMachine.underTrench());
-    SmartDashboard.putNumber("rot new testing", robotStateMachine.getConvertedTurretPosition());
-    SmartDashboard.putNumber("rot adder",
-        RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition()));
-    SmartDashboard.putNumber("rot old testing", robotStateMachine.getTurretPose().getRotation().getDegrees());
+    // Disabled high-rate SmartDashboard telemetry: reported flywheel speed and requested speed,
+    // shot/rotation corrections, readiness, trench state, and turret-angle test values.
+    // SmartDashboard.putNumber("Left Motor Speed", m_topMotor.getVelocity().getValueAsDouble());
+    // SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
+    // SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
+    // SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
+    // SmartDashboard.putNumber("reqSpeed", reqSpeed);
+    // SmartDashboard.putNumber("actSpeed", getSpeed());
+    // SmartDashboard.putBoolean("isUnderTrench", robotStateMachine.underTrench());
+    // SmartDashboard.putNumber("rot new testing", robotStateMachine.getConvertedTurretPosition());
+    // SmartDashboard.putNumber("rot adder",
+    //     RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition()));
+    // SmartDashboard.putNumber("rot old testing", robotStateMachine.getTurretPose().getRotation().getDegrees());
 
     // This method will be called once per scheduler run
   }
@@ -129,11 +130,12 @@ public class Flywheel extends SubsystemBase {
       trenchCorr = 4;
     }
     // set velocity to rps, add 0.5 V to overcome gravity
-    SmartDashboard.putNumber("flywheel initial speed", speed);
+    // Disabled SmartDashboard telemetry: reported the base and corrected flywheel setpoints.
+    // SmartDashboard.putNumber("flywheel initial speed", speed);
     double speedValue = speed + (2 * speedMultiplier)
         + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
     if (speedValue > 0) {
-      SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
+      // SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
 
       if (robotStateMachine.underTrench()) {
         speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;

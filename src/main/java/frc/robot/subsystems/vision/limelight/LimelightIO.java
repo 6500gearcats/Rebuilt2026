@@ -234,8 +234,9 @@ public class LimelightIO implements VisionIO {
     }
 
     public void throttleTemp() {
-        SmartDashboard.putNumber("Throttle",
-                LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").getDouble(0));
+        // Disabled SmartDashboard telemetry: reported the Limelight throttle before applying it.
+        // SmartDashboard.putNumber("Throttle",
+        //         LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").getDouble(0));
         boolean done = LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").setNumber(150);
         if (done) {
             System.out.println("Limelight has been throttled");
@@ -245,8 +246,9 @@ public class LimelightIO implements VisionIO {
     }
 
     public void resetThrottle() {
-        SmartDashboard.putNumber("Throttle",
-                LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").getDouble(0));
+        // Disabled SmartDashboard telemetry: reported the Limelight throttle before resetting it.
+        // SmartDashboard.putNumber("Throttle",
+        //         LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").getDouble(0));
         boolean done = LimelightHelpers.getLimelightNTTableEntry(name, "throttle_set").setNumber(0);
         if (done) {
             System.out.println("Limelight's throttle has been reset");

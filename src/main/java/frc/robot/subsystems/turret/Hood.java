@@ -62,11 +62,13 @@ public class Hood extends SubsystemBase {
       stop();
     }
 
-    SmartDashboard.putNumber("Hood Absolute Position (rotations)", absolutePositionRotations);
-    SmartDashboard.putNumber("Hood Absolute Position (degrees)", absolutePositionRotations * 360.0);
-    SmartDashboard.putBoolean("Hood Encoder Connected", encoderConnected);
-    SmartDashboard.putBoolean("Hood At Lower Limit", isAtLowerLimit(absolutePositionRotations));
-    SmartDashboard.putBoolean("Hood At Upper Limit", isAtUpperLimit(absolutePositionRotations));
+    // Disabled high-rate SmartDashboard telemetry: reported hood position, encoder connectivity,
+    // and lower/upper software-limit state.
+    // SmartDashboard.putNumber("Hood Absolute Position (rotations)", absolutePositionRotations);
+    // SmartDashboard.putNumber("Hood Absolute Position (degrees)", absolutePositionRotations * 360.0);
+    // SmartDashboard.putBoolean("Hood Encoder Connected", encoderConnected);
+    // SmartDashboard.putBoolean("Hood At Lower Limit", isAtLowerLimit(absolutePositionRotations));
+    // SmartDashboard.putBoolean("Hood At Upper Limit", isAtUpperLimit(absolutePositionRotations));
   }
 
   /** Runs the hood motor at the requested duty cycle. */
