@@ -4,13 +4,19 @@
 
 package frc.robot.subsystems.turret;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -24,102 +30,71 @@ public class Turret extends SubsystemBase {
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private final CANcoder m_encoder = new CANcoder(Constants.MotorConstants.kTurretEncoderID);
   private PositionVoltage m_request;
-  private final DigitalInput m_switch = new DigitalInput(4);
   private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
   private final RobotStateMachine robotStateMachine;
   // private double tagRot = 0 - tagPose.getRotation().getAngle();
-  private boolean overridden = false;
-  private boolean toZeroPos = false;
   TalonFXConfiguration talonFXConfigs;
-  // BOUNDS: 0.0 to 55
 
   public Turret(RobotStateMachine robotStateMachine) {
     this.robotStateMachine = robotStateMachine;
-    m_request = new PositionVoltage(0).withSlot(2);
-    talonFXConfigs = new TalonFXConfiguration();
+    m_request = new PositionVoltage(0).withSlot(0);
 
-    var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 5; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kA = 3; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0Configs.kP = 3; // A position error of 2.5 rotations results in 12 V output
-    slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0.4; // A velocity error of 1 rps results in 0.1 V output
+    CANcoderConfiguration encoderConfig = new CANcoderConfiguration()
+        .withMagnetSensor(new MagnetSensorConfigs()
+            .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+            .withAbsoluteSensorDiscontinuityPoint(
+                Constants.TurretConstants.kTurretEncoderDiscontinuityPointRotations)
+            .withMagnetOffset(-Constants.TurretConstants.kTurretEncoderZeroRotations));
+    m_encoder.getConfigurator().apply(encoderConfig);
 
-    var slot1Configs = talonFXConfigs.Slot1;
-    slot1Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    slot1Configs.kV = SmartDashboard.getNumber("kV", 0);// 8; // A velocity target of 1 rps results in 0.12 V
-                                                        // output
-    slot1Configs.kA = SmartDashboard.getNumber("kA", 0);// 5; // An acceleration of 1 rps/s requires 0.01 V output
-    slot1Configs.kP = SmartDashboard.getNumber("kP", 0);// 4; // A position error of 2.5 rotations results in 12 V
-                                                        // output
-    slot1Configs.kI = 0; // no output for integrated error
-    slot1Configs.kD = SmartDashboard.getNumber("kD", 0);// 0.7; // A velocity error of 1 rps results in 0.1 V output
+    talonFXConfigs = new TalonFXConfiguration()
+        .withFeedback(new FeedbackConfigs()
+            .withFeedbackRemoteSensorID(Constants.MotorConstants.kTurretEncoderID)
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
+            .withSensorToMechanismRatio(1.0))
+        .withSoftwareLimitSwitch(new SoftwareLimitSwitchConfigs()
+            .withForwardSoftLimitEnable(true)
+            .withForwardSoftLimitThreshold(
+                Constants.TurretConstants.kTurretMaxPositionRotations)
+            .withReverseSoftLimitEnable(true)
+            .withReverseSoftLimitThreshold(
+                Constants.TurretConstants.kTurretMinPositionRotations));
 
-    // This one is good
-    var slot2Configs = talonFXConfigs.Slot2;
-    slot2Configs.kS = 0.20757; // Add 0.25 V output to overcome static friction
-    slot2Configs.kV = 0.1034; // A velocity target of 1 rps results in 0.12 V output
-    slot2Configs.kA = 0.0075573; // An acceleration of 1 rps/s requires 0.01 V output
-    slot2Configs.kP = 7.4749; // A position error of 2.5 rotations results in 12 V output
-    slot2Configs.kI = 0; // no output for integrated error
-    slot2Configs.kD = 0.36566; // A velocity error of 1 rps results in 0.1 V output
-
-    // slot2Configs.kS = 0.2; // Add 0.25 V output to overcome static friction
-    // slot2Configs.kV = 13; // A velocity target of 1 rps results in 0.12 V output
-    // slot2Configs.kA = 5; // An acceleration of 1 rps/s requires 0.01 V output
-    // slot2Configs.kP = 6; // A position error of 2.5 rotations results in 12 V output
-    // slot2Configs.kI = 0; // no output for integrated error
-    // slot2Configs.kD = 1; // A velocity error of 1 rps results in 0.1 V output
+    // Closed-loop gains intentionally remain unset until the new turret is tuned.
 
     m_motor.getConfigurator().apply(talonFXConfigs);
-
-    m_motor.getConfigurator();
   }
 
   @Override
   public void periodic() {
-    double absolutePositionRotations = getAbsolutePositionRotations();
-    SmartDashboard.putBoolean("switch on or off", m_switch.get());
-    SmartDashboard.putNumber("Motor Position", getMotorPosition());
+    var positionSignal = m_encoder.getAbsolutePosition();
+    double absolutePositionRotations = positionSignal.getValueAsDouble();
+    boolean encoderConnected = positionSignal.getStatus().isOK();
+
+    if (!encoderConnected) {
+      stop();
+    }
+
+    SmartDashboard.putNumber("Turret Feedback Position (rotations)", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Turret Absolute Position (rotations)", absolutePositionRotations);
     SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * 360.0);
+    SmartDashboard.putBoolean("Turret Encoder Connected", encoderConnected);
+    SmartDashboard.putBoolean("Turret At Left Limit", isAtLeftLimit(absolutePositionRotations));
+    SmartDashboard.putBoolean("Turret At Right Limit", isAtRightLimit(absolutePositionRotations));
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
-
-    if (toZeroPos) {
-      if (!m_switch.get()) {
-        m_motor.set(-0.5);
-      } else {
-        m_motor.set(0);
-        zeroMotorPosition();
-        toZeroPos = false;
-      }
-
-    }
   }
 
   public void setSpeed(double speed) {
-    if (!overridden) {
-      if ((getMotorPosition() < 2)) {
-        if (speed < 0) {
-          speed = 0;
-        }
-      } else if ((getMotorPosition() > 53)) {
-        if (speed > 0) {
-          speed = 0;
-        }
-      }
+    if (!m_encoder.getAbsolutePosition().getStatus().isOK()) {
+      stop();
+      return;
     }
-    m_motor.set(speed);
-  }
-
-  public void toggleOverride() {
-    overridden = !overridden;
+    m_motor.set(MathUtil.clamp(speed, -1.0, 1.0));
   }
 
   /**
-   * Returns the raw motor position in rotations.
+   * Returns the Talon's selected turret feedback position in rotations.
    *
    * @return motor sensor position
    */
@@ -127,31 +102,27 @@ public class Turret extends SubsystemBase {
     return m_motor.getPosition().getValueAsDouble();
   }
 
-  /** Returns the raw absolute turret encoder position in rotations. */
+  /** Returns the zeroed absolute turret encoder position in rotations. */
   public double getAbsolutePositionRotations() {
     return m_encoder.getAbsolutePosition().getValueAsDouble();
   }
 
-  /** Returns the raw absolute turret encoder position in degrees. */
+  /** Returns the zeroed absolute turret encoder position in degrees. */
   public double getAbsolutePositionDegrees() {
     return getAbsolutePositionRotations() * 360.0;
   }
 
-  public void zeroMotorPosition() {
-    m_motor.setPosition(-1); // Limit switch is slightly inaccurate after zeroing the first time, affects all alignment, this offsets it
-  }
-
   /**
-   * Returns the turret position converted to degrees.
+   * Returns turret angle in degrees, with left positive and right negative.
    *
    * @return turret angle in degrees
    */
   public double getConvertedTurretPosition() {
-    return -((getMotorPosition() * 4) - 110);
+    return -getMotorPosition() * 360.0;
   }
 
   public double unconvertPosition(double pos) {
-    return ((-1 * pos) + 110) / 4;
+    return -pos / 360.0;
   }
 
   /**
@@ -160,9 +131,17 @@ public class Turret extends SubsystemBase {
    * @param deg desired position in degress
    */
   public void setPosition(double deg) {
+    if (!m_encoder.getAbsolutePosition().getStatus().isOK()) {
+      stop();
+      return;
+    }
     if (robotStateMachine.ductTapeCorrection) {
       deg -= 5;
     }
+    deg = MathUtil.clamp(
+        deg,
+        Constants.TurretConstants.kTurretMinAngleDegrees,
+        Constants.TurretConstants.kTurretMaxAngleDegrees);
     SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }
@@ -175,7 +154,19 @@ public class Turret extends SubsystemBase {
   }
 
   public void goToZero() {
-    toZeroPos = true;
+    setPosition(0.0);
+  }
+
+  public void stop() {
+    m_motor.stopMotor();
+  }
+
+  private boolean isAtLeftLimit(double positionRotations) {
+    return positionRotations <= Constants.TurretConstants.kTurretMinPositionRotations;
+  }
+
+  private boolean isAtRightLimit(double positionRotations) {
+    return positionRotations >= Constants.TurretConstants.kTurretMaxPositionRotations;
   }
 
   public void updateSlotConfigs() {
@@ -185,10 +176,15 @@ public class Turret extends SubsystemBase {
     slot.kP = SmartDashboard.getNumber("kP", 0);
     slot.kI = SmartDashboard.getNumber("kI", 0);
     slot.kD = SmartDashboard.getNumber("kD", 0);
+    m_motor.getConfigurator().apply(slot);
     m_request = new PositionVoltage(0).withSlot(1);
   }
 
   public void setControl(ControlRequest req) {
-    m_motor.setControl(req);
+    if (m_encoder.getAbsolutePosition().getStatus().isOK()) {
+      m_motor.setControl(req);
+    } else {
+      stop();
+    }
   }
 }

@@ -245,6 +245,16 @@ public final class Constants {
     public static final double kHoodMaxPositionRotations = (172.002 - 50.010) / 360.0;
     public static final double kHoodEncoderDiscontinuityPointRotations =
         ((kHoodMinPositionRotations + kHoodMaxPositionRotations) / 2.0) + 0.5;
+    // Raw CANcoder readings: forward 7.559 deg, left -95.625 deg, right 103.799 deg.
+    // CANcoder/Talon feedback is positive toward the right; the public turret-angle API below
+    // preserves the existing left-positive convention used by aiming code.
+    public static final double kTurretEncoderZeroRotations = 7.559 / 360.0;
+    public static final double kTurretMinPositionRotations = (-95.625 - 7.559) / 360.0;
+    public static final double kTurretMaxPositionRotations = (103.799 - 7.559) / 360.0;
+    public static final double kTurretEncoderDiscontinuityPointRotations =
+        ((kTurretMinPositionRotations + kTurretMaxPositionRotations) / 2.0) + 0.5;
+    public static final double kTurretMinAngleDegrees = -kTurretMaxPositionRotations * 360.0;
+    public static final double kTurretMaxAngleDegrees = -kTurretMinPositionRotations * 360.0;
     public static final double kTurretTransformMetersX = 0.1524;
     public static final double kTurretTransformIMetersY = 0.0635;
     public static final Transform2d ROBOT_TO_TURRET_BASE = new Transform2d(

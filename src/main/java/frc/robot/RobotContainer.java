@@ -244,7 +244,6 @@ public class RobotContainer {
                                                 back_left,
                                                 left_cam
                                 );
-                                m_turret.goToZero();
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -328,13 +327,6 @@ public class RobotContainer {
                                 .onFalse(new InstantCommand(
                                                 () -> joystick.setRumble(GenericHID.RumbleType.kBothRumble, 0))
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
-
-                new JoystickButton(m_gunner, XboxController.Button.kStart.value)
-                                .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
-
-                new JoystickButton(m_gunner, XboxController.Button.kBack.value)
-                                .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
-                                .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
 
                 joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
                 joystick2.b().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
