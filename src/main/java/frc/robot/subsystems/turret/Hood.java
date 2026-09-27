@@ -6,6 +6,7 @@ package frc.robot.subsystems.turret;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -15,9 +16,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.generated.TunerConstants;
+
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 /** Controls the turret hood and reports its absolute angle sensor. */
@@ -25,11 +29,14 @@ public class Hood extends SubsystemBase {
   private final TalonFX m_motor = new TalonFX(MotorConstants.kTurretHoodID);
   private final CANcoder m_encoder = new CANcoder(MotorConstants.kTurretHoodEncoderID);
   private double m_commandedSpeed = 0.0;
-
+  private double targetPosition = 0.0;
+  private double HOOD_INCREMENT = 0.034;
+  private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
   public Hood() {
+
     CANcoderConfiguration encoderConfig = new CANcoderConfiguration()
         .withMagnetSensor(new MagnetSensorConfigs()
-            .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+            .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(
                 TurretConstants.kHoodEncoderDiscontinuityPointRotations)
             .withMagnetOffset(-TurretConstants.kHoodEncoderZeroRotations));
@@ -47,15 +54,18 @@ public class Hood extends SubsystemBase {
                             TurretConstants.kHoodMaxPositionRotations)
                     .withReverseSoftLimitEnable(true)
                     .withReverseSoftLimitThreshold(
-                            TurretConstants.kHoodMinPositionRotations));
-
+                            TurretConstants.kHoodMinPositionRotations)
+                            ).withSlot0(new Slot0Configs().withKS(1.0).withKP(1.0));
+    m_encoder.setPosition(TurretConstants.kHoodMinPositionRotations);
     m_motor.getConfigurator().apply(motorConfig);
+    targetPosition = m_motor.getPosition().getValueAsDouble();
   }
 
   @Override
   public void periodic() {
     var positionSignal = m_encoder.getAbsolutePosition();
     double absolutePositionRotations = positionSignal.getValueAsDouble();
+    // double posSignal = m_encoder.getPosition().getValueAsDouble();
     boolean encoderConnected = positionSignal.getStatus().isOK();
 
     if (!encoderConnected || isMotionBlocked(m_commandedSpeed, absolutePositionRotations)) {
@@ -63,7 +73,10 @@ public class Hood extends SubsystemBase {
     }
 
     SmartDashboard.putNumber("Hood Absolute Position (rotations)", absolutePositionRotations);
+    SmartDashboard.putNumber("Hood m_commandedSpeed", m_commandedSpeed);
+    // SmartDashboard.putNumber("Hood Position (rotations)", posSignal);
     SmartDashboard.putNumber("Hood Absolute Position (degrees)", absolutePositionRotations * 360.0);
+    SmartDashboard.putNumber("Hood motor Position", targetPosition);
     SmartDashboard.putBoolean("Hood Encoder Connected", encoderConnected);
     SmartDashboard.putBoolean("Hood At Lower Limit", isAtLowerLimit(absolutePositionRotations));
     SmartDashboard.putBoolean("Hood At Upper Limit", isAtUpperLimit(absolutePositionRotations));
@@ -71,12 +84,12 @@ public class Hood extends SubsystemBase {
 
   /** Runs the hood motor at the requested duty cycle. */
   public void setSpeed(double speed) {
-    var positionSignal = m_encoder.getAbsolutePosition();
+    // var positionSignal = m_encoder.getAbsolutePosition();
     double limitedSpeed = MathUtil.clamp(speed, -1.0, 1.0);
-    if (!positionSignal.getStatus().isOK()
-        || isMotionBlocked(limitedSpeed, positionSignal.getValueAsDouble())) {
-      limitedSpeed = 0.0;
-    }
+    // if (!positionSignal.getStatus().isOK()
+    //     || isMotionBlocked(limitedSpeed, positionSignal.getValueAsDouble())) {
+    //   limitedSpeed = 0.0;
+    // }
 
     m_commandedSpeed = limitedSpeed;
     m_motor.set(limitedSpeed);
@@ -89,8 +102,9 @@ public class Hood extends SubsystemBase {
   }
 
   private boolean isMotionBlocked(double speed, double positionRotations) {
-    return (speed < 0.0 && isAtLowerLimit(positionRotations))
-        || (speed > 0.0 && isAtUpperLimit(positionRotations));
+    // return (speed < 0.0 && isAtLowerLimit(positionRotations))
+    //     || (speed > 0.0 && isAtUpperLimit(positionRotations));
+    return false;
   }
 
   private boolean isAtLowerLimit(double positionRotations) {
@@ -110,4 +124,27 @@ public class Hood extends SubsystemBase {
   public double getAbsolutePositionDegrees() {
     return getAbsolutePositionRotations() * 360.0;
   }
-}
+
+  public void moveDownOneStep(){
+    targetPosition -= HOOD_INCREMENT;
+    if (targetPosition <= TurretConstants.kHoodMinPositionRotations){
+        SmartDashboard.putBoolean("Hood move down blocked", true);
+        targetPosition = TurretConstants.kHoodMinPositionRotations;
+    }else{
+        SmartDashboard.putBoolean("Hood move down blocked", false);
+    }
+    SmartDashboard.putNumber("Hood targetPosition", targetPosition);
+    m_motor.setControl(positionRequest.withPosition(targetPosition));
+  }
+  public void moveUpOneStep(){
+    targetPosition += HOOD_INCREMENT;
+    if (targetPosition >= TurretConstants.kHoodMaxPositionRotations){
+        SmartDashboard.putBoolean("Hood move up blocked", true);
+        targetPosition = TurretConstants.kHoodMaxPositionRotations;
+    }else{
+        SmartDashboard.putBoolean("Hood move up blocked", false);
+    }
+    SmartDashboard.putNumber("Hood targetPosition", targetPosition);
+    m_motor.setControl(positionRequest.withPosition(targetPosition));
+  }
+};

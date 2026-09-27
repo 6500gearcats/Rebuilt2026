@@ -37,6 +37,7 @@ public class Flywheel extends SubsystemBase {
   private double speedMultiplier = 0;
   public double rotationMultiplier = 0;
   private double reqSpeed;
+  private int m_loop = 0;
   TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
   private RobotStateMachine robotStateMachine;
 
@@ -105,20 +106,22 @@ public class Flywheel extends SubsystemBase {
           robotStateMachine.getTurretPose().getTranslation()
               .getDistance(targetPose.getTranslation())));
     }
+    if (m_loop == 20){
+      m_loop = 0;
+      SmartDashboard.putNumber("Left Motor Speed", m_topMotor.getVelocity().getValueAsDouble());
+      SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
+      SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
 
-    SmartDashboard.putNumber("Left Motor Speed", m_topMotor.getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
-    SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
-
-    SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
-    SmartDashboard.putNumber("reqSpeed", reqSpeed);
-    SmartDashboard.putNumber("actSpeed", getSpeed());
-    SmartDashboard.putBoolean("isUnderTrench", robotStateMachine.underTrench());
-    SmartDashboard.putNumber("rot new testing", robotStateMachine.getConvertedTurretPosition());
-    SmartDashboard.putNumber("rot adder",
-        RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition()));
-    SmartDashboard.putNumber("rot old testing", robotStateMachine.getTurretPose().getRotation().getDegrees());
-
+      SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
+      SmartDashboard.putNumber("reqSpeed", reqSpeed);
+      SmartDashboard.putNumber("actSpeed", getSpeed());
+      SmartDashboard.putBoolean("isUnderTrench", robotStateMachine.underTrench());
+      SmartDashboard.putNumber("rot new testing", robotStateMachine.getConvertedTurretPosition());
+      SmartDashboard.putNumber("rot adder",
+          RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition()));
+      SmartDashboard.putNumber("rot old testing", robotStateMachine.getTurretPose().getRotation().getDegrees());
+    }
+    m_loop++;
     // This method will be called once per scheduler run
   }
 
