@@ -112,7 +112,7 @@ public class Flywheel extends SubsystemBase {
     if (snurboEnable) {
       speedModifier = 0.15;// 0.15;
     } else {
-      speedModifier = 1;
+      speedModifier = 1;//1
     }
     if (!robotStateMachine.isFacingHub()) {
       rotationMultiplier = 2;

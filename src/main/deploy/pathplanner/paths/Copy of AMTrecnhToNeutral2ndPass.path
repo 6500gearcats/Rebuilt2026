@@ -75,7 +75,7 @@
   "folder": "Armageddon",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -1.4320961841646607
+    "rotation": 175.2670585422626
   },
   "useDefaultConstraints": true
 }
