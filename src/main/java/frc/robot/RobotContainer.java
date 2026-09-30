@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -29,6 +30,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -38,6 +40,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
@@ -359,6 +362,30 @@ public class RobotContainer {
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+
+                // Start and stop recording
+                joystick.leftBumper().onTrue(
+                                Commands.runOnce(SignalLogger::start));
+
+                joystick.rightBumper().onTrue(
+                                Commands.runOnce(SignalLogger::stop));
+
+                // SysId tests
+                joystick.y().whileTrue(
+                                m_flywheel.sysIdQuasistatic(
+                                                SysIdRoutine.Direction.kForward));
+
+                joystick.a().whileTrue(
+                                m_flywheel.sysIdQuasistatic(
+                                                SysIdRoutine.Direction.kReverse));
+
+                joystick.b().whileTrue(
+                                m_flywheel.sysIdDynamic(
+                                                SysIdRoutine.Direction.kForward));
+
+                joystick.x().whileTrue(
+                                m_flywheel.sysIdDynamic(
+                                                SysIdRoutine.Direction.kReverse));
         }
 
         public void testBindings() {
