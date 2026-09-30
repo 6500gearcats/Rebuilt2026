@@ -87,7 +87,7 @@ public class Flywheel extends SubsystemBase {
 
     m_motor.getConfigurator().apply(talonFXConfigs);
     m_motor2.getConfigurator().apply(talonFXConfigs);
-    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorTopID, MotorAlignmentValue.Opposed));
+    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorTopID, MotorAlignmentValue.Aligned));
 
     sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(

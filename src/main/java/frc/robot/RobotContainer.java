@@ -331,8 +331,8 @@ public class RobotContainer {
 
                 // joystick.rightBumper().onTrue(ne
 
-                joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
-                joystick.leftBumper().onTrue(new InstantCommand(() -> reverseBoolean()));
+                //joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
+                //joystick.leftBumper().onTrue(new InstantCommand(() -> reverseBoolean()));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(
@@ -353,7 +353,7 @@ public class RobotContainer {
                 joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
                 joystick2.b().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
 
-                joystick.a().whileTrue(new AlignTurretToHub(m_turret));
+                //joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
