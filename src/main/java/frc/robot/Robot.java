@@ -29,12 +29,12 @@ public class Robot extends TimedRobot {
     SignalLogger.setPath("media/sda1/ctre-logs");
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
-    PortForwarder.add(5800, "photonvision.local", 5800);
+    PortForwarder.add(5800, "photonvision-a.local", 5800);
+    PortForwarder.add(5801, "photonvision-b.local", 5800);
     if (m_gcTimer.advanceIfElapsed(5)) {
       System.gc();
     }
     SignalLogger.start();
-    // DataLogManager.start();
     DataLogManager.start();
     addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
     SmartDashboard.putNumber("AutoTime", autoTimer.get());
@@ -85,7 +85,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    SmartDashboard.putNumber("AutoTime", autoTimer.get());
+     SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
