@@ -7,37 +7,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Copy of AMTrecnhToNeutral"
+            "pathName": "farrisOne"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "AMNeutralToTrench"
+            "pathName": "farrisTwo"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootFuel5s"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Copy of AMTrecnhToNeutral2ndPass"
+            "pathName": "farrisThree"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "AM2NeutralToAlliance"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AM2AllianceToTrench"
+            "pathName": "farrisFour"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "armogeddon's",
+  "folder": "tests",
   "choreoAuto": false
 }

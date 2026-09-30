@@ -50,7 +50,7 @@
     "rotation": 145.0
   },
   "reversed": false,
-  "folder": "CopiumRight",
+  "folder": "copium",
   "idealStartingState": {
     "velocity": 0.0,
     "rotation": 100.0

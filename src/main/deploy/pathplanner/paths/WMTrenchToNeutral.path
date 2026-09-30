@@ -96,7 +96,7 @@
     "rotation": -90.0
   },
   "reversed": false,
-  "folder": "Weirdmageddon",
+  "folder": "wierdmageddon",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

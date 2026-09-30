@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.09796081567373177,
+      "waypointRelativePos": 0.10888030888030883,
       "rotationDegrees": 180.0
     },
     {
@@ -84,10 +84,10 @@
     "rotation": 106.751
   },
   "reversed": false,
-  "folder": "Armageddon",
+  "folder": "armageddon",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -1.4320961841646607
+    "rotation": 175.2670585422626
   },
   "useDefaultConstraints": true
 }

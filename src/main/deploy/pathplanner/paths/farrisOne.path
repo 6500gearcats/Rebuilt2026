@@ -3,78 +3,53 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.4,
-        "y": 0.63
+        "x": 4.395315934065935,
+        "y": 0.63375
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.419001004824148,
-        "y": 0.63
+        "x": 5.865453296703297,
+        "y": 0.7085027472527474
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.706386404293381,
-        "y": 0.6195527728085859
+        "x": 7.260837912087911,
+        "y": 1.0947252747252743
       },
       "prevControl": {
-        "x": 5.456500939467456,
-        "y": 0.6271194410801211
+        "x": 7.104664150199303,
+        "y": 0.899508072364514
       },
       "nextControl": {
-        "x": 7.0991962110172455,
-        "y": 0.5773777316145644
+        "x": 7.659519230769229,
+        "y": 1.5930769230769226
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.361377459749552,
-        "y": 1.3334704830053659
+        "x": 7.75,
+        "y": 3.5
       },
       "prevControl": {
-        "x": 7.242002105709947,
-        "y": 1.1138127382115188
-      },
-      "nextControl": {
-        "x": 7.480752813789158,
-        "y": 1.5531282277992131
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 7.6,
-        "y": 3.0
-      },
-      "prevControl": {
-        "x": 7.6,
-        "y": 2.75
+        "x": 7.75,
+        "y": 1.9205318614825693
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "fer1"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.9979959919839678,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 1.7194388777555125,
-      "rotationDegrees": 82.21561700538092
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.0202952029520436,
-      "maxWaypointRelativePos": 1.99,
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 0.3608860075634764,
       "constraints": {
         "maxVelocity": 1.5,
         "maxAcceleration": 3.0,
@@ -86,10 +61,10 @@
     },
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.9944649446494451,
-      "maxWaypointRelativePos": 3.0,
+      "minWaypointRelativePos": 1.0610480821177706,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 0.65,
+        "maxVelocity": 1.5,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -101,13 +76,13 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "IntakeFuel",
-      "waypointRelativePos": 1.578571428571429,
-      "endWaypointRelativePos": 3.0,
+      "name": "IntakeFuelJason",
+      "waypointRelativePos": 0.9746083198271196,
+      "endWaypointRelativePos": 2.0,
       "command": {
         "type": "named",
         "data": {
-          "name": "IntakeFuel"
+          "name": "IntakeFuelJason"
         }
       }
     }
@@ -121,11 +96,11 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.65,
+    "velocity": 0,
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": "WakeRight",
+  "folder": "Farris",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

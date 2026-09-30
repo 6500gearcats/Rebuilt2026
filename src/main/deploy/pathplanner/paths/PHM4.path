@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 7.4986472708230325,
-        "y": 1.2246421431240881
+        "y": 1.2246421431240884
       },
       "isLocked": false,
       "linkedName": null
@@ -45,7 +45,7 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": "RightProjectHailMary",
+  "folder": "PHM",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 58.00000000000001

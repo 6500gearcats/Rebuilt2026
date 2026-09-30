@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "simple center start"
+            "pathName": "The rEmpire 1"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "ShootFuel3s"
+            "pathName": "The rEmpire 2"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "tests",
   "choreoAuto": false
 }

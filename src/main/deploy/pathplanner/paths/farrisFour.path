@@ -3,25 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 3.2
+        "x": 6.525769230769231,
+        "y": 3.6114010989010987
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.957117481995526,
-        "y": 2.9102999384560926
+        "x": 6.52728021978022,
+        "y": 2.3257692307692306
+      },
+      "isLocked": false,
+      "linkedName": "fer3"
+    },
+    {
+      "anchor": {
+        "x": 5.890370879120879,
+        "y": 0.7334203296703288
+      },
+      "prevControl": {
+        "x": 6.532089571876082,
+        "y": 0.8760244836159269
+      },
+      "nextControl": {
+        "x": 5.217596153846155,
+        "y": 0.5839148351648369
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.4,
-        "y": 0.652
+        "x": 4.45760989010989,
+        "y": 0.63375
       },
       "prevControl": {
-        "x": 1.4,
-        "y": 0.6520000000000002
+        "x": 6.123722527472529,
+        "y": 0.5749450549450543
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,17 +46,17 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5040485829959614,
-      "rotationDegrees": 180.0
+      "waypointRelativePos": 1.123775601068567,
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.17,
-      "maxWaypointRelativePos": 0.38,
+      "minWaypointRelativePos": 1.0956239870340347,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 0.2,
+        "maxVelocity": 1.5,
         "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -50,25 +66,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "ShootFuel",
-      "waypointRelativePos": 0.2,
-      "endWaypointRelativePos": 0.35,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "ShootFuel"
-        }
-      }
-    },
-    {
-      "name": "Intake",
-      "waypointRelativePos": 0.5,
-      "endWaypointRelativePos": 0.8,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -82,10 +80,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Farris",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }
