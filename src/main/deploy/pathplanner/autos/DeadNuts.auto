@@ -76,6 +76,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "other autos for comp",
   "choreoAuto": false
 }

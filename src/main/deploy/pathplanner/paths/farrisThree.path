@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 5.280995864775581,
-        "y": 0.3691121915056361
+        "y": 0.369112191505636
       },
       "nextControl": {
         "x": 6.675274725274724,
@@ -96,7 +96,7 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": "ferris",
+  "folder": "Farris",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
