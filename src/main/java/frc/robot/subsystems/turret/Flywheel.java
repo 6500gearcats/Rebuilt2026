@@ -16,12 +16,13 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.controls.VoltageOut;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.units.Units;
 import frc.robot.Constants;
@@ -85,6 +86,21 @@ public class Flywheel extends SubsystemBase {
     m_topMotor.getConfigurator().apply(talonFXConfigs);
     m_bottomMotor.getConfigurator().apply(talonFXConfigs);
     m_bottomMotor.setControl(new Follower(MotorConstants.kShooterMotorTopID, MotorAlignmentValue.Aligned));
+    sysIdRoutine = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    Units.Volts.per(Units.Second).of(0.5),
+                    Units.Volts.of(4),
+                    Units.Seconds.of(5),
+                    state -> SignalLogger.writeString(
+                            "sysid testing", state.toString())),
+
+            new SysIdRoutine.Mechanism(
+                    voltage -> m_topMotor.setControl(
+                            voltageRequest.withOutput(
+                                    voltage.in(Units.Volts))),
+                    null,
+                    this));
+
   }
 
   @Override
@@ -152,7 +168,7 @@ public class Flywheel extends SubsystemBase {
 
       if (robotStateMachine.underTrench()) {
         speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
-≈      reqSpeed = speedValue;
+        reqSpeed = speedValue;
       }
       m_topMotor.setControl(m_request.withVelocity(speedValue));
     }
