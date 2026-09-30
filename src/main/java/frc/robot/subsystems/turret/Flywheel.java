@@ -156,6 +156,13 @@ public class Flywheel extends SubsystemBase {
 
   public void setSpeed(double speed) {
     double trenchCorr = 0;
+    if (speed == 0) {
+      m_topMotor.setControl(voltageRequest.withOutput(0));
+      reqSpeed = 0;
+      speedStable = false;
+      speedWithinToleranceSince = -1;
+      return;
+    }
     if (robotStateMachine.ductTapeCorrection) {
       trenchCorr = 4;
     }
