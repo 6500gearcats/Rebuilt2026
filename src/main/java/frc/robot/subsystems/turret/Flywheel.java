@@ -35,7 +35,7 @@ import frc.robot.Constants.MotorConstants;
  */
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
-  TalonFX m_topMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
+  TalonFX m_topMotor = new TalonFX(MotorConstants.kShooterMotorTopID);
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
@@ -48,7 +48,7 @@ public class Flywheel extends SubsystemBase {
   private static final double SPEED_TOLERANCE_RPS = 2.0;
   private static final double SPEED_STABLE_TIME_SECONDS = 0.08;
   private int m_loop = 0;
-  TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
+  TalonFX m_bottomMotor = new TalonFX(MotorConstants.kShooterMotorBottomID);
   private RobotStateMachine robotStateMachine;
   private final VoltageOut voltageRequest = new VoltageOut(0);
   private final SysIdRoutine sysIdRoutine;
@@ -85,7 +85,7 @@ public class Flywheel extends SubsystemBase {
 
     m_topMotor.getConfigurator().apply(talonFXConfigs);
     m_bottomMotor.getConfigurator().apply(talonFXConfigs);
-    m_bottomMotor.setControl(new Follower(MotorConstants.kShooterMotorTopID, MotorAlignmentValue.Aligned));
+    m_bottomMotor.setControl(new Follower(m_topMotor.getDeviceID(), MotorAlignmentValue.Aligned));
     sysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
                     Units.Volts.per(Units.Second).of(0.5),
@@ -131,9 +131,9 @@ public class Flywheel extends SubsystemBase {
           best.getY() + (-speeds.vyMetersPerSecond * robotStateMachine.getTOF(distance)),
           new Rotation2d());
 
-      setSpeed(RangeFinder.getShotVelocity(
-          robotStateMachine.getTurretPose().getTranslation()
-              .getDistance(targetPose.getTranslation())));
+//      setSpeed(RangeFinder.getShotVelocity(
+//          robotStateMachine.getTurretPose().getTranslation()
+//              .getDistance(targetPose.getTranslation())));
     }
     if (m_loop == 20){
       m_loop = 0;
@@ -204,7 +204,7 @@ public class Flywheel extends SubsystemBase {
 
   public void stopMotor() {
     m_topMotor.set(0);
-    m_bottomMotor.set(0);
+//    m_bottomMotor.set(0);
   }
 
   public void incrementMultiplierUp() {
