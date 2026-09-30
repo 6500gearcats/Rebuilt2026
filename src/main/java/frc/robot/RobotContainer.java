@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -40,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
@@ -318,8 +320,8 @@ public class RobotContainer {
 
                 // joystick.rightBumper().onTrue(ne
 
-                joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
-                joystick.leftBumper().onTrue(new InstantCommand(() -> reverseBoolean()));
+                //joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
+                //joystick.leftBumper().onTrue(new InstantCommand(() -> reverseBoolean()));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(
@@ -340,7 +342,7 @@ public class RobotContainer {
                 joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
                 joystick2.b().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
 
-                joystick.a().whileTrue(new AlignTurretToHub(m_turret));
+                //joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
@@ -349,6 +351,30 @@ public class RobotContainer {
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+
+                // Start and stop recording
+                joystick.leftBumper().onTrue(
+                                Commands.runOnce(SignalLogger::start));
+
+                joystick.rightBumper().onTrue(
+                                Commands.runOnce(SignalLogger::stop));
+
+                // SysId tests
+                joystick.y().whileTrue(
+                                m_flywheel.sysIdQuasistatic(
+                                                SysIdRoutine.Direction.kForward));
+
+                joystick.a().whileTrue(
+                                m_flywheel.sysIdQuasistatic(
+                                                SysIdRoutine.Direction.kReverse));
+
+                joystick.b().whileTrue(
+                                m_flywheel.sysIdDynamic(
+                                                SysIdRoutine.Direction.kForward));
+
+                joystick.x().whileTrue(
+                                m_flywheel.sysIdDynamic(
+                                                SysIdRoutine.Direction.kReverse));
 
                 new JoystickButton(m_gunner, XboxController.Button.kY.value)
                                 .onTrue(new InstantCommand(() -> m_hood.moveUpOneStep()));

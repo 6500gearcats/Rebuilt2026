@@ -13,12 +13,17 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.controls.VoltageOut;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.units.Units;
 import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
 import frc.robot.utility.RangeFinder;
@@ -37,9 +42,15 @@ public class Flywheel extends SubsystemBase {
   private double speedMultiplier = 0;
   public double rotationMultiplier = 0;
   private double reqSpeed;
+  private double speedWithinToleranceSince = -1;
+  private boolean speedStable = false;
+  private static final double SPEED_TOLERANCE_RPS = 2.0;
+  private static final double SPEED_STABLE_TIME_SECONDS = 0.08;
   private int m_loop = 0;
   TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
   private RobotStateMachine robotStateMachine;
+  private final VoltageOut voltageRequest = new VoltageOut(0);
+  private final SysIdRoutine sysIdRoutine;
 
   TalonFXConfiguration talonFXConfigs;
 
@@ -78,8 +89,10 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void periodic() {
+    RobotStateMachine.ShotSolution shotSolution = robotStateMachine.getShotSolution();
+
     if (snurboEnable) {
-      speedModifier = 0.15;
+      speedModifier = 0.15;// 0.15;
     } else {
       speedModifier = 1;
     }
@@ -126,7 +139,6 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void setSpeed(double speed) {
-    reqSpeed = speed + (2 * speedMultiplier) + rotationMultiplier;
     double trenchCorr = 0;
     if (robotStateMachine.ductTapeCorrection) {
       trenchCorr = 4;
@@ -140,7 +152,7 @@ public class Flywheel extends SubsystemBase {
 
       if (robotStateMachine.underTrench()) {
         speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
-        reqSpeed = speedValue;
+≈      reqSpeed = speedValue;
       }
       m_topMotor.setControl(m_request.withVelocity(speedValue));
     }
@@ -158,7 +170,20 @@ public class Flywheel extends SubsystemBase {
   }
 
   public boolean isUpToSpeed() {
-    return Math.abs(reqSpeed - getSpeed()) < 5;
+    return speedStable;
+  }
+
+  private void updateSpeedReadiness() {
+    double speedError = Math.abs(reqSpeed - getSpeed());
+    if (speedError <= SPEED_TOLERANCE_RPS) {
+      if (speedWithinToleranceSince < 0) {
+        speedWithinToleranceSince = Timer.getFPGATimestamp();
+      }
+      speedStable = Timer.getFPGATimestamp() - speedWithinToleranceSince >= SPEED_STABLE_TIME_SECONDS;
+    } else {
+      speedWithinToleranceSince = -1;
+      speedStable = false;
+    }
   }
 
   public void stopMotor() {
@@ -187,5 +212,13 @@ public class Flywheel extends SubsystemBase {
     // slot.kI = SmartDashboard.getNumber("shooter kI", 0);
     // slot.kD = SmartDashboard.getNumber("shooter kD", 0);
     // m_motor.getConfigurator().apply(slot);
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.dynamic(direction);
   }
 }
