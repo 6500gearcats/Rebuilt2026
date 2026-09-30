@@ -19,10 +19,15 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.controls.VoltageOut;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.units.Units;
 import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
 import frc.robot.utility.RangeFinder;
@@ -34,7 +39,7 @@ import frc.robot.RobotStateMachine.FieldZone;
  */
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
-  TalonFX m_motor = new TalonFX(Constants.MotorConstants.kShooterMotorRightID);
+  TalonFX m_motor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
@@ -46,8 +51,10 @@ public class Flywheel extends SubsystemBase {
   private boolean speedStable = false;
   private static final double SPEED_TOLERANCE_RPS = 2.0;
   private static final double SPEED_STABLE_TIME_SECONDS = 0.08;
-  TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorLeftID);
+  TalonFX m_motor2 = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
   private RobotStateMachine robotStateMachine;
+  private final VoltageOut voltageRequest = new VoltageOut(0);
+  private final SysIdRoutine sysIdRoutine;
 
   TalonFXConfiguration talonFXConfigs;
 
@@ -80,7 +87,22 @@ public class Flywheel extends SubsystemBase {
 
     m_motor.getConfigurator().apply(talonFXConfigs);
     m_motor2.getConfigurator().apply(talonFXConfigs);
-    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorRightID, MotorAlignmentValue.Opposed));
+    m_motor2.setControl(new Follower(MotorConstants.kShooterMotorTopID, MotorAlignmentValue.Opposed));
+
+    sysIdRoutine = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            Units.Volts.per(Units.Second).of(0.5),
+            Units.Volts.of(4),
+            Units.Seconds.of(5),
+            state -> SignalLogger.writeString(
+                "sysid testing", state.toString())),
+
+        new SysIdRoutine.Mechanism(
+            voltage -> m_motor.setControl(
+                voltageRequest.withOutput(
+                    voltage.in(Units.Volts))),
+            null,
+            this));
   }
 
   @Override
@@ -199,5 +221,13 @@ public class Flywheel extends SubsystemBase {
     // slot.kI = SmartDashboard.getNumber("shooter kI", 0);
     // slot.kD = SmartDashboard.getNumber("shooter kD", 0);
     // m_motor.getConfigurator().apply(slot);
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.dynamic(direction);
   }
 }

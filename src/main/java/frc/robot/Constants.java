@@ -224,8 +224,8 @@ public final class Constants {
 
   public static class MotorConstants {
     public static final int kTurretYawMotorID = 12;
-    public static final int kShooterMotorRightID = 13;
-    public static final int kShooterMotorLeftID = 14;
+    public static final int kShooterMotorTopID = 13;
+    public static final int kShooterMotorBottomID = 14;
 
     public static final int kIntakeMotorID = 20;
     public static final int kIntakeDeployMotorID = 21;
