@@ -39,9 +39,9 @@ public class Flywheel extends SubsystemBase {
         .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6))
         .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
     // Retain the merged gains/inversion until physical direction and speed tests.
-    configs.Slot0.kS = 0.1087;
-    configs.Slot0.kV = 0.076456;
-    configs.Slot0.kA = 0.010904;
+    configs.Slot0.kS = 0.28342;
+    configs.Slot0.kV = 0.075434;
+    configs.Slot0.kA = 0.0055825;
     configs.Slot0.kP = 0.3;
     configs.Slot0.kI = 0;
     configs.Slot0.kD = 0.00005;
