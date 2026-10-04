@@ -36,14 +36,15 @@ public class Robot extends TimedRobot {
     SignalLogger.start();
     // DataLogManager.start();
     DataLogManager.start();
-    addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
     SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
   @Override
   public void robotPeriodic() {
+    // Compute the shared shot once, before subsystem periodic/readiness and commands.
+    m_RobotStateMachine.periodic();
     CommandScheduler.getInstance().run();
-    // m_RobotStateMachine.periodic();
+    m_RobotStateMachine.getShotCalibration().publishAndCapture();
     if (m_gcTimer.advanceIfElapsed(0.1)) {
       System.gc();
     }
@@ -55,6 +56,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    m_RobotStateMachine.getShotCalibration().reset();
     m_robotContainer.disableInitCode();
   }
 

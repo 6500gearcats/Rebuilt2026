@@ -114,6 +114,13 @@ public class Turret extends SubsystemBase {
     m_motor.set(speed);
   }
 
+  /** Suppress shot feeding during homing or unhealthy yaw feedback. */
+  public boolean isHoming() { return toZeroPos; }
+  public boolean isHealthy() {
+    return m_motor.getPosition().getStatus().isOK() && m_motor.getVelocity().getStatus().isOK()
+        && Double.isFinite(getConvertedTurretPosition()) && Double.isFinite(getSpeed());
+  }
+
   public void toggleOverride() {
     overridden = !overridden;
   }

@@ -60,7 +60,6 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.LedCANdle;
 import frc.robot.subsystems.turret.Flywheel;
-import frc.robot.subsystems.turret.Hood;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
@@ -69,7 +68,6 @@ import frc.robot.subsystems.vision.limelight.LimelightHelpers;
 import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
-import frc.robot.utility.RangeFinder;
 import frc.robot.utility.SysIDUtil;
 
 /**
@@ -111,15 +109,12 @@ public class RobotContainer {
 
         private final Flywheel m_flywheel;
 
-        private final Hood m_hood = new Hood();
-
         private boolean toggleIntake = false;
 
         private final Intake m_intake = new Intake();
 
         private final Climber m_climber = new Climber();
 
-        private final RangeFinder rangeFinder = new RangeFinder();
         private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
 
         private final Turret m_turret = robotStateMachine.getTurret();
@@ -200,11 +195,9 @@ public class RobotContainer {
                                                 .andThen(new RunIntake(m_intake, -1).withTimeout(0.3)));
                 NamedCommands.registerCommand("BopBopStayUp",
                                 new RunCommand(() -> m_intake.deployIntake(-0.35)).withTimeout(0.45));
-                NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> m_flywheel.setSpeed(0.7)));
+                NamedCommands.registerCommand("SpeedUp", new InstantCommand(() -> robotStateMachine.getShotCalibration().adjustFlywheel(1)));
                 NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));
                 NamedCommands.registerCommand("ClimbDown2s", new ClimbPole(m_climber, -0.5).withTimeout(2));
-
-                SmartDashboard.putNumber("Shoot Speed", 0);
 
                 autoChooser = AutoBuilder.buildAutoChooser("SOMRight");
 
@@ -303,8 +296,6 @@ public class RobotContainer {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
-        //m_flywheel.setDefaultCommand(new RunCommand(()-> m_flywheel.setSpeed(RangeFinder.getShotVelocity(
-        //robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
@@ -364,9 +355,9 @@ public class RobotContainer {
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
 
                 new JoystickButton(m_gunner, XboxController.Button.kY.value)
-                                .onTrue(new InstantCommand(() -> m_hood.moveUpOneStep()));
+                                .onTrue(new InstantCommand(() -> robotStateMachine.getShotCalibration().adjustHood(0.005)));
                 new JoystickButton(m_gunner, XboxController.Button.kA.value)
-                                .onTrue(new InstantCommand(() -> m_hood.moveDownOneStep()));
+                                .onTrue(new InstantCommand(() -> robotStateMachine.getShotCalibration().adjustHood(-0.005)));
         }
 
         public void testBindings() {

@@ -9,6 +9,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotStateMachine;
 
+/**
+ * Historical fixed-hood calibration, retained only for reference.
+ * Robot shooting now uses utility.shooting.ShotTable and ShotSolver.
+ */
+@Deprecated
 public class RangeFinder {
   private static InterpolatingDoubleTreeMap m_shootMap = new InterpolatingDoubleTreeMap();
   private static InterpolatingDoubleTreeMap m_TOFMap = new InterpolatingDoubleTreeMap();

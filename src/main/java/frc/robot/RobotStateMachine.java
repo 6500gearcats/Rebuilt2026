@@ -27,7 +27,15 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.utility.RangeFinder;
+import frc.robot.subsystems.turret.Hood;
+import frc.robot.utility.shooting.ShotCalibration;
+import frc.robot.utility.shooting.ShotPlanner;
+import frc.robot.utility.shooting.ShotSafety;
+import frc.robot.utility.shooting.ShotSample;
+import frc.robot.utility.shooting.ShotSettings;
+import frc.robot.utility.shooting.ShotSolution;
+import frc.robot.utility.shooting.ShotSolver;
+import frc.robot.utility.shooting.ShotTable;
 
 /**
  * Singleton state machine that tracks robot state, pose, and field zone.
@@ -67,7 +75,11 @@ public final class RobotStateMachine {
 
     private final Field2d aimTargetField = new Field2d();
 
-    private ShotSolution shotSolution = ShotSolution.empty();
+    private final Hood m_Hood;
+    private final ShotSolver shotSolver;
+    private final ShotPlanner shotPlanner;
+    private final ShotCalibration shotCalibration;
+    private String shotTableError = "";
 
     private Pose2d pose = new Pose2d();
     private FieldZone currentZone = FieldZone.ALLIANCE;
@@ -101,6 +113,20 @@ public final class RobotStateMachine {
 
         m_Flywheel = new Flywheel(this);
         m_Turret = new Turret(this);
+        m_Hood = new Hood();
+        ShotSolver configuredSolver;
+        try {
+            configuredSolver = new ShotSolver(ShotTable.samples(), TurretConstants.kHoodMinPositionRotations,
+                    TurretConstants.kHoodMaxPositionRotations);
+        } catch (IllegalArgumentException error) {
+            shotTableError = error.getMessage();
+            DriverStation.reportError("Invalid shot table: " + shotTableError, false);
+            configuredSolver = new ShotSolver(new ShotSample[0],
+                    TurretConstants.kHoodMinPositionRotations, TurretConstants.kHoodMaxPositionRotations);
+        }
+        shotSolver = configuredSolver;
+        shotPlanner = new ShotPlanner(shotSolver);
+        shotCalibration = new ShotCalibration(this);
 
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
@@ -110,6 +136,9 @@ public final class RobotStateMachine {
     public Flywheel getFlywheel() {
         return m_Flywheel;
     }
+
+    public Hood getHood() { return m_Hood; }
+    public ShotCalibration getShotCalibration() { return shotCalibration; }
 
     public CommandXboxController getDriver() {
         return joystick;
@@ -142,6 +171,7 @@ public final class RobotStateMachine {
      * Updates pose, field zone, and publishes telemetry.
      */
     public void periodic() {
+        shotCalibration.readInputs(DriverStation.isEnabled() && !DriverStation.isAutonomous());
         reqShooterSpeed = m_Flywheel.getReqSpeed();
         shooterSpeed = m_Flywheel.getSpeed();
         SmartDashboard.putBoolean("Driver Connected", joystick.isConnected());
@@ -178,6 +208,7 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("distToTag2", distToTag());
         SmartDashboard.putBoolean("isFacing", isFacingHub());
         updateTargetPose();
+        applyShotSetpoints();
 
         aimTargetField.getObject("Hub").setPose(HubPose);
         aimTargetField.getObject("Motion Compensated Hub").setPose(targetPose);
@@ -236,7 +267,6 @@ public final class RobotStateMachine {
     }
 
     public Pose2d getTargetPose() {
-        updateTargetPose();
         return targetPose;
     }
 
@@ -246,126 +276,97 @@ public final class RobotStateMachine {
      * @return the latest shot solution
      */
     public ShotSolution getShotSolution() {
-        updateTargetPose();
-        return shotSolution;
+        return shotPlanner.getSolution();
     }
 
-    public void updateTargetPose() {
+    /** Compute one snapshot per cycle; getters and commands never recompute it. */
+    private void updateTargetPose() {
         ChassisSpeeds speeds = getFieldSpeeds();
-        Optional<Pose2d> bestPose = getBestPoseTarget();
-
-        if (speeds == null || bestPose.isEmpty()) {
-            return;
+        targetPose = HubPose;
+        double distance = turretPose.getTranslation().getDistance(HubPose.getTranslation());
+        ShotSolution solution;
+        if (!DriverStation.isEnabled()) {
+            solution = shotPlanner.invalidate(HubPose, distance, "Disabled");
+        } else if (speeds == null) {
+            solution = shotPlanner.invalidate(HubPose, distance, "Drivetrain unavailable");
+        } else if (!isInAlliance() || underTrench()) {
+            solution = shotPlanner.invalidate(HubPose, distance, "Passing/trench profile not calibrated");
+        } else if (!shotCalibration.isEnabled() && DriverStation.isTest()) {
+            solution = shotPlanner.invalidate(HubPose, distance, "Test mode: enable calibration to tune shots");
+        } else if (!shotCalibration.isEnabled() && !isActive()) {
+            solution = shotPlanner.invalidate(HubPose, distance, "Hub inactive");
+        } else {
+            Translation2d velocity = getTurretFieldVelocity(speeds);
+            boolean stationary = ShotSafety.isStationary(velocity.getX(), velocity.getY(), speeds.omegaRadiansPerSecond);
+            if (shotCalibration.isEnabled()) {
+                Optional<ShotSettings> manual = shotCalibration.manualSettings();
+                if (!stationary) {
+                    solution = shotPlanner.invalidate(HubPose, distance, "Stop robot for manual calibration");
+                } else if (manual.isEmpty()) {
+                    solution = shotPlanner.invalidate(HubPose, distance, "Invalid calibration inputs");
+                } else {
+                    solution = shotPlanner.manual(HubPose, distance, manual.get());
+                }
+            } else if (!shotTableError.isEmpty()) {
+                solution = shotPlanner.invalidate(HubPose, distance, "Invalid table: " + shotTableError);
+            } else if (!shotCalibration.isMotionEnabled() && !stationary) {
+                solution = shotPlanner.invalidate(HubPose, distance, "Motion compensation disabled; stop robot");
+            } else if (!Double.isFinite(shotCalibration.getFlywheelTrimRps())
+                    || (!stationary && shotCalibration.getFlywheelTrimRps() != 0)) {
+                solution = shotPlanner.invalidate(HubPose, distance, "Moving shots require zero flywheel trim");
+            } else {
+                solution = shotPlanner.update(turretPose, HubPose, velocity, shotCalibration.isMotionEnabled());
+                if (solution.isValid() && solution.getFlywheelSpeed() + shotCalibration.getFlywheelTrimRps() <= 0) {
+                    solution = shotPlanner.invalidate(HubPose, distance, "Flywheel trim produces nonpositive RPS");
+                }
+            }
         }
-
-        SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
-
-        Pose2d best = bestPose.get();
-        Translation2d targetVector = best.getTranslation().minus(getTurretPose().getTranslation());
-        double distance = targetVector.getNorm();
-        if (distance < 1e-9) {
-            return;
-        }
-
-        Translation2d turretVelocity = getTurretFieldVelocity(speeds);
-        Translation2d unitVectorToTarget = targetVector.div(distance);
-        double radialVelocity = turretVelocity.getX() * unitVectorToTarget.getX()
-                + turretVelocity.getY() * unitVectorToTarget.getY();
-
-        // Solve the range/TOF coupling iteratively. Positive radial velocity means
-        // the turret is moving toward the target, so the effective stationary-shot
-        // distance is shorter. Lateral velocity is left for turret aiming.
-        double effectiveDistance = distance;
-        double tof = getTOF(distance);
-        for (int i = 0; i < 20; i++) {
-            tof = getTOF(effectiveDistance);
-            effectiveDistance = Math.max(0.0, distance - radialVelocity * tof);
-        }
-        double shotVelocity = RangeFinder.getShotVelocity(effectiveDistance);
-
-        // Use the full turret velocity for the aim lead, including the tangential
-        // velocity caused by rotating around the robot center.
-        targetPose = new Pose2d(
-                best.getX() - turretVelocity.getX() * tof,
-                best.getY() - turretVelocity.getY() * tof,
-                new Rotation2d());
+        targetPose = solution.getTargetPose();
         targetPosePublisher.set(targetPose);
-
-        shotSolution = new ShotSolution(
-                targetPose,
-                distance,
-                effectiveDistance,
-                tof,
-                radialVelocity,
-                shotVelocity,
-                turretVelocity.getX(),
-                turretVelocity.getY());
-
-        SmartDashboard.putNumber("TurretVelX", turretVelocity.getX());
-        SmartDashboard.putNumber("TurretVelY", turretVelocity.getY());
-        SmartDashboard.putNumber("RadialVelocity", radialVelocity);
-        SmartDashboard.putNumber("ShotDistance", distance);
-        SmartDashboard.putNumber("EffectiveShotDistance", effectiveDistance);
-        SmartDashboard.putNumber("ShotTOF", tof);
-        SmartDashboard.putNumber("ShotVelocity", shotVelocity);
-
-        // @formatter:off
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##**+++++**##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*+===---=----====++*#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+-======--:::--:::::-====##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##+:::::------=--::::...::----==+#%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+::=####*#+-.:-:::.--.-....:..:::-:=-*%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*=-+##%%%%####%###-.::::..--:........--:--+#%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%#=:+####%%#######%#%###+.=::. . :-..:.. .::.::-=**#%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%#--#######**********##%%##- =:::.:. ::.:.  . ::-:::+#%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%#-:+*#####***+++********####**.=:.::...  ...:.. ::.:::=#%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%--#%%##***+++++++*******######:-=:  ...  . ...: .:...:-*%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%+:##%#*+++++++++++*******##%###.-=    ........ ...: .::-=#%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%+:#%%#*++++++++++++******##%%#%=::-:....... ...... ...::-+%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%*-#%%#**++++++++++++*****##%%##-..::      .:.....  . :::.-+#%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%-+%%##*+++++++++++++*****#%##%. .:::    ...  .::::   .::::*%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%-=#*##*+++++++++++++****##%##=......      ..::::::.......-#%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%+:*####*+++++++++++++***#%%#-..:.          . .:..:..    .*%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%#.-##%###+++++++++++*#%#%#+....                 .    .:==+#%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%+.-##*#%%###*****##%%%*=:...                        :+%%+#%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%#::+#%%%%%%%#%%####+:.... .                      :=**#%%#%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%##=..=*#####**+=::.   .                       ..:-=+*##%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%##*+-:.::......... .                         ...:-=+**##%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%#**=-:.  .   .              ..::::::::::::::---==+**###%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%##*+=-:.                ..:--=+++++++++++++++****###%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%##*+=-::....     ...::--=+**##################%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%###**++==--------===++**###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%####************####%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%############%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        // @formatter:on
+        SmartDashboard.putBoolean("Shot/Valid", solution.isValid());
+        SmartDashboard.putString("Shot/Status", solution.status());
+        SmartDashboard.putNumber("ShotDistance", solution.getDistance());
+        SmartDashboard.putNumber("EffectiveShotDistance", solution.getEffectiveDistance());
+        SmartDashboard.putNumber("ShotTOF", solution.getTimeOfFlight());
+        SmartDashboard.putNumber("ShotVelocity", solution.getFlywheelSpeed());
+        SmartDashboard.putNumber("Shot/Hood Rotations", solution.getHoodRotations());
+        SmartDashboard.putNumber("RadialVelocity", solution.getRadialVelocity());
+        SmartDashboard.putNumber("TurretVelX", solution.getTurretVelocityX());
+        SmartDashboard.putNumber("TurretVelY", solution.getTurretVelocityY());
     }
 
-    public double getTOF(double dist) {
-        // Apx launch angle is 65 deg
-        // double shootAng = Units.degreesToRadians(65);
-        // double dh = Units.inchesToMeters(52 - 19);
-        // double term = Math.pow(shotVelocity, 2) * Math.pow(Math.sin(shootAng), 2) -
-        // (2 * 9.8 * dh);
-        // double safeTerm = Math.max(0.0, term);
-        // double timeOfFlight = ((shotVelocity * Math.sin(shootAng)) +
-        // Math.sqrt(safeTerm)) / 9.8;
-        // return timeOfFlight;
+    private void applyShotSetpoints() {
+        // Characterization commands own motor output in test mode unless tuning is enabled.
+        if (DriverStation.isEnabled() && DriverStation.isTest() && !shotCalibration.isEnabled()) { return; }
+        ShotSolution solution = getShotSolution();
+        if (solution.isValid()) {
+            double trim = shotCalibration.isEnabled() ? 0 : shotCalibration.getFlywheelTrimRps();
+            m_Flywheel.setSpeed(solution.getFlywheelSpeed() + trim);
+            m_Hood.setPositionRotations(solution.getHoodRotations());
+        } else {
+            m_Flywheel.stopMotor();
+            m_Hood.stop();
+        }
+    }
 
-        return RangeFinder.getTOF(dist);
+    /** Current physical alignment, independent of whether an aiming command is scheduled. */
+    public boolean isTurretAligned() {
+        Translation2d vector = targetPose.getTranslation().minus(turretPose.getTranslation());
+        return vector.getNorm() > 1e-9 && m_Turret.isHealthy() && !m_Turret.isHoming()
+                && Math.abs(ShotSafety.alignmentErrorDegrees(vector.getAngle().getDegrees(),
+                        turretPose.getRotation().getDegrees())) <= 1.5
+                && Math.abs(m_Turret.getSpeed()) <= 0.1;
+    }
+
+    /** All shooting sequences use this gate and explicitly stop when it becomes false. */
+    public boolean canFeedShot() {
+        return ShotSafety.canFeed(DriverStation.isEnabled(), shotCalibration.isEnabled() || isActive(),
+                getShotSolution().isValid(), isTurretAligned(), m_Flywheel.isUpToSpeed(), m_Hood.isAtPosition());
+    }
+
+    /** Compatibility lookup; no extrapolation or legacy TOF table. */
+    public double getTOF(double distanceMeters) {
+        return shotSolver.solve(distanceMeters).map(ShotSettings::tofSeconds).orElse(Double.NaN);
     }
 
     public Turret getTurret() {
@@ -423,73 +424,6 @@ public final class RobotStateMachine {
 
     public boolean isUpToSpeed() {
         return m_Flywheel.isUpToSpeed();
-    }
-
-    /** Shared target and velocity data used by turret and flywheel control. */
-    public static final class ShotSolution {
-        private final Pose2d targetPose;
-        private final double distance;
-        private final double effectiveDistance;
-        private final double timeOfFlight;
-        private final double radialVelocity;
-        private final double flywheelSpeed;
-        private final double turretVelocityX;
-        private final double turretVelocityY;
-
-        private ShotSolution(
-                Pose2d targetPose,
-                double distance,
-                double effectiveDistance,
-                double timeOfFlight,
-                double radialVelocity,
-                double flywheelSpeed,
-                double turretVelocityX,
-                double turretVelocityY) {
-            this.targetPose = targetPose;
-            this.distance = distance;
-            this.effectiveDistance = effectiveDistance;
-            this.timeOfFlight = timeOfFlight;
-            this.radialVelocity = radialVelocity;
-            this.flywheelSpeed = flywheelSpeed;
-            this.turretVelocityX = turretVelocityX;
-            this.turretVelocityY = turretVelocityY;
-        }
-
-        private static ShotSolution empty() {
-            return new ShotSolution(new Pose2d(), 0, 0, 0, 0, 0, 0, 0);
-        }
-
-        public Pose2d getTargetPose() {
-            return targetPose;
-        }
-
-        public double getDistance() {
-            return distance;
-        }
-
-        public double getEffectiveDistance() {
-            return effectiveDistance;
-        }
-
-        public double getTimeOfFlight() {
-            return timeOfFlight;
-        }
-
-        public double getRadialVelocity() {
-            return radialVelocity;
-        }
-
-        public double getFlywheelSpeed() {
-            return flywheelSpeed;
-        }
-
-        public double getTurretVelocityX() {
-            return turretVelocityX;
-        }
-
-        public double getTurretVelocityY() {
-            return turretVelocityY;
-        }
     }
 
     public boolean isFacingHub() {
@@ -958,29 +892,4 @@ public final class RobotStateMachine {
         return checkZone() == FieldZone.ALLIANCE;
     }
 
-    private Optional<Pose2d> getBestPoseTarget() {
-        if (checkZone() == FieldZone.ALLIANCE) {
-            return Optional.of(HubPose);
-        } else {
-            // return feed position
-            if (getAlliance() == Alliance.Blue) {
-                if (checkZone() == FieldZone.NEUTRAL_TOP) {
-                    // top blue pose
-                    return Optional.of(new Pose2d(1.0, 1.681, new Rotation2d()));
-                } else if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
-                    // bottom blue pose
-                    return Optional.of(new Pose2d(1.0, 5.835, new Rotation2d()));
-                }
-            } else {
-                if (checkZone() == FieldZone.NEUTRAL_BOTTOM) {
-                    // bottom red pose
-                    return Optional.of(new Pose2d(15.7, 5.835, new Rotation2d()));
-                } else if (checkZone() == FieldZone.NEUTRAL_TOP) {
-                    // top red pose
-                    return Optional.of(new Pose2d(15.7, 1.681, new Rotation2d()));
-                }
-            }
-        }
-        return Optional.empty();
-    }
 }

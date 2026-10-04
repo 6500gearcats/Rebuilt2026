@@ -1,64 +1,61 @@
 // Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
+// Open Source Software; see the WPILib BSD license file in this project.
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
-import frc.robot.RobotStateMachine.FieldZone;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.turret.Flywheel;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+/** Feeds only while the shared shot and every physical readiness gate remain valid. */
 public class UpToSpeedHopperShoot extends Command {
-  /** Creates a new JasonsShooting. */
-  Hopper m_Hopper;
-  Flywheel m_Flywheel;
-  private RobotStateMachine stateMachine = RobotStateMachine.getInstance();
+  private final BooleanSupplier canFeed;
+  private final Runnable startFeed;
+  private final Runnable stopFeed;
+  private final Runnable recordFeedStart;
+  private boolean feeding;
 
-  public UpToSpeedHopperShoot(Hopper m_Hopper, Flywheel m_Flywheel) {
-    this.m_Hopper = m_Hopper;
-    this.m_Flywheel = m_Flywheel;
+  public UpToSpeedHopperShoot(Hopper hopper, Flywheel flywheel) {
+    this(RobotStateMachine.getInstance()::canFeedShot,
+        () -> hopper.startAllMotors(-1, 1), hopper::stopAllMotors,
+        () -> RobotStateMachine.getInstance().getShotCalibration().recordFeedStart());
+    addRequirements(hopper);
   }
 
-  // Called when the command is initially scheduled.
+  // Package-visible callback seam tests shutdown without constructing robot hardware.
+  UpToSpeedHopperShoot(BooleanSupplier canFeed, Runnable startFeed, Runnable stopFeed, Runnable recordFeedStart) {
+    this.canFeed = canFeed;
+    this.startFeed = startFeed;
+    this.stopFeed = stopFeed;
+    this.recordFeedStart = recordFeedStart;
+  }
+
   @Override
   public void initialize() {
+    feeding = false;
+    stopFeed.run();
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
-      return;
+    if (canFeed.getAsBoolean()) {
+      if (!feeding) { recordFeedStart.run(); }
+      feeding = true;
+      startFeed.run();
+    } else {
+      feeding = false;
+      stopFeed.run();
     }
-    // TEMPORARY TEST OVERRIDE: run the hopper regardless of turret alignment,
-    // distance, or flywheel-speed readiness. Restore the gates below after testing.
-    if (SmartDashboard.getBoolean("Aligned", true)) {
-      if (stateMachine.isFarEnough()) {
-        if (m_Flywheel.isUpToSpeed()) {
-          m_Hopper.startAllMotors(-1, 1);
-        }
-      } else {
-        m_Hopper.startAllMotors(-1, 1);
-      }
-    }
-    m_Hopper.startAllMotors(-1, 1);
-
   }
 
-  // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_Hopper.stopAllMotors();
-    m_Flywheel.setSpeed(0);
+    feeding = false;
+    stopFeed.run();
   }
 
-  // Returns true when the command should end.
   @Override
-  public boolean isFinished() {
-    return false;
-  }
+  public boolean isFinished() { return false; }
 }

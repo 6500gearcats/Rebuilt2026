@@ -1,150 +1,128 @@
 // Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
+// Open Source Software; see the WPILib BSD license file in this project.
 package frc.robot.subsystems.turret;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
 import frc.robot.Constants.TurretConstants;
-import frc.robot.generated.TunerConstants;
+import frc.robot.utility.shooting.SetpointReadiness;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-
-/** Controls the turret hood and reports its absolute angle sensor. */
+/** Holds hood CANcoder rotations in the same zeroed coordinate used by the shot table. */
 public class Hood extends SubsystemBase {
   private final TalonFX m_motor = new TalonFX(MotorConstants.kTurretHoodID);
   private final CANcoder m_encoder = new CANcoder(MotorConstants.kTurretHoodEncoderID);
-  private double m_commandedSpeed = 0.0;
-  private double targetPosition = 0.0;
-  private double HOOD_INCREMENT = 0.034;
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
+  private final SetpointReadiness readiness = new SetpointReadiness(0.005, 0.10);
+  private final boolean configured;
+  private boolean initialized;
+  private boolean holdingPosition;
+  private double targetPosition = Double.NaN;
+
   public Hood() {
+    var encoderConfig = new CANcoderConfiguration().withMagnetSensor(new MagnetSensorConfigs()
+        .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
+        .withAbsoluteSensorDiscontinuityPoint(TurretConstants.kHoodEncoderDiscontinuityPointRotations)
+        .withMagnetOffset(-TurretConstants.kHoodEncoderZeroRotations));
+    boolean encoderConfigured = m_encoder.getConfigurator().apply(encoderConfig).isOK();
+    var motorConfig = new TalonFXConfiguration()
+        .withFeedback(new FeedbackConfigs().withFeedbackRemoteSensorID(m_encoder.getDeviceID())
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
+            .withSensorToMechanismRatio(1.0))
+        .withSoftwareLimitSwitch(new SoftwareLimitSwitchConfigs()
+            .withForwardSoftLimitEnable(true)
+            .withForwardSoftLimitThreshold(TurretConstants.kHoodMaxPositionRotations)
+            .withReverseSoftLimitEnable(true)
+            .withReverseSoftLimitThreshold(TurretConstants.kHoodMinPositionRotations))
+        .withSlot0(new Slot0Configs().withKS(1.0).withKP(1.0));
+    boolean motorConfigured = m_motor.getConfigurator().apply(motorConfig).isOK();
+    configured = encoderConfigured && motorConfigured;
+    initializeFromAbsolute();
+    if (!configured) {
+      DriverStation.reportError("Hood configuration failed; shooting disabled", false);
+    }
+  }
 
-    CANcoderConfiguration encoderConfig = new CANcoderConfiguration()
-        .withMagnetSensor(new MagnetSensorConfigs()
-            .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
-            .withAbsoluteSensorDiscontinuityPoint(
-                TurretConstants.kHoodEncoderDiscontinuityPointRotations)
-            .withMagnetOffset(-TurretConstants.kHoodEncoderZeroRotations));
-    m_encoder.getConfigurator().apply(encoderConfig);
-
-    TalonFXConfiguration motorConfig = new TalonFXConfiguration()
-            .withFeedback(new FeedbackConfigs()
-                    .withFeedbackRemoteSensorID(MotorConstants.kTurretHoodEncoderID)
-                    .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
-                    // The CANcoder is directly measuring the hood mechanism.
-                    .withSensorToMechanismRatio(1.0))
-            .withSoftwareLimitSwitch(new SoftwareLimitSwitchConfigs()
-                    .withForwardSoftLimitEnable(true)
-                    .withForwardSoftLimitThreshold(
-                            TurretConstants.kHoodMaxPositionRotations)
-                    .withReverseSoftLimitEnable(true)
-                    .withReverseSoftLimitThreshold(
-                            TurretConstants.kHoodMinPositionRotations)
-                            ).withSlot0(new Slot0Configs().withKS(1.0).withKP(1.0));
-    m_encoder.setPosition(TurretConstants.kHoodMinPositionRotations);
-    m_motor.getConfigurator().apply(motorConfig);
-    targetPosition = m_motor.getPosition().getValueAsDouble();
+  /** Seed relative feedback with the actual absolute position, never a presumed endpoint. */
+  private void initializeFromAbsolute() {
+    var absolute = m_encoder.getAbsolutePosition().refresh();
+    if (configured && absolute.getStatus().isOK() && validPosition(absolute.getValueAsDouble())) {
+      targetPosition = absolute.getValueAsDouble();
+      initialized = m_encoder.setPosition(targetPosition).isOK();
+    }
   }
 
   @Override
   public void periodic() {
-    var positionSignal = m_encoder.getAbsolutePosition();
-    double absolutePositionRotations = positionSignal.getValueAsDouble();
-    // double posSignal = m_encoder.getPosition().getValueAsDouble();
-    boolean encoderConnected = positionSignal.getStatus().isOK();
+    // Recover initialization only while disabled, before any shooting command.
+    if (!initialized && DriverStation.isDisabled()) { initializeFromAbsolute(); }
+    double actual = getAbsolutePositionRotations();
+    boolean healthy = isHealthy() && DriverStation.isEnabled();
+    boolean feedbackAgrees = Math.abs(actual - m_motor.getPosition().getValueAsDouble()) <= 0.005;
+    readiness.update(targetPosition, actual, healthy && holdingPosition && feedbackAgrees, Timer.getFPGATimestamp());
+    if (!healthy) { stop(); }
+    SmartDashboard.putNumber("Hood Absolute Position (rotations)", actual);
+    SmartDashboard.putNumber("Hood Requested Position (rotations)", targetPosition);
+    SmartDashboard.putNumber("Hood Feedback Position (rotations)", m_motor.getPosition().getValueAsDouble());
+    SmartDashboard.putBoolean("Hood Encoder Connected", isHealthy());
+    SmartDashboard.putBoolean("Hood Ready", isAtPosition());
+    SmartDashboard.putBoolean("Hood At Lower Limit", actual <= TurretConstants.kHoodMinPositionRotations);
+    SmartDashboard.putBoolean("Hood At Upper Limit", actual >= TurretConstants.kHoodMaxPositionRotations);
+  }
 
-    if (!encoderConnected || isMotionBlocked(m_commandedSpeed, absolutePositionRotations)) {
+  public static boolean validPosition(double rotations) {
+    return Double.isFinite(rotations) && rotations >= TurretConstants.kHoodMinPositionRotations
+        && rotations <= TurretConstants.kHoodMaxPositionRotations;
+  }
+
+  /** Invalid requests stop rather than silently clamping to a different trajectory. */
+  public void setPositionRotations(double rotations) {
+    if (!validPosition(rotations) || !isHealthy() || !DriverStation.isEnabled()) {
       stop();
+      return;
     }
-
-    SmartDashboard.putNumber("Hood Absolute Position (rotations)", absolutePositionRotations);
-    SmartDashboard.putNumber("Hood m_commandedSpeed", m_commandedSpeed);
-    // SmartDashboard.putNumber("Hood Position (rotations)", posSignal);
-    SmartDashboard.putNumber("Hood Absolute Position (degrees)", absolutePositionRotations * 360.0);
-    SmartDashboard.putNumber("Hood motor Position", targetPosition);
-    SmartDashboard.putBoolean("Hood Encoder Connected", encoderConnected);
-    SmartDashboard.putBoolean("Hood At Lower Limit", isAtLowerLimit(absolutePositionRotations));
-    SmartDashboard.putBoolean("Hood At Upper Limit", isAtUpperLimit(absolutePositionRotations));
+    if (!holdingPosition || Math.abs(rotations - targetPosition) > 0.005) { readiness.reset(); }
+    targetPosition = rotations;
+    holdingPosition = true;
+    if (!m_motor.setControl(positionRequest.withPosition(rotations)).isOK()) { stop(); }
   }
 
-  /** Runs the hood motor at the requested duty cycle. */
-  public void setSpeed(double speed) {
-    // var positionSignal = m_encoder.getAbsolutePosition();
-    double limitedSpeed = MathUtil.clamp(speed, -1.0, 1.0);
-    // if (!positionSignal.getStatus().isOK()
-    //     || isMotionBlocked(limitedSpeed, positionSignal.getValueAsDouble())) {
-    //   limitedSpeed = 0.0;
-    // }
-
-    m_commandedSpeed = limitedSpeed;
-    m_motor.set(limitedSpeed);
+  /** Communication and range checks; transient CAN sample lag must not stop a move. */
+  public boolean isHealthy() {
+    var absolute = m_encoder.getAbsolutePosition();
+    var feedback = m_motor.getPosition();
+    double position = absolute.getValueAsDouble();
+    return configured && initialized && absolute.getStatus().isOK() && feedback.getStatus().isOK()
+        && validPosition(position) && validPosition(feedback.getValueAsDouble());
   }
 
-  /** Stops the hood motor. */
+  public double getAbsolutePositionRotations() { return m_encoder.getAbsolutePosition().getValueAsDouble(); }
+  public double getAbsolutePositionDegrees() { return getAbsolutePositionRotations() * 360.0; }
+  public double getRequestedPositionRotations() { return targetPosition; }
+  public boolean isAtPosition() {
+    double actual = getAbsolutePositionRotations();
+    return holdingPosition && isHealthy() && readiness.isReady()
+        && Math.abs(actual - targetPosition) <= 0.005
+        && Math.abs(actual - m_motor.getPosition().getValueAsDouble()) <= 0.005;
+  }
+
   public void stop() {
-    m_commandedSpeed = 0.0;
+    holdingPosition = false;
+    readiness.reset();
     m_motor.stopMotor();
   }
-
-  private boolean isMotionBlocked(double speed, double positionRotations) {
-    // return (speed < 0.0 && isAtLowerLimit(positionRotations))
-    //     || (speed > 0.0 && isAtUpperLimit(positionRotations));
-    return false;
-  }
-
-  private boolean isAtLowerLimit(double positionRotations) {
-    return positionRotations <= TurretConstants.kHoodMinPositionRotations;
-  }
-
-  private boolean isAtUpperLimit(double positionRotations) {
-    return positionRotations >= TurretConstants.kHoodMaxPositionRotations;
-  }
-
-  /** Returns the zeroed absolute hood position in rotations. */
-  public double getAbsolutePositionRotations() {
-    return m_encoder.getAbsolutePosition().getValueAsDouble();
-  }
-
-  /** Returns the zeroed absolute hood position in degrees. */
-  public double getAbsolutePositionDegrees() {
-    return getAbsolutePositionRotations() * 360.0;
-  }
-
-  public void moveDownOneStep(){
-    targetPosition -= HOOD_INCREMENT;
-    if (targetPosition <= TurretConstants.kHoodMinPositionRotations){
-        SmartDashboard.putBoolean("Hood move down blocked", true);
-        targetPosition = TurretConstants.kHoodMinPositionRotations;
-    }else{
-        SmartDashboard.putBoolean("Hood move down blocked", false);
-    }
-    SmartDashboard.putNumber("Hood targetPosition", targetPosition);
-    m_motor.setControl(positionRequest.withPosition(targetPosition));
-  }
-  public void moveUpOneStep(){
-    targetPosition += HOOD_INCREMENT;
-    if (targetPosition >= TurretConstants.kHoodMaxPositionRotations){
-        SmartDashboard.putBoolean("Hood move up blocked", true);
-        targetPosition = TurretConstants.kHoodMaxPositionRotations;
-    }else{
-        SmartDashboard.putBoolean("Hood move up blocked", false);
-    }
-    SmartDashboard.putNumber("Hood targetPosition", targetPosition);
-    m_motor.setControl(positionRequest.withPosition(targetPosition));
-  }
-};
+}
