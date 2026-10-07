@@ -55,10 +55,15 @@ public class Hood extends SubsystemBase {
                     .withReverseSoftLimitEnable(true)
                     .withReverseSoftLimitThreshold(
                             TurretConstants.kHoodMinPositionRotations)
-                            ).withSlot0(new Slot0Configs().withKS(1.0).withKP(1.0));
-    m_encoder.setPosition(TurretConstants.kHoodMinPositionRotations);
+                            ).withSlot0(new Slot0Configs().withKS(2.0).withKV(0.02).withKP(10.0));
     m_motor.getConfigurator().apply(motorConfig);
-    targetPosition = m_motor.getPosition().getValueAsDouble();
+    var absPositionSignal = m_encoder.getAbsolutePosition().waitForUpdate(0.5);
+    if (absPositionSignal.getStatus().isOK()){
+      targetPosition = absPositionSignal.getValueAsDouble();
+      m_motor.setPosition(targetPosition);
+    }else{
+      targetPosition = m_motor.getPosition().getValueAsDouble();
+    }
   }
 
   @Override
