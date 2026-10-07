@@ -38,10 +38,10 @@ public class RangeFinder {
     // ! Fake values
     m_TOFMap.put(1.8, 0.85);
     m_TOFMap.put(2.5, 0.92);
-    .put(3.0, 0.97);
+    m_TOFMap.put(3.0, 0.97);
     m_TOFMap.put(3.5, 1.02);
     m_TOFMap.put(4.2, 1.08);
-    m_TOFMap.put(5.2, 1.14);m_TOFMap
+    m_TOFMap.put(5.2, 1.14);
   }
 
   public static double getShotVelocity(double distance) {
