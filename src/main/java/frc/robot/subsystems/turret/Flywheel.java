@@ -29,7 +29,7 @@ import frc.robot.Constants.MotorConstants;
  */
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
-  TalonFX m_topMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
+  TalonFX m_topMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
@@ -38,7 +38,7 @@ public class Flywheel extends SubsystemBase {
   public double rotationMultiplier = 0;
   private double reqSpeed;
   private int m_loop = 0;
-  TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
+  TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
   private RobotStateMachine robotStateMachine;
 
   TalonFXConfiguration talonFXConfigs;
