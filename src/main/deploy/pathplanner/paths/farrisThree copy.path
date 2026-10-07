@@ -1,0 +1,105 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.34548076923077,
+        "y": 0.5589972527472526
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.345480769230771,
+        "y": 0.5589972527472523
+      },
+      "isLocked": false,
+      "linkedName": "fer2"
+    },
+    {
+      "anchor": {
+        "x": 5.965123626373626,
+        "y": 0.9452197802197793
+      },
+      "prevControl": {
+        "x": 5.280995864775581,
+        "y": 0.369112191505636
+      },
+      "nextControl": {
+        "x": 6.675274725274724,
+        "y": 1.5432417582417564
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.525769230769231,
+        "y": 3.6114010989010987
+      },
+      "prevControl": {
+        "x": 6.525769230769231,
+        "y": 2.7459858036791918
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "fer3"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.7390917186108656,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.2840605520926085,
+      "rotationDegrees": 90.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 2.0,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "IntakeFuelJason",
+      "waypointRelativePos": 1.32,
+      "endWaypointRelativePos": 2.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "IntakeFuelJason"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "reversed": false,
+  "folder": "Farris",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
