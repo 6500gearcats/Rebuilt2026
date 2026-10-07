@@ -60,6 +60,34 @@
      "exp":"0 rad",
      "val":0.0
     }
+   },
+   "chris":{
+    "x":{
+     "exp":"TrenchShot.x",
+     "val":4.236070156097412
+    },
+    "y":{
+     "exp":"TrenchShot.y",
+     "val":7.367390155792236
+    },
+    "heading":{
+     "exp":"TrenchShot.heading",
+     "val":0.0
+    }
+   },
+   "chris1":{
+    "x":{
+     "exp":"4.37 m",
+     "val":4.37
+    },
+    "y":{
+     "exp":"7.4 m",
+     "val":7.4
+    },
+    "heading":{
+     "exp":"TrenchShot.heading",
+     "val":0.0
+    }
    }
   }
  },

@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "DeployIntakeFast0.5s"
+          }
+        },
+        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -15,22 +21,9 @@
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "DeployIntakeFast0.5s"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "IntakeFuel"
-                      }
-                    }
-                  ]
+                  "name": "IntakeFuel"
                 }
               }
             ]
@@ -45,12 +38,6 @@
                 "data": {
                   "pathName": "NeutralToTrench"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AlignTurretFromLeftTrench"
-                }
               }
             ]
           }
@@ -62,7 +49,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel4s"
+                  "name": "ShootFuel5s"
                 }
               },
               {
@@ -121,20 +108,8 @@
                 "data": {
                   "pathName": "NeutralToAlliance"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "TurretDeadOn"
-                }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.7
           }
         },
         {
@@ -144,13 +119,38 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel8s"
+                  "name": "ShootFuel5s"
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "HomeIntake"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "BopBop"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "BopBop"
+                      }
+                    }
+                  ]
                 }
               }
             ]
