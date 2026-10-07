@@ -42,7 +42,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel10s"
+                  "name": "ShootFuel5s"
                 }
               },
               {
@@ -73,7 +73,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "ShootFuel3s"
+                  "name": "ShootFuel5s"
                 }
               },
               {
@@ -83,12 +83,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AM2AllianceToTrench"
           }
         }
       ]

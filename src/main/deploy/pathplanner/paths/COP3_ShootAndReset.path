@@ -31,7 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [
     {
-      "name": "Constraints Zone",
+      "name": "shooting",
       "minWaypointRelativePos": 0,
       "maxWaypointRelativePos": 0.897482014388497,
       "constraints": {
@@ -71,5 +71,5 @@
     "velocity": 0.1,
     "rotation": 145.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
