@@ -4,6 +4,10 @@
 
 **Companion tracker:** [`LETO_MERGE_PROGRESS.md`](LETO_MERGE_PROGRESS.md) — update it in the same commit as any work this plan produces, per the process convention established in `leto`'s `plans/PLANNING_GUIDE.md` (see §0.3).
 
+> **Update, 2026-10-10:** On the remote, `origin/leto` was renamed to **`origin/leto_old_notused`** (same commit, `22ba3b1` — nothing was lost; confirmed via `git branch -a --contains 22ba3b1`). Every reference to "`leto`" below still means this same branch/commit; only the remote name changed. If you have a local `leto` branch whose upstream still says `origin/leto`, `git fetch --prune` will report its upstream as gone — fix it with `git branch --set-upstream-to=origin/leto_old_notused leto` (no rename of your local branch needed), then `git pull`/`git push` work as before.
+>
+> Separately, `leto_main` has advanced 12 commits past the `5372905` snapshot this plan was built from (now at `208284c` as of 2026-10-10 — see §0.5). The file-by-file classification in §2–§4 has **not** been re-audited against that new state and should be treated as stale until Stage 0 re-runs the comparison commands in Appendix A against the current tips.
+
 ---
 
 ## 0. Ground rules
@@ -22,16 +26,28 @@ Once execution begins (a separate, explicitly-authorized phase), follow the same
 - Compile (and run tests) after every reconciliation step; never mark a task done on "looks right."
 - Verify vendor/WPILib/PhotonLib API signatures against extracted sources before relying on them, per this session's own hard-won lesson.
 
-### 0.4 Reference points
+### 0.4 Reference points (as of 2026-09-16 — see §0.5 for what has moved since)
 | Ref | Meaning | Value |
 |---|---|---|
 | Merge base | Last common ancestor of `leto` and `leto_main` | `67ee7a5` |
-| `leto` tip | Target architecture | `22ba3b1` — "Remove Telemetry.java's legacy Field2d array publishing" |
-| `leto_main` tip | Current branch, holds competition-tested assets to port forward | `5372905` — "Merge pull request #13 from 6500gearcats/ShootOnTheMoveAuto2026" |
+| `leto` tip | Target architecture | `22ba3b1` — "Remove Telemetry.java's legacy Field2d array publishing". Remote name as of 2026-10-10: `origin/leto_old_notused` (renamed, same commit). |
+| `leto_main` tip | Current branch, holds competition-tested assets to port forward | `5372905` — "Merge pull request #13 from 6500gearcats/ShootOnTheMoveAuto2026". Superseded as of 2026-10-10 by `208284c` — see §0.5. |
 | Commits, base→`leto` | 78 | |
 | Commits, base→`leto_main` | 88 | |
 | Files changed, base→`leto` | 218 files, +36350/−4284 | |
 | Files changed, base→`leto_main` | 66 files, +5346/−682 | |
+
+### 0.5 `leto_main` has moved since this plan was written (noted 2026-10-10)
+
+The classification in §2–§4 was built against `leto_main`@`5372905`. As of 2026-10-10, `origin/leto_main` is 12 commits ahead, at `208284c`, via PR #17 ("Merge pull request #17 from 6500gearcats/turret_hood_trim_contols"). Notably for this plan:
+
+- **A new `Hood.java` subsystem was added** (`src/main/java/frc/robot/subsystems/turret/Hood.java`, +150 lines) — a file this plan has no row for at all, since it didn't exist at the 2026-09-16 snapshot. Needs its own classification (almost certainly Bucket B or a new bucket, since `leto`'s aiming/shooter rewrite has no `Hood` concept yet as of its own last-inspected tip).
+- `generated/TunerConstants.java` changed again (+211/−~150-ish, "New TunerConstants, inverting flywheel motors") — on top of the 169-line regeneration already noted in §3.4.6. This makes it even more likely `leto_main`'s drivetrain constants are the live, current-hardware source of truth, and makes re-running the CAN ID collision check (Stage 4) more urgent, not less.
+- `Turret.java` and `Flywheel.java` both changed again (+15 and +76 lines respectively) — "Hood, Flywheel, Joystick controls" commits, plus "Fixed Hood Absolute Encoder magnet offsets, and discontinuity, added controls to step Hood position with Y/A gunner." More bench-tuned hardware behavior in the same vein as §3.4.4's turret PID/zeroing concerns — likely more at risk of silent loss during the architecture port, not less.
+- `RobotContainer.java` changed again (+57 lines) and `Constants.java` again (+15 lines, separately from the diff already noted in §2.4) — both need re-diffing against the current tip, not the 2026-09-16 one.
+- New non-code assets landed too: `docs/Phoenix-Tuner-X-Beginner-Guide.md` and two PhotonVision settings export zips under `photonvision_config/` (`leto-a-photonvision-settings-export.zip`, `leto-b-photonvision-settings-export.zip`) — worth carrying forward regardless of which side "wins" the code reconciliation, since they're camera/coprocessor configuration, not source.
+
+**Recommendation:** before Stage 0 is actually executed, re-run Appendix A's commands against the current tips (`leto_old_notused`@`22ba3b1` vs `leto_main`@`208284c`) and refresh §2–§4 rather than trusting the numbers as written. This plan is not wrong, just dated — treat every line-count and "only N lines changed" claim below as provisional until re-verified.
 
 ---
 

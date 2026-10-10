@@ -16,6 +16,11 @@ Update this file in the **same commit** as any work it describes, per `leto`'s `
 
 No commits have been made on any integration branch yet — `leto-integration` (§5, Stage 0) does not exist.
 
+## Update, 2026-10-10
+
+- `origin/leto` was renamed to `origin/leto_old_notused` on the remote — same commit (`22ba3b1`), nothing lost. Local `leto` branch's upstream was repointed accordingly (`git branch --set-upstream-to=origin/leto_old_notused leto`). All plan references to "`leto`" remain valid; only the remote name changed.
+- `origin/leto_main` advanced 12 commits past the snapshot above, to `208284c` (PR #17, "turret_hood_trim_contols"), adding a new `Hood.java` subsystem, another `TunerConstants.java` regeneration, and further `Turret.java`/`Flywheel.java`/`RobotContainer.java` edits. See `leto_merge_plan.md` §0.5 for details. **The Bucket A–D classification in the plan has not been re-audited against this new tip** — treat it as stale until Stage 0 re-runs the comparison.
+
 ---
 
 ## Stage checklist
