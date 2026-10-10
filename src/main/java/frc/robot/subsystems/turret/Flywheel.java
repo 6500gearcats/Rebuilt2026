@@ -106,8 +106,8 @@ public class Flywheel extends SubsystemBase {
           robotStateMachine.getTurretPose().getTranslation()
               .getDistance(targetPose.getTranslation())));
     }
-    if (m_loop == 20){
-      m_loop = 0;
+    // if (m_loop == 20){
+      // m_loop = 0;
       SmartDashboard.putNumber("Left Motor Speed", m_topMotor.getVelocity().getValueAsDouble());
       SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
       SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
@@ -120,8 +120,8 @@ public class Flywheel extends SubsystemBase {
       SmartDashboard.putNumber("rot adder",
           RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition()));
       SmartDashboard.putNumber("rot old testing", robotStateMachine.getTurretPose().getRotation().getDegrees());
-    }
-    m_loop++;
+    // }
+    // m_loop++;
     // This method will be called once per scheduler run
   }
 
