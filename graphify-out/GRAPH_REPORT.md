@@ -1,16 +1,16 @@
-# Graph Report - Rebuilt2026  (2026-10-04)
+# Graph Report - Rebuilt2026  (2026-10-10)
 
 ## Corpus Check
-- 71 files · ~39,607 words
+- 73 files · ~40,062 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 859 nodes · 1844 edges · 50 communities (41 shown, 9 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 107 edges (avg confidence: 0.8)
+- 871 nodes · 1854 edges · 47 communities (41 shown, 6 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 106 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a4cdd007`
+- Built from commit: `341426f0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,8 +25,8 @@
 - Intake
 - Pose2d
 - Constants
-- RobotStateMachine
-- Hopper
+- .getState
+- RunHopper
 - LimelightIO
 - Pose3d
 - Robot
@@ -36,19 +36,16 @@
 - .periodic
 - Telemetry
 - Flywheel
-- RobotStateMachine.java
+- RobotStateMachine
 - PoseEstimate
 - .getLimelightNTDoubleArray
 - .periodic
-- Climber
-- LimelightHelpers.java
-- SysIDUtil
+- Q: Can you check to see if the vision subsystem is currently working in this branch and describe the cameras and pose estimation?
+- .getLimelightNTTableEntry
+- Q: Why does gunner D-pad up flywheel speed jump back to the initial speed?
 - ShooterValuesSenable
 - ControllerRumble
-- CoolSnurbo
-- SequentialCommandGroup
-- FieldZone
-- UpToSpeedHopperShoot
+- Command
 - Q: when we are testing the auto, for the first part the shots are consistently extremely off, the shoots are about 3 feet to the left of the hub, it seems like the robot locks on and accuracy dramatically improves once the cameras are able to see tags on the hub. what's going on here ? give me some options...
 - Q: Help me understand a good procedure for calibrating TOF
 - Q: Enable the new hood motor and turret and hood CANcoders with four manual trim controls
@@ -67,7 +64,7 @@
 1. `LimelightHelpers` - 104 edges
 2. `RobotStateMachine` - 77 edges
 3. `Turret` - 45 edges
-4. `Flywheel` - 38 edges
+4. `Flywheel` - 40 edges
 5. `RobotContainer` - 36 edges
 6. `CommandSwerveDrivetrain` - 32 edges
 7. `PhotonVisionIO` - 32 edges
@@ -82,27 +79,27 @@
   src/main/java/frc/robot/Robot.java → src/main/java/frc/robot/RobotStateMachine.java
 - `RobotContainer` --references--> `RobotStateMachine`  [EXTRACTED]
   src/main/java/frc/robot/RobotContainer.java → src/main/java/frc/robot/RobotStateMachine.java
-- `RobotContainer` --references--> `Climber`  [EXTRACTED]
-  src/main/java/frc/robot/RobotContainer.java → src/main/java/frc/robot/subsystems/Climber.java
 - `RobotContainer` --references--> `CommandSwerveDrivetrain`  [EXTRACTED]
   src/main/java/frc/robot/RobotContainer.java → src/main/java/frc/robot/subsystems/CommandSwerveDrivetrain.java
+- `RobotContainer` --references--> `Intake`  [EXTRACTED]
+  src/main/java/frc/robot/RobotContainer.java → src/main/java/frc/robot/subsystems/intake/Intake.java
 
 ## Import Cycles
 - None detected.
 
-## Communities (50 total, 9 thin omitted)
+## Communities (47 total, 6 thin omitted)
 
 ### Community 0 - "PhotonVisionSimIO"
 Cohesion: 0.07
 Nodes (20): PhotonCameraSim, SimCameraProperties, Matrix, N1, N3, Override, PhotonPipelineResult, PhotonPoseEstimator (+12 more)
 
 ### Community 1 - "TunerConstants"
-Cohesion: 0.05
-Nodes (31): Angle, CANBus, CANcoderConfiguration, ClosedLoopOutputType, Current, Distance, DriveMotorArrangement, LinearVelocity (+23 more)
+Cohesion: 0.07
+Nodes (30): Angle, CANBus, CANcoderConfiguration, ClosedLoopOutputType, Current, DriveMotorArrangement, LinearVelocity, MomentOfInertia (+22 more)
 
 ### Community 2 - "Turret"
-Cohesion: 0.07
-Nodes (17): DigitalInput, AlignTurretToHub, Override, Pose2d, DoubleSupplier, Override, MoveTurret, Override (+9 more)
+Cohesion: 0.06
+Nodes (22): AlignTurretToHub, Override, Pose2d, DoubleSupplier, Override, MoveTurret, Override, SetTurretAngle (+14 more)
 
 ### Community 3 - "PhotonVisionIO"
 Cohesion: 0.10
@@ -113,40 +110,40 @@ Cohesion: 0.05
 Nodes (37): A device doesn't appear in Tuner, Actually moving a motor, Before you start, CAN bus utilization, Decide this first: Tuner or code?, Device shows as not licensed when it should be, Faults, and why sticky ones matter, Firmware or version mismatch errors (+29 more)
 
 ### Community 6 - "CommandSwerveDrivetrain"
-Cohesion: 0.10
+Cohesion: 0.07
 Nodes (20): ApplyRobotSpeeds, Notifier, Pigeon2, CommandSwerveDrivetrain, Command, Direction, Matrix, N1 (+12 more)
 
 ### Community 7 - "Intake"
 Cohesion: 0.11
 Nodes (10): HomeIntake, Override, Override, RunIntake, IntakeConstants, MotorConstants, Intake, Override (+2 more)
 
-### Community 8 - "Pose2d"
-Cohesion: 0.14
-Nodes (6): Pose2d, LimelightResults, LimelightTarget_Classifier, LimelightTarget_Detector, LimelightTarget_Fiducial, LimelightTarget_Retro
-
 ### Community 9 - "Constants"
-Cohesion: 0.11
-Nodes (23): Constraints, IdleMode, RobotConfig, AutoConstants, ClimberConstants, Constants, DriveConstants, GyroConstants (+15 more)
+Cohesion: 0.12
+Nodes (23): Constraints, DigitalInput, IdleMode, RobotConfig, AutoConstants, ClimberConstants, Constants, DriveConstants (+15 more)
 
-### Community 10 - "RobotStateMachine"
-Cohesion: 0.14
-Nodes (6): CommandXboxController, XboxController, RobotState, ACTIVE, INACTIVE, RobotStateMachine
+### Community 10 - ".getState"
+Cohesion: 0.24
+Nodes (3): RobotState, ACTIVE, INACTIVE
 
-### Community 11 - "Hopper"
-Cohesion: 0.14
-Nodes (7): Command, Override, RunHopper, Override, RunHopperBack, Hopper, Override
+### Community 11 - "RunHopper"
+Cohesion: 0.18
+Nodes (4): Override, RunHopper, Override, RunHopperBack
 
 ### Community 12 - "LimelightIO"
-Cohesion: 0.18
+Cohesion: 0.21
 Nodes (3): Override, Rotation2d, LimelightIO
 
+### Community 13 - "Pose3d"
+Cohesion: 0.13
+Nodes (5): Pose3d, LimelightResults, LimelightTarget_Classifier, LimelightTarget_Detector, LimelightTarget_Fiducial
+
 ### Community 14 - "Robot"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (5): Command, Override, Timer, Robot, TimedRobot
 
 ### Community 15 - "RobotContainer.java"
-Cohesion: 0.15
-Nodes (15): CommandPS4Controller, FieldCentric, ParallelCommandGroup, PointWheelsAt, SendableChooser, SlewRateLimiter, ShootingSequence, ShootingSequenceUTS (+7 more)
+Cohesion: 0.05
+Nodes (27): CommandPS4Controller, FieldCentric, ParallelCommandGroup, PointWheelsAt, SendableChooser, SequentialCommandGroup, SlewRateLimiter, ClimbPole (+19 more)
 
 ### Community 16 - "Vision"
 Cohesion: 0.20
@@ -156,33 +153,37 @@ Nodes (11): AprilTagFieldLayout, Field2d, N3, Override, Pose2d, Rotation2d, Stru
 Cohesion: 0.18
 Nodes (11): CANdle, CANdleConfiguration, EmptyAnimation, RainbowAnimation, RGBWColor, DoubleSupplier, Override, Timer (+3 more)
 
+### Community 18 - ".periodic"
+Cohesion: 0.19
+Nodes (3): Override, UpToSpeedHopperShoot, Override
+
 ### Community 19 - "Telemetry"
 Cohesion: 0.20
 Nodes (15): DoubleArrayPublisher, DoublePublisher, Mechanism2d, MechanismLigament2d, NetworkTableInstance, ChassisSpeeds, NetworkTable, Pose2d (+7 more)
 
 ### Community 20 - "Flywheel"
-Cohesion: 0.18
-Nodes (8): DoubleSupplier, Override, ShootFuel, Flywheel, ControlRequest, TalonFX, TalonFXConfiguration, VelocityVoltage
+Cohesion: 0.21
+Nodes (5): Flywheel, ControlRequest, TalonFX, TalonFXConfiguration, VelocityVoltage
 
-### Community 21 - "RobotStateMachine.java"
-Cohesion: 0.16
-Nodes (8): Color, InterpolatingDoubleTreeMap, TurretConstants, ChassisSpeeds, Pose3d, StructPublisher, RangeFinder, Transform2d
+### Community 21 - "RobotStateMachine"
+Cohesion: 0.15
+Nodes (10): Alliance, Color, Distance, ChassisSpeeds, CommandXboxController, Pose2d, Pose3d, StructPublisher (+2 more)
 
 ### Community 22 - "PoseEstimate"
 Cohesion: 0.21
 Nodes (3): PoseEstimate, RawDetection, RawFiducial
 
-### Community 25 - "Climber"
-Cohesion: 0.24
-Nodes (4): ClimbPole, Override, Climber, Override
+### Community 25 - "Q: Can you check to see if the vision subsystem is currently working in this branch and describe the cameras and pose estimation?"
+Cohesion: 0.40
+Nodes (4): Answer, Outcome, Q: Can you check to see if the vision subsystem is currently working in this branch and describe the cameras and pose estimation?, Source Nodes
 
-### Community 26 - "LimelightHelpers.java"
-Cohesion: 0.20
+### Community 26 - ".getLimelightNTTableEntry"
+Cohesion: 0.14
 Nodes (5): DoubleArrayEntry, NetworkTableEntry, ObjectMapper, NetworkTable, URL
 
-### Community 27 - "SysIDUtil"
-Cohesion: 0.36
-Nodes (6): Command, Direction, SequentialCommandGroup, SysIdRoutine, SysIDUtil, VoltageOut
+### Community 27 - "Q: Why does gunner D-pad up flywheel speed jump back to the initial speed?"
+Cohesion: 0.40
+Nodes (4): Answer, Outcome, Q: Why does gunner D-pad up flywheel speed jump back to the initial speed?, Source Nodes
 
 ### Community 28 - "ShooterValuesSenable"
 Cohesion: 0.24
@@ -192,13 +193,9 @@ Nodes (4): Sendable, SendableBuilder, Override, ShooterValuesSenable
 Cohesion: 0.36
 Nodes (3): GenericHID, ControllerRumble, Override
 
-### Community 31 - "SequentialCommandGroup"
-Cohesion: 0.38
-Nodes (3): SequentialCommandGroup, StaggerHopper, UncoolSnurbo
-
-### Community 32 - "FieldZone"
-Cohesion: 0.29
-Nodes (6): FieldZone, ALLIANCE, NEUTRAL_BOTTOM, NEUTRAL_CENTER, NEUTRAL_TOP, OPPONENT
+### Community 32 - "Command"
+Cohesion: 0.13
+Nodes (12): Command, InterpolatingDoubleTreeMap, DoubleSupplier, Override, ShootFuel, FieldZone, ALLIANCE, NEUTRAL_BOTTOM (+4 more)
 
 ### Community 34 - "Q: when we are testing the auto, for the first part the shots are consistently extremely off, the shoots are about 3 feet to the left of the hub, it seems like the robot locks on and accuracy dramatically improves once the cameras are able to see tags on the hub. what's going on here ? give me some options..."
 Cohesion: 0.40
@@ -245,38 +242,38 @@ Cohesion: 0.83
 Nodes (3): gradlew script, die(), warn()
 
 ## Knowledge Gaps
-- **75 isolated node(s):** `REAL`, `SIM`, `OIConstants`, `NeoMotorConstants`, `GyroConstants` (+70 more)
+- **81 isolated node(s):** `REAL`, `SIM`, `OIConstants`, `NeoMotorConstants`, `GyroConstants` (+76 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **6 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Work-memory lessons
 
 **Preferred sources** — corroborated by past sessions; start here.
-- `Turret` (6× useful, score=4.653978507)
-- `RobotContainer` (5× useful, score=3.894263178) _(code changed — re-verify)_
-- `Constants` (5× useful, score=3.863357088)
-- `TunerConstants` (3× useful, score=2.343026467)
-- `Flywheel` (3× useful, score=2.205587587) _(code changed — re-verify)_
-- `Vision` (3× useful, score=2.197152057)
-- `AlignTurretToHub` (3× useful, score=2.060869265) _(code changed — re-verify)_
-- `RobotStateMachine` (3× useful, score=2.060869265) _(code changed — re-verify)_
-- `PhotonVisionIO` (2× useful, score=1.582276987)
-- `UpToSpeedHopperShoot` (2× useful, score=1.270247847) _(code changed — re-verify)_
+- `RobotContainer` (6× useful, score=4.103565189) _(code changed — re-verify)_
+- `Constants` (6× useful, score=4.078928059)
+- `Turret` (6× useful, score=3.709970173)
+- `Vision` (4× useful, score=2.750694385)
+- `RobotStateMachine` (4× useful, score=2.642055059)
+- `PhotonVisionIO` (3× useful, score=2.260539959)
+- `TunerConstants` (3× useful, score=1.867769328)
+- `Flywheel` (3× useful, score=1.758208413) _(code changed — re-verify)_
+- `AlignTurretToHub` (3× useful, score=1.64284461)
+- `UpToSpeedHopperShoot` (2× useful, score=1.012592047)
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `LimelightHelpers` connect `LimelightHelpers` to `Pose2d`, `LimelightIO`, `Pose3d`, `LimelightTarget_Barcode`, `RobotContainer.java`, `PoseEstimate`, `.getLimelightNTDoubleArray`, `LimelightHelpers.java`?**
-  _High betweenness centrality (0.221) - this node is a cross-community bridge._
-- **Why does `RobotStateMachine` connect `RobotStateMachine` to `FieldZone`, `UpToSpeedHopperShoot`, `Turret`, `CommandSwerveDrivetrain`, `Hopper`, `Robot`, `RobotContainer.java`, `Vision`, `.periodic`, `Flywheel`, `RobotStateMachine.java`, `.periodic`?**
-  _High betweenness centrality (0.125) - this node is a cross-community bridge._
-- **Why does `RobotContainer` connect `RobotContainer.java` to `TunerConstants`, `Turret`, `PhotonVisionIO`, `LimelightHelpers`, `CommandSwerveDrivetrain`, `Intake`, `RobotStateMachine`, `Hopper`, `Robot`, `Vision`, `LedCANdle`, `Telemetry`, `Flywheel`, `RobotStateMachine.java`, `.periodic`, `Climber`, `SysIDUtil`?**
-  _High betweenness centrality (0.116) - this node is a cross-community bridge._
+- **Why does `LimelightHelpers` connect `LimelightHelpers` to `CommandSwerveDrivetrain`, `Pose2d`, `LimelightIO`, `Pose3d`, `LimelightTarget_Barcode`, `RobotContainer.java`, `PoseEstimate`, `.getLimelightNTDoubleArray`, `.getLimelightNTTableEntry`?**
+  _High betweenness centrality (0.216) - this node is a cross-community bridge._
+- **Why does `RobotStateMachine` connect `RobotStateMachine` to `Command`, `Turret`, `CommandSwerveDrivetrain`, `.getState`, `RunHopper`, `Robot`, `RobotContainer.java`, `Vision`, `.periodic`, `Flywheel`, `.periodic`?**
+  _High betweenness centrality (0.122) - this node is a cross-community bridge._
+- **Why does `RobotContainer` connect `RobotContainer.java` to `Command`, `TunerConstants`, `Turret`, `PhotonVisionIO`, `CommandSwerveDrivetrain`, `Intake`, `Robot`, `Vision`, `LedCANdle`, `Telemetry`, `Flywheel`, `RobotStateMachine`, `.periodic`?**
+  _High betweenness centrality (0.113) - this node is a cross-community bridge._
 - **What connects `REAL`, `SIM`, `OIConstants` to the rest of the system?**
-  _75 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _81 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PhotonVisionSimIO` be split into smaller, more focused modules?**
   _Cohesion score 0.06836055656382335 - nodes in this community are weakly interconnected._
 - **Should `TunerConstants` be split into smaller, more focused modules?**
-  _Cohesion score 0.053544494720965306 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06755260243632337 - nodes in this community are weakly interconnected._
 - **Should `Turret` be split into smaller, more focused modules?**
-  _Cohesion score 0.07346938775510205 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06271186440677966 - nodes in this community are weakly interconnected._
