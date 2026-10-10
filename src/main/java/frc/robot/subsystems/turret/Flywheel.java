@@ -36,7 +36,7 @@ public class Flywheel extends SubsystemBase {
   public Flywheel(RobotStateMachine robotStateMachine) {
     this.robotStateMachine = robotStateMachine;
     TalonFXConfiguration configs = new TalonFXConfiguration()
-        .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6))
+        .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.5))
         .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
     // Retain the merged gains/inversion until physical direction and speed tests.
     configs.Slot0.kS = 0.28342;

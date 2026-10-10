@@ -48,7 +48,7 @@ public class Hood extends SubsystemBase {
             .withForwardSoftLimitThreshold(TurretConstants.kHoodMaxPositionRotations)
             .withReverseSoftLimitEnable(true)
             .withReverseSoftLimitThreshold(TurretConstants.kHoodMinPositionRotations))
-        .withSlot0(new Slot0Configs().withKS(1.0).withKP(1.0));
+        .withSlot0(new Slot0Configs().withKS(2.0).withKV(0.02).withKP(10.0));
     boolean motorConfigured = m_motor.getConfigurator().apply(motorConfig).isOK();
     configured = encoderConfigured && motorConfigured;
     initializeFromAbsolute();
