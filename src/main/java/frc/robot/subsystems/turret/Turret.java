@@ -83,6 +83,18 @@ public class Turret extends SubsystemBase {
     m_encoder.getPosition().setUpdateFrequency(100.0);
     m_encoder.getVelocity().setUpdateFrequency(100.0);
     zeroMotorPosition();
+    m_motor.getConfigurator().apply(talonFXConfigs);
+
+    // Seed motor feedback and the first target from the calibrated absolute angle.
+    var absolutePositionSignal = m_encoder.getAbsolutePosition().waitForUpdate(0.5);
+    if (absolutePositionSignal.getStatus().isOK()) {
+      double targetPosition = absolutePositionSignal.getValueAsDouble();
+      m_motor.setPosition(targetPosition);
+    } else {
+      double targetPosition = m_motor.getPosition().getValueAsDouble();
+      DriverStation.reportError("Failed to initialize turret position from absolute encoder: "
+              + absolutePositionSignal.getStatus(), false);
+    }
   }
 
   @Override
@@ -92,7 +104,7 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Turret Absolute Position (rotations)", absolutePositionRotations);
-    SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * 360.0);
+    SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * -360.0);
     SmartDashboard.putBoolean("Turret Encoder Connected", isEncoderFeedbackReady());
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
 
@@ -136,7 +148,7 @@ public class Turret extends SubsystemBase {
 
   /** Returns the raw absolute turret encoder position in degrees. */
   public double getAbsolutePositionDegrees() {
-    return getAbsolutePositionRotations() * 360.0;
+    return getAbsolutePositionRotations() * -360.0;
   }
 
   /** Synchronizes continuous feedback with the existing absolute encoder reference. */

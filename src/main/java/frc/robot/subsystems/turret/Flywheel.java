@@ -54,7 +54,7 @@ public class Flywheel extends SubsystemBase {
 
   public Flywheel(RobotStateMachine robotStateMachine) {
     this.robotStateMachine = robotStateMachine;
-    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.5))
+    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6))
         .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
 
     // // set slot 0 gains
@@ -137,6 +137,12 @@ public class Flywheel extends SubsystemBase {
     setSpeed(speed);
   }
 
+  public void setManualSpeedIncrement(double increment) {
+    double newSpeed = manualSpeedOverride.orElse(getReqSpeed()) + increment;
+    manualSpeedOverride = OptionalDouble.of(newSpeed);
+    setSpeed(newSpeed);
+  }
+
   public void clearManualSpeed() {
     manualSpeedOverride = OptionalDouble.empty();
   }
@@ -149,8 +155,9 @@ public class Flywheel extends SubsystemBase {
         speed = manualSpeedOverride.getAsDouble();
         speedValue = speed;
       } else {
-        speedValue = speed + (2 * speedMultiplier)
-            + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
+        speedValue = speed;
+//                + (2 * speedMultiplier)
+//            + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
         if (robotStateMachine.underTrench()) {
           double trenchCorr = robotStateMachine.ductTapeCorrection ? 4 : 0;
           speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
@@ -189,6 +196,9 @@ public class Flywheel extends SubsystemBase {
       speedWithinToleranceSince = -1;
       speedStable = false;
     }
+
+    // Force for testing
+    speedStable = true;
   }
 
   public void stopMotor() {
