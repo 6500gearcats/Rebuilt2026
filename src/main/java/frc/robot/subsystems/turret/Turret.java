@@ -56,11 +56,11 @@ public class Turret extends SubsystemBase {
     // Convert its gains to output per turret rotation (and rotation/s, rotation/s^2).
     var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kS = 0.2;
-    slot0Configs.kV = 450.0;
-    slot0Configs.kA = 270.0;
-    slot0Configs.kP = 270.0;
+    slot0Configs.kV = 5;
+    slot0Configs.kA = 3;
+    slot0Configs.kP = 3;
     slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 36.0;
+    slot0Configs.kD = 0.4;
 
     var slot1Configs = talonFXConfigs.Slot1;
     // Dashboard tuning values now use turret rotations, not motor rotations.
@@ -74,11 +74,11 @@ public class Turret extends SubsystemBase {
     // Existing tuned gains, converted from motor rotations to turret rotations.
     var slot2Configs = talonFXConfigs.Slot2;
     slot2Configs.kS = 0.20757;
-    slot2Configs.kV = 9.306;
-    slot2Configs.kA = 0.680157;
-    slot2Configs.kP = 672.741;
+    slot2Configs.kV = 0.1;
+    slot2Configs.kA = 0.001;
+    slot2Configs.kP = 7.4;
     slot2Configs.kI = 0; // no output for integrated error
-    slot2Configs.kD = 32.9094;
+    slot2Configs.kD = 0.365;
 
     m_encoder.getPosition().setUpdateFrequency(100.0);
     m_encoder.getVelocity().setUpdateFrequency(100.0);
@@ -200,9 +200,9 @@ public class Turret extends SubsystemBase {
    * @param deg desired turret angle in degrees
    */
   public void setPosition(double deg) {
-    if (robotStateMachine.ductTapeCorrection) {
-      deg -= 5;
-    }
+//    if (robotStateMachine.ductTapeCorrection) {
+//      deg -= 5;
+//    }
     requestAngle(deg);
   }
 
