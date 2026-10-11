@@ -12,6 +12,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
@@ -55,10 +56,20 @@ public class Hood extends SubsystemBase {
                     .withReverseSoftLimitEnable(true)
                     .withReverseSoftLimitThreshold(
                             TurretConstants.kHoodMinPositionRotations)
-                            ).withSlot0(new Slot0Configs().withKS(1.0).withKP(1.0));
-    m_encoder.setPosition(TurretConstants.kHoodMinPositionRotations);
+//                            ).withSlot0(new Slot0Configs().withKS(1.0).withKP(1.0));
+                            ).withSlot0(new Slot0Configs().withKS(2.0).withKV(0.02).withKP(10.0));
     m_motor.getConfigurator().apply(motorConfig);
-    targetPosition = m_motor.getPosition().getValueAsDouble();
+
+    // Seed motor feedback and the first target from the calibrated absolute angle.
+    var absolutePositionSignal = m_encoder.getAbsolutePosition().waitForUpdate(0.5);
+    if (absolutePositionSignal.getStatus().isOK()) {
+      targetPosition = absolutePositionSignal.getValueAsDouble();
+      m_motor.setPosition(targetPosition);
+    } else {
+      targetPosition = m_motor.getPosition().getValueAsDouble();
+      DriverStation.reportError("Failed to initialize hood position from absolute encoder: "
+          + absolutePositionSignal.getStatus(), false);
+    }
   }
 
   @Override
