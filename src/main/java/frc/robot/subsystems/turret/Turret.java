@@ -44,7 +44,7 @@ public class Turret extends SubsystemBase {
     talonFXConfigs.Feedback.SensorToMechanismRatio = 1.0;
     // Positive output previously decreased the encoder angle. Reverse the motor
     // so positive closed-loop output now increases the selected feedback.
-    talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    talonFXConfigs.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
     talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
         TurretConstants.kTurretMinAngleDegrees / 360.0;
