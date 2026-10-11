@@ -88,6 +88,7 @@ public class Hood extends SubsystemBase {
     if (!encoderConnected || isMotionBlocked(m_commandedSpeed, absolutePositionRotations)) {
       stop();
     }
+    m_motor.setControl(positionRequest.withPosition(shotSolution.getHoodRotation()));
 
     SmartDashboard.putNumber("Hood Absolute Position (rotations)", absolutePositionRotations);
     SmartDashboard.putNumber("Hood m_commandedSpeed", m_commandedSpeed);

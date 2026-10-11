@@ -54,7 +54,7 @@ public class Flywheel extends SubsystemBase {
 
   public Flywheel(RobotStateMachine robotStateMachine) {
     this.robotStateMachine = robotStateMachine;
-    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.5))
+    talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6))
         .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
 
     // // set slot 0 gains
