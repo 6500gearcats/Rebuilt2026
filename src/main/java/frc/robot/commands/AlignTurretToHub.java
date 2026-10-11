@@ -4,13 +4,14 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.turret.Turret;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -23,7 +24,8 @@ public class AlignTurretToHub extends Command {
   private Pose2d prevPose = new Pose2d();
   private double prevTurretRot = 0;
   private static final double ALIGNMENT_TOLERANCE_DEGREES = 1.5;
-  private static final double ALIGNMENT_RATE_TOLERANCE_RPS = 0.1;
+  // Preserve the former 0.4 degrees/s tolerance with encoder-based velocity.
+  private static final double ALIGNMENT_RATE_TOLERANCE_RPS = 0.4 / 360.0;
 
   public AlignTurretToHub(Turret turret) {
     m_turret = turret;
@@ -62,28 +64,24 @@ public class AlignTurretToHub extends Command {
                                                                                      // minue rotation between tag/robot
     SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
 
-    double newError = turretToTargetAngle.getDegrees() + m_turret.getConvertedTurretPosition();
-    newError = (Math.abs(newError) - 180) * Math.signum(newError); // (newError / Math.abs(newError)); Signum handles
-                                                                   // divide by zero
-
-    if (newError > 0) {
-      if (Math.abs(newError) > 110) {
-        newError = 110 * (Math.abs(newError) / newError);
-      }
-    } else {
-      if (Math.abs(newError) > 103) {
-        newError = 110 * (Math.abs(newError) / newError);
-      }
-    }
-    if (Math.abs(newError) > 0.005) {
-      m_turret.setPosition(newError);
-    }
+    // Absolute encoder zero is forward. Add the heading error to the measured
+    // angle to obtain the desired angle relative to the robot, including zero.
+    double targetAngleDegrees = calculateTargetAngleDegrees(
+        turretToTargetAngle, m_turret.getAbsolutePositionDegrees());
+    m_turret.setPosition(targetAngleDegrees);
 
     boolean aligned = Math.abs(turretToTargetAngle.getDegrees()) <= ALIGNMENT_TOLERANCE_DEGREES
         && Math.abs(m_turret.getSpeed()) <= ALIGNMENT_RATE_TOLERANCE_RPS;
     SmartDashboard.putBoolean("Aligned", aligned);
 
-    SmartDashboard.putNumber("tunring_pos_setpoint", newError);
+    SmartDashboard.putNumber("tunring_pos_setpoint", targetAngleDegrees);
+  }
+
+  static double calculateTargetAngleDegrees(Rotation2d headingError, double turretAngleDegrees) {
+    double targetAngleDegrees = MathUtil.inputModulus(
+        headingError.getDegrees() + turretAngleDegrees, -180.0, 180.0);
+    return MathUtil.clamp(targetAngleDegrees,
+        TurretConstants.kTurretMinAngleDegrees, TurretConstants.kTurretMaxAngleDegrees);
   }
 
   // Called once the command ends or is interrupted.
