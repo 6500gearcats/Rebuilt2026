@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -74,6 +75,18 @@ public class Turret extends SubsystemBase {
 
     m_motor.getConfigurator().apply(talonFXConfigs);
 
+    // Seed motor feedback and the first target from the calibrated absolute angle.
+    var absolutePositionSignal = m_encoder.getAbsolutePosition().waitForUpdate(0.5);
+    if (absolutePositionSignal.getStatus().isOK()) {
+      double targetPosition = absolutePositionSignal.getValueAsDouble();
+      m_motor.setPosition(targetPosition);
+    } else {
+      double targetPosition = m_motor.getPosition().getValueAsDouble();
+      DriverStation.reportError("Failed to initialize turret position from absolute encoder: "
+              + absolutePositionSignal.getStatus(), false);
+    }
+
+
     m_motor.getConfigurator();
   }
 
@@ -84,7 +97,7 @@ public class Turret extends SubsystemBase {
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Turret Absolute Position (rotations)", absolutePositionRotations);
-    SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * 360.0);
+    SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * -360.0);
     SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
 
     if (toZeroPos) {
@@ -134,7 +147,7 @@ public class Turret extends SubsystemBase {
 
   /** Returns the raw absolute turret encoder position in degrees. */
   public double getAbsolutePositionDegrees() {
-    return getAbsolutePositionRotations() * 360.0;
+    return getAbsolutePositionRotations() * -360.0;
   }
 
   public void zeroMotorPosition() {
@@ -147,11 +160,11 @@ public class Turret extends SubsystemBase {
    * @return turret angle in degrees
    */
   public double getConvertedTurretPosition() {
-    return -((getMotorPosition() * 4) - 110);
+    return this.getAbsolutePositionDegrees();
   }
 
   public double unconvertPosition(double pos) {
-    return ((-1 * pos) + 110) / 4;
+    return pos / 360.0;
   }
 
   /**
