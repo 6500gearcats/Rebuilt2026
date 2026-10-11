@@ -137,6 +137,12 @@ public class Flywheel extends SubsystemBase {
     setSpeed(speed);
   }
 
+  public void setManualSpeedIncrement(double increment) {
+    double newSpeed = manualSpeedOverride.orElse(getReqSpeed()) + increment;
+    manualSpeedOverride = OptionalDouble.of(newSpeed);
+    setSpeed(newSpeed);
+  }
+
   public void clearManualSpeed() {
     manualSpeedOverride = OptionalDouble.empty();
   }
