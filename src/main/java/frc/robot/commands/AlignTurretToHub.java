@@ -70,8 +70,8 @@ public class AlignTurretToHub extends Command {
         turretToTargetAngle, m_turret.getAbsolutePositionDegrees());
     m_turret.setPosition(targetAngleDegrees);
 
-    boolean aligned = Math.abs(turretToTargetAngle.getDegrees()) <= ALIGNMENT_TOLERANCE_DEGREES
-        && Math.abs(m_turret.getSpeed()) <= ALIGNMENT_RATE_TOLERANCE_RPS;
+    boolean aligned = Math.abs(turretToTargetAngle.getDegrees()) <= ALIGNMENT_TOLERANCE_DEGREES)
+//        && Math.abs(m_turret.getSpeed()) <= ALIGNMENT_RATE_TOLERANCE_RPS;
     SmartDashboard.putBoolean("Aligned", aligned);
 
     SmartDashboard.putNumber("tunring_pos_setpoint", targetAngleDegrees);
