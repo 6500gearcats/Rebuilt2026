@@ -5,29 +5,36 @@
 package frc.robot.utility;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotStateMachine;
 
 public class RangeFinder {
   private static InterpolatingDoubleTreeMap m_shootMap = new InterpolatingDoubleTreeMap();
   private static InterpolatingDoubleTreeMap m_TOFMap = new InterpolatingDoubleTreeMap();
+  private static InterpolatingDoubleTreeMap m_hoodMap = new InterpolatingDoubleTreeMap();
   private static InterpolatingDoubleTreeMap m_rotMap = new InterpolatingDoubleTreeMap();
 
   static {
-    m_shootMap.put(1.6, 44.0);
-    m_shootMap.put(1.8, 46.25);
-    m_shootMap.put(2.0, 47.0);
-    m_shootMap.put(2.2, 48.5);
-    m_shootMap.put(2.38, 50.0);
-    m_shootMap.put(2.64, 51.0);
-    m_shootMap.put(3.1, 55.0);
-    m_shootMap.put(3.4, 60.0);
-    m_shootMap.put(3.6, 63.0);
-    m_shootMap.put(3.8, 64.5);
-    m_shootMap.put(4.0, 70.0);
-    m_shootMap.put(4.7, 80.0);
-    m_shootMap.put(5.3, 91.0);
+    m_shootMap.put(1.6321524, 47.1966146);
+    m_shootMap.put(2.05940044, 50.8945313);
+    m_shootMap.put(2.28893151, 55.1516544);
+    m_shootMap.put(2.70346734, 57.5031467);
+    m_shootMap.put(3.07653898, 58.3346354);
+    m_shootMap.put(3.41765063, 57.6749132);
+    m_shootMap.put(3.95500451, 61.0183377);
+    m_shootMap.put(4.31298443, 64.5872396);
+    m_shootMap.put(4.76775014, 56.7465278);
+
+
+
+    m_hoodMap.put(1.6321524, 0.01235623);
+    m_hoodMap.put(2.05940044, 0.075927734);
+    m_hoodMap.put(2.28893151, 0.02648208);
+    m_hoodMap.put(2.70346734, 0.08269586);
+    m_hoodMap.put(3.07653898, 0.12628852);
+    m_hoodMap.put(3.41765063, 0.24892849);
+    m_hoodMap.put(3.95500451, 0.29673937);
+    m_hoodMap.put(4.31298443, 0.32543945);
+    m_hoodMap.put(4.76775014, 0.34509277);
+
 
     m_rotMap.put(-90.0, 7.0);
     m_rotMap.put(-45.0, 5.0);
@@ -36,16 +43,24 @@ public class RangeFinder {
     m_rotMap.put(90.0, 7.0);
 
     // ! Fake values
-    m_TOFMap.put(1.8, 0.85);
-    m_TOFMap.put(2.5, 0.92);
-    m_TOFMap.put(3.0, 0.97);
-    m_TOFMap.put(3.5, 1.02);
-    m_TOFMap.put(4.2, 1.08);
-    m_TOFMap.put(5.2, 1.14);
+    m_TOFMap.put(1.6321524, 0.7759643441);
+    m_TOFMap.put(2.05940044, 0.8953730721);
+    m_TOFMap.put(2.28893151, 1.01208837);
+    m_TOFMap.put(2.70346734, 1.106016396);
+    m_TOFMap.put(3.07653898, 1.077115465);
+    m_TOFMap.put(3.41765063, 0.9879116298);
+    m_TOFMap.put(3.95500451, 1.038766153);
+    m_TOFMap.put(4.31298443, 1.12867541);
+    m_TOFMap.put(4.76775014, 1.161381345);
+
   }
 
   public static double getShotVelocity(double distance) {
     return m_shootMap.get(distance);
+  }
+
+  public static double getHoodRotations(double distance) {
+    return m_hoodMap.get(distance);
   }
 
   public static double getTOF(double distance) {

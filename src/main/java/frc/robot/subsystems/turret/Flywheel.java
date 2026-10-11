@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.turret;
 
+import java.util.OptionalDouble;
+
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -29,7 +31,7 @@ import frc.robot.Constants.MotorConstants;
  */
 public class Flywheel extends SubsystemBase {
   /** Creates a new Turret. */
-  TalonFX m_topMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
+  TalonFX m_topMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
@@ -37,8 +39,9 @@ public class Flywheel extends SubsystemBase {
   private double speedMultiplier = 0;
   public double rotationMultiplier = 0;
   private double reqSpeed;
+  private OptionalDouble manualSpeedOverride = OptionalDouble.empty();
   private int m_loop = 0;
-  TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorTopID);
+  TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
   private RobotStateMachine robotStateMachine;
 
   TalonFXConfiguration talonFXConfigs;
@@ -64,9 +67,9 @@ public class Flywheel extends SubsystemBase {
 
     // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.1087; // Add 0.25 V output to overcome static friction
-    slot0Configs.kV = 0.076456; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kA = 0.010904; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kS = 0.28342; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = 0.075434; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = 0.0055825; // An acceleration of 1 rps/s requires 0.01 V output
     slot0Configs.kP = 0.3; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0.00005;
@@ -89,7 +92,9 @@ public class Flywheel extends SubsystemBase {
       rotationMultiplier = 0;
     }
 
-    if (robotStateMachine.isActive() /*
+    if (manualSpeedOverride.isPresent()) {
+      setSpeed(manualSpeedOverride.getAsDouble());
+    } else if (robotStateMachine.isActive() /*
                                       * && robotStateMachine.checkZone() ==
                                       * FieldZone.ALLIANCE
                                       */) {
@@ -106,44 +111,56 @@ public class Flywheel extends SubsystemBase {
           robotStateMachine.getTurretPose().getTranslation()
               .getDistance(targetPose.getTranslation())));
     }
-    if (m_loop == 20){
-      m_loop = 0;
+    // if (m_loop == 20){
+      // m_loop = 0;
       SmartDashboard.putNumber("Left Motor Speed", m_topMotor.getVelocity().getValueAsDouble());
       SmartDashboard.putNumber("Shot Multiplier", speedMultiplier);
       SmartDashboard.putNumber("Rotation Multiplier", rotationMultiplier);
 
       SmartDashboard.putBoolean("Up to Speed", isUpToSpeed());
       SmartDashboard.putNumber("reqSpeed", reqSpeed);
+      SmartDashboard.putBoolean("Flywheel Manual Override", manualSpeedOverride.isPresent());
       SmartDashboard.putNumber("actSpeed", getSpeed());
       SmartDashboard.putBoolean("isUnderTrench", robotStateMachine.underTrench());
       SmartDashboard.putNumber("rot new testing", robotStateMachine.getConvertedTurretPosition());
       SmartDashboard.putNumber("rot adder",
           RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition()));
       SmartDashboard.putNumber("rot old testing", robotStateMachine.getTurretPose().getRotation().getDegrees());
-    }
-    m_loop++;
+    // }
+    // m_loop++;
     // This method will be called once per scheduler run
   }
 
-  public void setSpeed(double speed) {
-    reqSpeed = speed + (2 * speedMultiplier) + rotationMultiplier;
-    double trenchCorr = 0;
-    if (robotStateMachine.ductTapeCorrection) {
-      trenchCorr = 4;
-    }
-    // set velocity to rps, add 0.5 V to overcome gravity
-    SmartDashboard.putNumber("flywheel initial speed", speed);
-    double speedValue = speed + (2 * speedMultiplier)
-        + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
-    if (speedValue > 0) {
-      SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
+  /** Selects an exact speed in RPS until manual mode is cleared. */
+  public void setManualSpeed(double speed) {
+    manualSpeedOverride = OptionalDouble.of(speed);
+    setSpeed(speed);
+  }
 
-      if (robotStateMachine.underTrench()) {
-        speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
-        reqSpeed = speedValue;
+  public void clearManualSpeed() {
+    manualSpeedOverride = OptionalDouble.empty();
+  }
+
+  public void setSpeed(double speed) {
+    // Stop requests still take effect even when a manual preset is selected.
+    double speedValue = 0;
+    if (speed > 0) {
+      if (manualSpeedOverride.isPresent()) {
+        speed = manualSpeedOverride.getAsDouble();
+        speedValue = speed;
+      } else {
+        speedValue = speed + (2 * speedMultiplier)
+            + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
+        if (robotStateMachine.underTrench()) {
+          double trenchCorr = robotStateMachine.ductTapeCorrection ? 4 : 0;
+          speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
+        }
       }
-      m_topMotor.setControl(m_request.withVelocity(speedValue));
     }
+    reqSpeed = speedValue;
+    SmartDashboard.putNumber("flywheel initial speed", speed);
+    SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
+    m_topMotor.setControl(m_request.withVelocity(speedValue));
   }
 
   /*

@@ -346,9 +346,11 @@ public class RobotContainer {
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
                                 .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
-                new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
+                new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.setManualSpeed(80)));
 
-                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.setManualSpeed(30)));
+                new JoystickButton(m_gunner, XboxController.Button.kB.value)
+                                .onTrue(new InstantCommand(() -> m_flywheel.clearManualSpeed()));
 
                 new JoystickButton(m_gunner, XboxController.Button.kY.value)
                                 .onTrue(new InstantCommand(() -> m_hood.moveUpOneStep()));
@@ -460,6 +462,7 @@ public class RobotContainer {
         }
 
         public void disableInitCode() {
+                m_flywheel.clearManualSpeed();
                 m_vision.throttleLimelight();
         }
 

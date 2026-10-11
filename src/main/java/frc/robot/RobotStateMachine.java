@@ -233,6 +233,8 @@ public final class RobotStateMachine {
         SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
 
         double distance = getTurretPose().getTranslation().getDistance(HubPose.getTranslation());
+                SmartDashboard.putNumber("ShotDistance", distance);
+
         double shotVelocity = RangeFinder.getShotVelocity(distance);
 
         double tof = getTOF(distance);// RangeFinder.getTOF(distance);
