@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -73,6 +74,18 @@ public class Turret extends SubsystemBase {
     // slot2Configs.kD = 1; // A velocity error of 1 rps results in 0.1 V output
 
     m_motor.getConfigurator().apply(talonFXConfigs);
+
+    // Seed motor feedback and the first target from the calibrated absolute angle.
+    var absolutePositionSignal = m_encoder.getAbsolutePosition().waitForUpdate(0.5);
+    if (absolutePositionSignal.getStatus().isOK()) {
+      double targetPosition = absolutePositionSignal.getValueAsDouble();
+      m_motor.setPosition(targetPosition);
+    } else {
+      double targetPosition = m_motor.getPosition().getValueAsDouble();
+      DriverStation.reportError("Failed to initialize turret position from absolute encoder: "
+              + absolutePositionSignal.getStatus(), false);
+    }
+
 
     m_motor.getConfigurator();
   }
