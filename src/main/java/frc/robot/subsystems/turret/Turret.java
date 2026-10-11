@@ -76,7 +76,7 @@ public class Turret extends SubsystemBase {
     slot2Configs.kS = 0.20757;
     slot2Configs.kV = 0.1;
     slot2Configs.kA = 0.001;
-    slot2Configs.kP = 7.4;
+    slot2Configs.kP = 100;
     slot2Configs.kI = 0; // no output for integrated error
     slot2Configs.kD = 0.365;
 
