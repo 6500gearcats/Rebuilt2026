@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.RobotStateMachine;
 import frc.robot.generated.TunerConstants;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -32,8 +33,11 @@ public class Hood extends SubsystemBase {
   private double m_commandedSpeed = 0.0;
   private double targetPosition = 0.0;
   private double HOOD_INCREMENT = 0.034;
+  private RobotStateMachine robotStateMachine;
+
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
-  public Hood() {
+  public Hood(RobotStateMachine robotStateMachine) {
+    this.robotStateMachine = robotStateMachine;
 
     CANcoderConfiguration encoderConfig = new CANcoderConfiguration()
         .withMagnetSensor(new MagnetSensorConfigs()
@@ -74,6 +78,8 @@ public class Hood extends SubsystemBase {
 
   @Override
   public void periodic() {
+    RobotStateMachine.ShotSolution shotSolution = robotStateMachine.getShotSolution();
+
     var positionSignal = m_encoder.getAbsolutePosition();
     double absolutePositionRotations = positionSignal.getValueAsDouble();
     // double posSignal = m_encoder.getPosition().getValueAsDouble();

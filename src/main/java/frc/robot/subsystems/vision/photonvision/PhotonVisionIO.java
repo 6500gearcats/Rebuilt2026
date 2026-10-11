@@ -44,7 +44,7 @@ public class PhotonVisionIO implements VisionIO {
     private static final String COLLECTION_ROOT = "Vision/DataCollection/";
     private static final DateTimeFormatter FILE_STAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
     private static final double MAX_SINGLE_TAG_AMBIGUITY = 0.20;
-    private static final double MAX_SINGLE_TAG_DISTANCE_METERS = 4.0;
+    private static final double MAX_SINGLE_TAG_DISTANCE_METERS = 6.0;
     private static final double MAX_POSE_Z_METERS = 1.00;
 
     private final PhotonCamera m_camera;
