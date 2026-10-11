@@ -22,6 +22,8 @@ public class AlignTurretToHub extends Command {
 
   private Pose2d prevPose = new Pose2d();
   private double prevTurretRot = 0;
+  private static final double ALIGNMENT_TOLERANCE_DEGREES = 1.5;
+  private static final double ALIGNMENT_RATE_TOLERANCE_RPS = 0.1;
 
   public AlignTurretToHub(Turret turret) {
     m_turret = turret;
@@ -32,6 +34,7 @@ public class AlignTurretToHub extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    SmartDashboard.putBoolean("Aligned", false);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -73,10 +76,12 @@ public class AlignTurretToHub extends Command {
       }
     }
     if (Math.abs(newError) > 0.005) {
-      SmartDashboard.putBoolean("Aligned", false);
       m_turret.setPosition(newError);
     }
-    SmartDashboard.putBoolean("Aligned", true);
+
+    boolean aligned = Math.abs(turretToTargetAngle.getDegrees()) <= ALIGNMENT_TOLERANCE_DEGREES
+        && Math.abs(m_turret.getSpeed()) <= ALIGNMENT_RATE_TOLERANCE_RPS;
+    SmartDashboard.putBoolean("Aligned", aligned);
 
     SmartDashboard.putNumber("tunring_pos_setpoint", newError);
   }

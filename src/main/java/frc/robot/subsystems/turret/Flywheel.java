@@ -16,9 +16,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -39,8 +37,14 @@ public class Flywheel extends SubsystemBase {
   private double speedMultiplier = 0;
   public double rotationMultiplier = 0;
   private double reqSpeed;
+  private double speedWithinToleranceSince = -1;
   private OptionalDouble manualSpeedOverride = OptionalDouble.empty();
   private int m_loop = 0;
+
+  private boolean speedStable = false;
+  private static final double SPEED_TOLERANCE_RPS = 2.0;
+  private static final double SPEED_STABLE_TIME_SECONDS = 0.08;
+
   TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
   private RobotStateMachine robotStateMachine;
 
@@ -81,6 +85,8 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void periodic() {
+    RobotStateMachine.ShotSolution shotSolution = robotStateMachine.getShotSolution();
+
     if (snurboEnable) {
       speedModifier = 0.15;
     } else {
@@ -98,19 +104,13 @@ public class Flywheel extends SubsystemBase {
                                       * && robotStateMachine.checkZone() ==
                                       * FieldZone.ALLIANCE
                                       */) {
-      double distance = robotStateMachine.getTurretPose().getTranslation()
-          .getDistance(robotStateMachine.getHubPose().getTranslation());
-      ChassisSpeeds speeds = robotStateMachine.getFieldSpeeds();
-      Pose2d best = robotStateMachine.getHubPose();
-      Pose2d targetPose = new Pose2d(
-          best.getX() + ((-speeds.vxMetersPerSecond) * robotStateMachine.getTOF(distance)),
-          best.getY() + (-speeds.vyMetersPerSecond * robotStateMachine.getTOF(distance)),
-          new Rotation2d());
 
-      setSpeed(RangeFinder.getShotVelocity(
-          robotStateMachine.getTurretPose().getTranslation()
-              .getDistance(targetPose.getTranslation())));
+      if (shotSolution.getDistance() > 0.0) {
+        setSpeed(shotSolution.getFlywheelSpeed());
+      }
     }
+    updateSpeedReadiness();
+
     // if (m_loop == 20){
       // m_loop = 0;
       SmartDashboard.putNumber("Left Motor Speed", m_topMotor.getVelocity().getValueAsDouble());
@@ -155,8 +155,9 @@ public class Flywheel extends SubsystemBase {
         speed = manualSpeedOverride.getAsDouble();
         speedValue = speed;
       } else {
-        speedValue = speed + (2 * speedMultiplier)
-            + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
+        speedValue = speed;
+//                + (2 * speedMultiplier)
+//            + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
         if (robotStateMachine.underTrench()) {
           double trenchCorr = robotStateMachine.ductTapeCorrection ? 4 : 0;
           speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
@@ -165,7 +166,7 @@ public class Flywheel extends SubsystemBase {
     }
     reqSpeed = speedValue;
     SmartDashboard.putNumber("flywheel initial speed", speed);
-    SmartDashboard.putNumber("flywheel sped-up speed", speedValue);
+    SmartDashboard.putNumber("flywheel new speed", speedValue);
     m_topMotor.setControl(m_request.withVelocity(speedValue));
   }
 
@@ -181,7 +182,23 @@ public class Flywheel extends SubsystemBase {
   }
 
   public boolean isUpToSpeed() {
-    return Math.abs(reqSpeed - getSpeed()) < 5;
+    return speedStable;
+  }
+
+  private void updateSpeedReadiness() {
+    double speedError = Math.abs(reqSpeed - getSpeed());
+    if (speedError <= SPEED_TOLERANCE_RPS) {
+      if (speedWithinToleranceSince < 0) {
+        speedWithinToleranceSince = Timer.getFPGATimestamp();
+      }
+      speedStable = Timer.getFPGATimestamp() - speedWithinToleranceSince >= SPEED_STABLE_TIME_SECONDS;
+    } else {
+      speedWithinToleranceSince = -1;
+      speedStable = false;
+    }
+
+    // Force for testing
+    speedStable = true;
   }
 
   public void stopMotor() {

@@ -111,7 +111,7 @@ public class RobotContainer {
 
         private final Flywheel m_flywheel;
 
-        private final Hood m_hood = new Hood();
+        private final Hood m_hood;
 
         private boolean toggleIntake = false;
 
@@ -143,6 +143,7 @@ public class RobotContainer {
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
+                m_hood = robotStateMachine.getHood();
                 m_flywheel = robotStateMachine.getFlywheel();
                 joystick = robotStateMachine.getDriver();
                 m_gunner = robotStateMachine.getGunner();
