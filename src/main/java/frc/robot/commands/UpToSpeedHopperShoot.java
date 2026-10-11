@@ -32,10 +32,10 @@ public class UpToSpeedHopperShoot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
-      return;
-    }
-    if (SmartDashboard.getBoolean("Aligned", true)) {
+//    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
+//      return;
+//    }
+//    if (SmartDashboard.getBoolean("Aligned", true)) {
       m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
           stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
       // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
@@ -48,7 +48,7 @@ public class UpToSpeedHopperShoot extends Command {
       // }
 
       m_Hopper.startAllMotors(-1, 1);
-    }
+//    }
 
   }
 

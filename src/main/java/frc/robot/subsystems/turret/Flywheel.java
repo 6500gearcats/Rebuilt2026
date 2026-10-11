@@ -155,8 +155,9 @@ public class Flywheel extends SubsystemBase {
         speed = manualSpeedOverride.getAsDouble();
         speedValue = speed;
       } else {
-        speedValue = speed + (2 * speedMultiplier)
-            + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
+        speedValue = speed;
+//                + (2 * speedMultiplier)
+//            + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
         if (robotStateMachine.underTrench()) {
           double trenchCorr = robotStateMachine.ductTapeCorrection ? 4 : 0;
           speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
@@ -195,6 +196,9 @@ public class Flywheel extends SubsystemBase {
       speedWithinToleranceSince = -1;
       speedStable = false;
     }
+
+    // Force for testing
+    speedStable = true;
   }
 
   public void stopMotor() {
