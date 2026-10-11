@@ -160,11 +160,11 @@ public class Turret extends SubsystemBase {
    * @return turret angle in degrees
    */
   public double getConvertedTurretPosition() {
-    return -((getMotorPosition() * 4) - 110);
+    return this.getAbsolutePositionDegrees();
   }
 
   public double unconvertPosition(double pos) {
-    return ((-1 * pos) + 110) / 4;
+    return pos / 360.0;
   }
 
   /**
