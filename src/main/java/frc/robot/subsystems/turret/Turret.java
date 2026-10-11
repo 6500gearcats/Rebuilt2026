@@ -191,7 +191,7 @@ public class Turret extends SubsystemBase {
 
   /** Converts a turret angle in degrees to encoder rotations for position control. */
   public double unconvertPosition(double pos) {
-    return pos / 360.0;
+    return pos / -360.0;
   }
 
   /**
