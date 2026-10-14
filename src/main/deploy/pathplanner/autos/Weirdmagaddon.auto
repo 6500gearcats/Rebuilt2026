@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "DeployIntakeFast"
+            "name": "DeployIntakeFast0.5s"
           }
         },
         {

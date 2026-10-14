@@ -153,7 +153,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.1).withTimeout(1));
                 NamedCommands.registerCommand("DeployIntakeFast0.5s",
-                                new RunIntake(m_intake, 0, 1).withTimeout(0.5));
+                                new RunIntake(m_intake, 0, 1.5).withTimeout(1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",

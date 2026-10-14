@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "DeployIntakeFast0.5s"
+          }
+        },
+        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -57,7 +63,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AMTrecnhToNeutral2ndPass"
+            "pathName": "AMTrecnhToNeutral2ndPass copy"
           }
         },
         {
