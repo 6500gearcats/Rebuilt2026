@@ -14,15 +14,15 @@ public class RangeFinder {
 
   static {
 
-    m_shootMap.put(1.7845524, 47.1966146);
-    m_shootMap.put(2.21180044, 50.8945313);
-    m_shootMap.put(2.44133151, 55.1516544);
-    m_shootMap.put(2.85586734, 57.3031467);
-    m_shootMap.put(3.22893898, 57.5346354);
-    m_shootMap.put(3.57005063, 58.6749132);
-    m_shootMap.put(4.10740451, 61.0183377);
-    m_shootMap.put(4.46538443, 64.5872396);
-    m_shootMap.put(4.92015014, 68.7465278);
+    m_shootMap.put(1.7845524, 49.1966146);
+    m_shootMap.put(2.21180044, 52.8945313);
+    m_shootMap.put(2.44133151, 57.1516544);
+    m_shootMap.put(2.85586734, 59.3031467);
+    m_shootMap.put(3.22893898, 59.5346354);
+    m_shootMap.put(3.57005063, 60.6749132);
+    m_shootMap.put(4.10740451, 63.0183377);
+    m_shootMap.put(4.46538443, 66.5872396);
+    m_shootMap.put(4.92015014, 70.7465278);
 
     m_hoodMap.put(1.4845524, 0.0);
     m_hoodMap.put(1.7845524, 0.01235623);
