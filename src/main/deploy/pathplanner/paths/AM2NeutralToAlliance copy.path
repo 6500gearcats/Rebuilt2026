@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.171879518072289,
-        "y": 2.5816144578313254
+        "x": 6.624533452052697,
+        "y": 3.0137309474571077
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.380799656961178,
-        "y": 2.5083281441739187
+        "x": 4.833453590941586,
+        "y": 2.940444633799701
       },
       "isLocked": false,
       "linkedName": "Neutral2"
@@ -53,7 +53,7 @@
   "folder": "armageddon",
   "idealStartingState": {
     "velocity": 4.0,
-    "rotation": -51.139482414131656
+    "rotation": 131.01577895364167
   },
   "useDefaultConstraints": true
 }
