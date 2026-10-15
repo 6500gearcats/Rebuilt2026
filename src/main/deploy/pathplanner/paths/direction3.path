@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.3,
-        "y": 0.71623395149786
+        "x": 4.325096385542168,
+        "y": 0.5818433734939765
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.4494401041666665,
-        "y": 0.6585483206954654
+        "x": 5.474536489708835,
+        "y": 0.524157742691582
       },
       "isLocked": false,
       "linkedName": "d2"
@@ -62,10 +62,6 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.3,
-      "rotationDegrees": -179.14355179698202
-    },
-    {
       "waypointRelativePos": 0.6533779628801429,
       "rotationDegrees": 0.20405599523390788
     },
@@ -81,7 +77,7 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.0,
+      "minWaypointRelativePos": 0.2765880217785832,
       "maxWaypointRelativePos": 3.0,
       "constraints": {
         "maxVelocity": 1.0,
@@ -97,8 +93,8 @@
   "eventMarkers": [
     {
       "name": "IntakeFuel",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": 1.0,
+      "waypointRelativePos": 0.31143375680579655,
+      "endWaypointRelativePos": 3.0,
       "command": {
         "type": "named",
         "data": {
@@ -123,7 +119,7 @@
   "folder": "armageddon",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.64678790164498
+    "rotation": -0.9495668564358158
   },
   "useDefaultConstraints": true
 }
