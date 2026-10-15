@@ -5,22 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 1.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeLong"
-                }
-              }
-            ]
+            "name": "IntakeLong"
           }
         },
         {
@@ -42,7 +29,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel10s"
+                  "name": "NewShootFuel5s"
                 }
               },
               {
@@ -83,12 +70,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AM2AllianceToTrench"
           }
         }
       ]

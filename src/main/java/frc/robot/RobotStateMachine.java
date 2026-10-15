@@ -285,8 +285,8 @@ public final class RobotStateMachine {
             tof = getTOF(effectiveDistance);
             effectiveDistance = Math.max(0.0, distance - radialVelocity * tof);
         }
-        double shotVelocity = RangeFinder.getShotVelocity(effectiveDistance);
         double hoodRotation = RangeFinder.getHoodRotations(effectiveDistance);
+        double shotVelocity = RangeFinder.getShotVelocity(effectiveDistance);
         // Use the full turret velocity for the aim lead, including the tangential
         // velocity caused by rotating around the robot center.
         targetPose = new Pose2d(

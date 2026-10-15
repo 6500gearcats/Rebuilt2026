@@ -155,13 +155,14 @@ public class Flywheel extends SubsystemBase {
         speed = manualSpeedOverride.getAsDouble();
         speedValue = speed;
       } else {
-        speedValue = speed;
+        speedValue = speed + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
 //                + (2 * speedMultiplier)
 //            + RangeFinder.getRotAdder(robotStateMachine.getConvertedTurretPosition());
-        if (robotStateMachine.underTrench()) {
-          double trenchCorr = robotStateMachine.ductTapeCorrection ? 4 : 0;
-          speedValue = 68 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
-        }
+        //  if (robotStateMachine.underTrench()) {
+        //   double trenchCorr = robotStateMachine.ductTapeCorrection ? 4 : 0;
+            //speedValue = speedValue + 10;
+            // 6 + (2 * speedMultiplier) + rotationMultiplier + trenchCorr;
+        //  }
       }
     }
     reqSpeed = speedValue;

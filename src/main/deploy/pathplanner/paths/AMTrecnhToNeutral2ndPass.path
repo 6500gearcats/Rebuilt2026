@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.0039657631954344,
-        "y": 0.71623395149786
+        "x": 4.13932530120482,
+        "y": 0.5927710843373495
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.092582025677602,
-        "y": 0.4703994293865924
+        "x": 8.227941563686986,
+        "y": 0.34693656222608193
       },
       "isLocked": false,
       "linkedName": "Trench"
@@ -31,15 +31,11 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.09796081567373177,
-      "rotationDegrees": 180.0
+      "rotationDegrees": 0.0
     },
     {
-      "waypointRelativePos": 0.2898840463814464,
-      "rotationDegrees": 180.0
-    },
-    {
-      "waypointRelativePos": 0.5185925629748112,
-      "rotationDegrees": 90.0
+      "waypointRelativePos": 0.6481675392670159,
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [
@@ -87,7 +83,7 @@
   "folder": "Armageddon",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -1.4320961841646607
+    "rotation": -0.5937173962125859
   },
   "useDefaultConstraints": true
 }

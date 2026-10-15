@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.0039657631954344,
-        "y": 0.71623395149786
+        "x": 4.13932530120482,
+        "y": 0.5927710843373495
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.92437945791726,
-        "y": 0.6127246790299581
+        "x": 8.059738995926644,
+        "y": 0.4892618118694476
       },
       "isLocked": false,
       "linkedName": "Trench"
@@ -75,7 +75,7 @@
   "folder": "Armageddon",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -1.4320961841646607
+    "rotation": -0.5937173962125859
   },
   "useDefaultConstraints": true
 }
