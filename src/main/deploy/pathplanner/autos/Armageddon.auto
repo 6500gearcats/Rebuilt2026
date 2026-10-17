@@ -15,24 +15,18 @@
           "data": {
             "commands": [
               {
-                "type": "wait",
+                "type": "path",
                 "data": {
-                  "waitTime": 1.0
+                  "pathName": "AMTrecnhToNeutral"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "IntakeLong"
+                  "name": "IntakeFuel"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AMTrecnhToNeutral"
           }
         },
         {
