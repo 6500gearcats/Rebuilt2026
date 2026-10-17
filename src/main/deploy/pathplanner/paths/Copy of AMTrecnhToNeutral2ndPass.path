@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 7.0198758200983455,
-        "y": 1.0048236721361383
+        "y": 1.0048236721361379
       },
       "nextControl": null,
       "isLocked": false,
@@ -79,7 +79,7 @@
   "folder": "armageddon",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.64678790164498
+    "rotation": -0.6206335802355023
   },
   "useDefaultConstraints": true
 }
