@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -40,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.RobotConstants;
 import frc.robot.commands.AlignTurretToHub;
@@ -154,9 +156,11 @@ public class RobotContainer {
                 NamedCommands.registerCommand("AlignTurretFromLeftTrench",
                                 new InstantCommand(() -> m_turret.setPosition(101), m_turret));
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
-                NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.25));
+                NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.1).withTimeout(1));
                 NamedCommands.registerCommand("DeployIntakeFast0.5s",
-                                new RunIntake(m_intake, 0, 0.25).withTimeout(0.5));
+                                new RunIntake(m_intake, 0.25, 1.5).withTimeout(1));
+                NamedCommands.registerCommand("AutosDeployIntake",
+                                new RunIntake(m_intake, 2, 2).withTimeout(1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
                 NamedCommands.registerCommand("Intake", new RunIntake(m_intake, -0.1).withTimeout(0.2));
                 NamedCommands.registerCommand("IntakeLong",
@@ -207,7 +211,7 @@ public class RobotContainer {
 
                 SmartDashboard.putNumber("Shoot Speed", 0);
 
-                autoChooser = AutoBuilder.buildAutoChooser("ShootOnTheMove");
+                autoChooser = AutoBuilder.buildAutoChooser("Weirdmagaddon");
 
                 SmartDashboard.putData("Auto Chooser", autoChooser);
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
@@ -217,18 +221,23 @@ public class RobotContainer {
                                                 "right",
                                                 true,
                                                 new Translation3d(-0.3112, 0.2477, 0.3734),
+<<<<<<< HEAD
                                                 new Rotation3d(0.0, -Math.PI / 6, -Math.PI / 2));
+=======
+                                                new Rotation3d(-Math.PI  /12, 0.0, Math.PI / 2));
+>>>>>>> main
 
                                 PhotonVisionIO back_left = new PhotonVisionIO(
                                                 "back_left",
                                                 true,
                                                 new Translation3d(-0.3683, 0.1715, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI));
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
 
                                 PhotonVisionIO back_right = new PhotonVisionIO(
                                                 "back_right",
                                                 true,
                                                 new Translation3d(-0.3683, -0.0445, 0.3734),
+<<<<<<< HEAD
                                                 new Rotation3d(0.0, -Math.PI / 6, Math.PI));
 
                                 PhotonVisionIO left_cam = new PhotonVisionIO(
@@ -236,6 +245,28 @@ public class RobotContainer {
                                                 true,
                                                 new Translation3d(-0.3112, -0.1207, 0.3734),
                                                 new Rotation3d(0.0, -Math.PI / 6, Math.PI / 2));
+=======
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
+                                                
+                                PhotonVisionIO frontCamTeal = new PhotonVisionIO(
+                                                "Teal_Cam_4",
+                                                true,
+                                                new Translation3d(-0.3112, -0.1207, 0.3734),
+                                                new Rotation3d(Math.PI / 12, 0.0, -Math.PI / 2));
+                                // LimelightIO m_ll = new LimelightIO(
+                                // "limelight-gcd",
+                                // true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // false);
+
+                                // LimelightIO m_ll2 = new LimelightIO(
+                                // "limelight-gcc",
+                                // true,
+                                // drivetrain.rotationSupplier(),
+                                // drivetrain.getAngularVel(),
+                                // false);
+>>>>>>> main
 
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
@@ -349,6 +380,7 @@ public class RobotContainer {
                                 .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.setManualSpeedIncrement(2)));
 
+<<<<<<< HEAD
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.setManualSpeedIncrement(-2)));
                 new JoystickButton(m_gunner, XboxController.Button.kB.value)
                                 .onTrue(new InstantCommand(() -> m_flywheel.clearManualSpeed()));
@@ -357,6 +389,33 @@ public class RobotContainer {
                                 .onTrue(new InstantCommand(() -> m_hood.moveUpOneStep()));
                 new JoystickButton(m_gunner, XboxController.Button.kA.value)
                                 .onTrue(new InstantCommand(() -> m_hood.moveDownOneStep()));
+=======
+                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+
+                // Start and stop recording
+                joystick.leftBumper().onTrue(
+                                Commands.runOnce(SignalLogger::start));
+
+                joystick.rightBumper().onTrue(
+                                Commands.runOnce(SignalLogger::stop));
+
+                // SysId tests
+                joystick.y().whileTrue(
+                                m_flywheel.sysIdQuasistatic(
+                                                SysIdRoutine.Direction.kForward));
+
+                joystick.a().whileTrue(
+                                m_flywheel.sysIdQuasistatic(
+                                                SysIdRoutine.Direction.kReverse));
+
+                joystick.b().whileTrue(
+                                m_flywheel.sysIdDynamic(
+                                                SysIdRoutine.Direction.kForward));
+
+                joystick.x().whileTrue(
+                                m_flywheel.sysIdDynamic(
+                                                SysIdRoutine.Direction.kReverse));
+>>>>>>> main
         }
 
         public void testBindings() {

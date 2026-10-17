@@ -57,10 +57,10 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "FinalHope",
+  "folder": "final hope",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 1.1223486732772183
+    "rotation": 1.1223486732772185
   },
   "useDefaultConstraints": true
 }

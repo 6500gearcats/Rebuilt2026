@@ -105,6 +105,7 @@ public final class RobotStateMachine {
 
         SmartDashboard.putString("RobotState", state.toString());
         SmartDashboard.putString("FieldZone", currentZone.toString());
+        SmartDashboard.putData("Aim Target Poses", aimTargetField);
     }
 
     public Flywheel getFlywheel() {

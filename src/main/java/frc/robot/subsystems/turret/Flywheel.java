@@ -15,10 +15,15 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.controls.VoltageOut;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.units.Units;
 import frc.robot.Constants;
 import frc.robot.RobotStateMachine;
 import frc.robot.utility.RangeFinder;
@@ -47,6 +52,8 @@ public class Flywheel extends SubsystemBase {
 
   TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
   private RobotStateMachine robotStateMachine;
+  private final VoltageOut voltageRequest = new VoltageOut(0);
+  private final SysIdRoutine sysIdRoutine;
 
   TalonFXConfiguration talonFXConfigs;
 
@@ -54,9 +61,10 @@ public class Flywheel extends SubsystemBase {
 
   public Flywheel(RobotStateMachine robotStateMachine) {
     this.robotStateMachine = robotStateMachine;
+    this.sysIdRoutine = null; // 
     talonFXConfigs = new TalonFXConfiguration().withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0.6))
         .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
-
+  
     // // set slot 0 gains
     // var slot0Configs = talonFXConfigs.Slot0;
     // slot0Configs.kS = 0.3087; // Add 0.25 V output to overcome static friction
@@ -88,9 +96,9 @@ public class Flywheel extends SubsystemBase {
     RobotStateMachine.ShotSolution shotSolution = robotStateMachine.getShotSolution();
 
     if (snurboEnable) {
-      speedModifier = 0.15;
+      speedModifier = 0.15;// 0.15;
     } else {
-      speedModifier = 1;
+      speedModifier = 1;//1
     }
     if (!robotStateMachine.isFacingHub()) {
       rotationMultiplier = 2;
@@ -104,7 +112,6 @@ public class Flywheel extends SubsystemBase {
                                       * && robotStateMachine.checkZone() ==
                                       * FieldZone.ALLIANCE
                                       */) {
-
       if (shotSolution.getDistance() > 0.0) {
         setSpeed(shotSolution.getFlywheelSpeed());
       }
@@ -227,5 +234,13 @@ public class Flywheel extends SubsystemBase {
     // slot.kI = SmartDashboard.getNumber("shooter kI", 0);
     // slot.kD = SmartDashboard.getNumber("shooter kD", 0);
     // m_motor.getConfigurator().apply(slot);
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.dynamic(direction);
   }
 }

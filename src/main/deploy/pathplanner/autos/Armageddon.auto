@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "DeployIntakeFast0.5s"
+          }
+        },
+        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -42,7 +48,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "NewShootFuel10s"
+                  "name": "ShootFuel5s"
                 }
               },
               {
@@ -57,7 +63,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AMTrecnhToNeutral2ndPass"
+            "pathName": "AMTrecnhToNeutral2ndPass copy"
           }
         },
         {
@@ -73,7 +79,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "ShootFuel3s"
+                  "name": "ShootFuel5s"
                 }
               },
               {
@@ -84,17 +90,11 @@
               }
             ]
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AM2AllianceToTrench"
-          }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "armogeddon's",
   "choreoAuto": false
 }

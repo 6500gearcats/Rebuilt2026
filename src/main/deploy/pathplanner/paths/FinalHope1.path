@@ -52,12 +52,12 @@
         "y": 3.498045649072753
       },
       "prevControl": {
-        "x": 7.589816772607647,
-        "y": 3.3200758894700786
+        "x": 7.790162154463988,
+        "y": 3.2492757671591828
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "finalhope1"
     }
   ],
   "rotationTargets": [
@@ -112,7 +112,7 @@
     "rotation": 90.0
   },
   "reversed": false,
-  "folder": "FinalHope",
+  "folder": "final hope",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
