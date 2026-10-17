@@ -239,6 +239,11 @@ public final class Constants {
   }
 
   public static class TurretConstants {
+    public static final double kTurretMinAngleDegrees = -110.0;
+    public static final double kTurretMaxAngleDegrees = 110.0;
+    // Preserve the previous manual-control margin inside the end positions.
+    public static final double kTurretManualMinAngleDegrees = -102.0;
+    public static final double kTurretManualMaxAngleDegrees = 102.0;
     public static final double kHoodManualSpeed = 0.1;
     public static final double kHoodEncoderZeroRotations = 0.8496;
     public static final double kHoodMinPositionRotations = 0.012;
