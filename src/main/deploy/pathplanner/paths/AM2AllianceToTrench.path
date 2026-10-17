@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Armageddon",
+  "folder": "armageddon",
   "idealStartingState": {
     "velocity": 4.0,
     "rotation": -157.28690739731707

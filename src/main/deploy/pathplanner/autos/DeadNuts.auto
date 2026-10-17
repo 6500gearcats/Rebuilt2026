@@ -7,12 +7,6 @@
         {
           "type": "path",
           "data": {
-            "pathName": "DNStartToTrench"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
             "pathName": "DNTrenchToNeutral"
           }
         },
@@ -76,6 +70,6 @@
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "other autos for comp",
   "choreoAuto": false
 }

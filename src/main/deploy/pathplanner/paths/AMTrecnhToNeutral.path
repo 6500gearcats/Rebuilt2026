@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.368807228915662,
-        "y": 0.6364819277108438
+        "x": 3.997265060240964,
+        "y": 0.5818433734939765
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.368807228915663,
-        "y": 0.6364819277108434
+        "x": 4.997265060240965,
+        "y": 0.5818433734939762
       },
       "isLocked": false,
       "linkedName": null
@@ -20,12 +20,12 @@
         "y": 0.637
       },
       "prevControl": {
-        "x": 4.903758728684196,
-        "y": 0.6808307775418299
+        "x": 4.904627514869856,
+        "y": 0.5784196781512024
       },
       "nextControl": {
-        "x": 7.577415219907408,
-        "y": 0.5460943287037037
+        "x": 7.54877108433735,
+        "y": 0.7566867469879515
       },
       "isLocked": false,
       "linkedName": null
@@ -123,7 +123,7 @@
     "rotation": 91.10911320901279
   },
   "reversed": false,
-  "folder": "Armageddon",
+  "folder": "armageddon",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
