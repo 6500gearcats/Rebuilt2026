@@ -221,11 +221,7 @@ public class RobotContainer {
                                                 "right",
                                                 true,
                                                 new Translation3d(-0.3112, 0.2477, 0.3734),
-<<<<<<< HEAD
                                                 new Rotation3d(0.0, -Math.PI / 6, -Math.PI / 2));
-=======
-                                                new Rotation3d(-Math.PI  /12, 0.0, Math.PI / 2));
->>>>>>> main
 
                                 PhotonVisionIO back_left = new PhotonVisionIO(
                                                 "back_left",
@@ -237,7 +233,6 @@ public class RobotContainer {
                                                 "back_right",
                                                 true,
                                                 new Translation3d(-0.3683, -0.0445, 0.3734),
-<<<<<<< HEAD
                                                 new Rotation3d(0.0, -Math.PI / 6, Math.PI));
 
                                 PhotonVisionIO left_cam = new PhotonVisionIO(
@@ -245,28 +240,6 @@ public class RobotContainer {
                                                 true,
                                                 new Translation3d(-0.3112, -0.1207, 0.3734),
                                                 new Rotation3d(0.0, -Math.PI / 6, Math.PI / 2));
-=======
-                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
-                                                
-                                PhotonVisionIO frontCamTeal = new PhotonVisionIO(
-                                                "Teal_Cam_4",
-                                                true,
-                                                new Translation3d(-0.3112, -0.1207, 0.3734),
-                                                new Rotation3d(Math.PI / 12, 0.0, -Math.PI / 2));
-                                // LimelightIO m_ll = new LimelightIO(
-                                // "limelight-gcd",
-                                // true,
-                                // drivetrain.rotationSupplier(),
-                                // drivetrain.getAngularVel(),
-                                // false);
-
-                                // LimelightIO m_ll2 = new LimelightIO(
-                                // "limelight-gcc",
-                                // true,
-                                // drivetrain.rotationSupplier(),
-                                // drivetrain.getAngularVel(),
-                                // false);
->>>>>>> main
 
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
@@ -380,7 +353,6 @@ public class RobotContainer {
                                 .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
                 new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.setManualSpeedIncrement(2)));
 
-<<<<<<< HEAD
                 new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.setManualSpeedIncrement(-2)));
                 new JoystickButton(m_gunner, XboxController.Button.kB.value)
                                 .onTrue(new InstantCommand(() -> m_flywheel.clearManualSpeed()));
@@ -389,33 +361,6 @@ public class RobotContainer {
                                 .onTrue(new InstantCommand(() -> m_hood.moveUpOneStep()));
                 new JoystickButton(m_gunner, XboxController.Button.kA.value)
                                 .onTrue(new InstantCommand(() -> m_hood.moveDownOneStep()));
-=======
-                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
-
-                // Start and stop recording
-                joystick.leftBumper().onTrue(
-                                Commands.runOnce(SignalLogger::start));
-
-                joystick.rightBumper().onTrue(
-                                Commands.runOnce(SignalLogger::stop));
-
-                // SysId tests
-                joystick.y().whileTrue(
-                                m_flywheel.sysIdQuasistatic(
-                                                SysIdRoutine.Direction.kForward));
-
-                joystick.a().whileTrue(
-                                m_flywheel.sysIdQuasistatic(
-                                                SysIdRoutine.Direction.kReverse));
-
-                joystick.b().whileTrue(
-                                m_flywheel.sysIdDynamic(
-                                                SysIdRoutine.Direction.kForward));
-
-                joystick.x().whileTrue(
-                                m_flywheel.sysIdDynamic(
-                                                SysIdRoutine.Direction.kReverse));
->>>>>>> main
         }
 
         public void testBindings() {
