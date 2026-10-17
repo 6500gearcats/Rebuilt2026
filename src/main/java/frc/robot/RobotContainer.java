@@ -153,7 +153,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("IntakeFuel", new RunIntake(m_intake, -1));
                 NamedCommands.registerCommand("DeployIntakeFast", new RunIntake(m_intake, 0, 0.1).withTimeout(1));
                 NamedCommands.registerCommand("DeployIntakeFast0.5s",
-                                new RunIntake(m_intake, 0.25, 1.5).withTimeout(1));
+                                new RunIntake(m_intake, 0.5, 1.0).withTimeout(1));
                 NamedCommands.registerCommand("AutosDeployIntake",
                                 new RunIntake(m_intake, 2, 2).withTimeout(1));
                 NamedCommands.registerCommand("IntakeFuelJason", new RunIntake(m_intake, -1).withTimeout(5));
@@ -354,6 +354,11 @@ public class RobotContainer {
 
                 joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
                 joystick2.b().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
+                joystick2.x().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
+
+                joystick2.x().onTrue(new RunIntake(m_intake, 0.5,0).withTimeout(0.25)
+                                .andThen(Commands.either(new RunIntake(m_intake, -1), Commands.none(),
+                                                () -> toggleIntake)));
 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
@@ -361,33 +366,33 @@ public class RobotContainer {
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
                                 .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
-                new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
+                // new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierUp()));
 
-                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
+                // new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.incrementMultiplierDown()));
 
                 // Start and stop recording
-                joystick.leftBumper().onTrue(
-                                Commands.runOnce(SignalLogger::start));
+        //         joystick.leftBumper().onTrue(
+        //                         Commands.runOnce(SignalLogger::start));
 
-                joystick.rightBumper().onTrue(
-                                Commands.runOnce(SignalLogger::stop));
+        //         joystick.rightBumper().onTrue(
+        //                         Commands.runOnce(SignalLogger::stop));
 
-                // SysId tests
-                joystick.y().whileTrue(
-                                m_flywheel.sysIdQuasistatic(
-                                                SysIdRoutine.Direction.kForward));
+        //         // SysId tests
+        //         joystick.y().whileTrue(
+        //                         m_flywheel.sysIdQuasistatic(
+        //                                         SysIdRoutine.Direction.kForward));
 
-                joystick.a().whileTrue(
-                                m_flywheel.sysIdQuasistatic(
-                                                SysIdRoutine.Direction.kReverse));
+        //         joystick.a().whileTrue(
+        //                         m_flywheel.sysIdQuasistatic(
+        //                                         SysIdRoutine.Direction.kReverse));
 
-                joystick.b().whileTrue(
-                                m_flywheel.sysIdDynamic(
-                                                SysIdRoutine.Direction.kForward));
+        //         joystick.b().whileTrue(
+        //                         m_flywheel.sysIdDynamic(
+        //                                         SysIdRoutine.Direction.kForward));
 
-                joystick.x().whileTrue(
-                                m_flywheel.sysIdDynamic(
-                                                SysIdRoutine.Direction.kReverse));
+        //         joystick.x().whileTrue(
+        //                         m_flywheel.sysIdDynamic(
+        //                                         SysIdRoutine.Direction.kReverse));
         }
 
         public void testBindings() {
