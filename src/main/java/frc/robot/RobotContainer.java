@@ -244,8 +244,7 @@ public class RobotContainer {
                                                 right_cam,
                                                 back_right,
                                                 back_left,
-                                                left_cam
-                                );
+                                                left_cam);
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -313,7 +312,8 @@ public class RobotContainer {
 
                 new Trigger(() -> toggleIntake).onTrue(new RunIntake(m_intake, -1));
                 new Trigger(() -> toggleIntake).onFalse(new RunIntake(m_intake, 0, 0));
-                // Keep manual directions unchanged after matching motor polarity to the encoder.
+                // Keep manual directions unchanged after matching motor polarity to the
+                // encoder.
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
@@ -340,6 +340,9 @@ public class RobotContainer {
 
                 joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
                 joystick2.b().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
+                joystick2.a().onTrue(new RunIntake(m_intake, 0.5).withTimeout(0.25)
+                                .andThen(Commands.either(new RunIntake(m_intake, -1), Commands.none(),
+                                                () -> toggleIntake)));
 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
