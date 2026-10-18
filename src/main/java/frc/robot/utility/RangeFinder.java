@@ -27,6 +27,19 @@ public class RangeFinder {
     m_shootMap.put(5.22015014, 70.7465278);
     m_shootMap.put(8.6015014, 80.0);
 
+//    2 rpm Slower
+//    m_shootMap.put(1.7845524, 45.1966146);
+//    m_shootMap.put(2.21180044, 48.8945313);
+//    m_shootMap.put(2.44133151, 53.1516544);
+//    m_shootMap.put(2.85586734, 55.3031467);
+//    m_shootMap.put(3.22893898, 55.5346354);
+//    m_shootMap.put(3.57005063, 57.6749132);
+//    m_shootMap.put(4.10740451, 59.0183377);
+//    m_shootMap.put(4.46538443, 62.5872396);
+//    m_shootMap.put(4.92015014, 63.7465278);
+//    m_shootMap.put(5.22015014, 68.7465278);
+//    m_shootMap.put(8.6015014, 80.0);
+
     m_hoodMap.put(1.4845524, 0.0);
     m_hoodMap.put(1.7845524, 0.01235623);
     m_hoodMap.put(2.21180044, 0.075927734);
@@ -40,7 +53,6 @@ public class RangeFinder {
     m_hoodMap.put(5.22015014, 0.34509277);
     m_hoodMap.put(5.6015014, 0.55509277);
 
-    // ! Fake values
     m_TOFMap.put(1.7845524, 0.7759643441);
     m_TOFMap.put(2.21180044, 0.8953730721);
     m_TOFMap.put(2.44133151, 1.01208837);
