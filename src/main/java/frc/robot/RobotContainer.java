@@ -213,29 +213,29 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO right_cam = new PhotonVisionIO(
-                                                "right",
+                                PhotonVisionIO left_cam = new PhotonVisionIO(
+                                                "left",
                                                 true,
-                                                new Translation3d(-0.3112, 0.2477, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, -Math.PI / 2));
+                                                new Translation3d(-0.2984, 0.3175, 0.3175),
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI / 2));
 
                                 PhotonVisionIO back_left = new PhotonVisionIO(
                                                 "back_left",
                                                 true,
-                                                new Translation3d(-0.3683, 0.1715, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI));
-
+                                                new Translation3d(-0.31115, 0.266, 0.3937),
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
+//0.3175 0.266 -0.1524 -0.19685
                                 PhotonVisionIO back_right = new PhotonVisionIO(
                                                 "back_right",
                                                 true,
-                                                new Translation3d(-0.3683, -0.0445, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI));
+                                                new Translation3d(-0.31115, -0.1524, 0.3937),
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
 
-                                PhotonVisionIO left_cam = new PhotonVisionIO(
-                                                "left",
+                                PhotonVisionIO right_cam = new PhotonVisionIO(
+                                                " right",
                                                 true,
-                                                new Translation3d(-0.3112, -0.1207, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI / 2));
+                                                new Translation3d(-0.2984, -0.19685, 0.3175),
+                                                new Rotation3d(0.0, -Math.PI / 12, -Math.PI / 2));
 
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
