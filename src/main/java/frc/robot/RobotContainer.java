@@ -213,29 +213,29 @@ public class RobotContainer {
                 CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
                 switch (RobotConstants.currentMode) {
                         case REAL:
-                                PhotonVisionIO right_cam = new PhotonVisionIO(
-                                                "right",
+                                PhotonVisionIO left_cam = new PhotonVisionIO(
+                                                "left",
                                                 true,
-                                                new Translation3d(-0.3112, 0.2477, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, -Math.PI / 2));
+                                                new Translation3d(-0.2984, 0.3175, 0.3175),
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI / 2));
 
                                 PhotonVisionIO back_left = new PhotonVisionIO(
                                                 "back_left",
                                                 true,
-                                                new Translation3d(-0.3683, 0.1715, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI));
-
+                                                new Translation3d(-0.31115, 0.266, 0.3937),
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
+//0.3175 0.266 -0.1524 -0.19685
                                 PhotonVisionIO back_right = new PhotonVisionIO(
                                                 "back_right",
                                                 true,
-                                                new Translation3d(-0.3683, -0.0445, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI));
+                                                new Translation3d(-0.31115, -0.1524, 0.3937),
+                                                new Rotation3d(0.0, -Math.PI / 12, Math.PI));
 
-                                PhotonVisionIO left_cam = new PhotonVisionIO(
-                                                "left",
+                                PhotonVisionIO right_cam = new PhotonVisionIO(
+                                                " right",
                                                 true,
-                                                new Translation3d(-0.3112, -0.1207, 0.3734),
-                                                new Rotation3d(0.0, -Math.PI / 6, Math.PI / 2));
+                                                new Translation3d(-0.2984, -0.19685, 0.3175),
+                                                new Rotation3d(0.0, -Math.PI / 12, -Math.PI / 2));
 
                                 m_vision = new Vision(
                                                 drivetrain.rotationSupplier(),
@@ -244,8 +244,7 @@ public class RobotContainer {
                                                 right_cam,
                                                 back_right,
                                                 back_left,
-                                                left_cam
-                                );
+                                                left_cam);
                                 break;
                         case SIM:
                                 // TODO: Add Real Camera Constants to use here
@@ -313,7 +312,8 @@ public class RobotContainer {
 
                 new Trigger(() -> toggleIntake).onTrue(new RunIntake(m_intake, -1));
                 new Trigger(() -> toggleIntake).onFalse(new RunIntake(m_intake, 0, 0));
-                // Keep manual directions unchanged after matching motor polarity to the encoder.
+                // Keep manual directions unchanged after matching motor polarity to the
+                // encoder.
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
 
@@ -340,6 +340,9 @@ public class RobotContainer {
 
                 joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
                 joystick2.b().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
+                joystick2.a().onTrue(new RunIntake(m_intake, 0.5).withTimeout(0.25)
+                                .andThen(Commands.either(new RunIntake(m_intake, -1), Commands.none(),
+                                                () -> toggleIntake)));
 
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
@@ -347,9 +350,11 @@ public class RobotContainer {
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
                                 .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
-                new POVButton(m_gunner, 0).onTrue(new InstantCommand(() -> m_flywheel.setManualSpeedIncrement(2)));
+                // new POVButton(m_gunner, 0).onTrue(new InstantCommand(() ->
+                // m_flywheel.setManualSpeedIncrement(2)));
 
-                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() -> m_flywheel.setManualSpeedIncrement(-2)));
+                // new POVButton(m_gunner, 180).onTrue(new InstantCommand(() ->
+                // m_flywheel.setManualSpeedIncrement(-2)));
                 new JoystickButton(m_gunner, XboxController.Button.kB.value)
                                 .onTrue(new InstantCommand(() -> m_flywheel.clearManualSpeed()));
 
