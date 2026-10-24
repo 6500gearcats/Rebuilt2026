@@ -34,11 +34,12 @@ public class Flywheel extends SubsystemBase {
   VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
   public boolean snurboEnable = false;
   public double speedModifier = 1;
-  public boolean waitForSpeed = false;
   private double reqSpeed;
   private double baseSpeed;
   private double rotationCorrection;
   private double speedWithinToleranceSince = -1;
+  // Absence means automatic shot tracking; a value is an intentional manual override.
+  @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
   private OptionalDouble manualSpeedOverride = OptionalDouble.empty();
   private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
 
@@ -50,7 +51,7 @@ public class Flywheel extends SubsystemBase {
   private static final boolean SPEED_READINESS_OVERRIDE = true;
 
   TalonFX m_bottomMotor = new TalonFX(Constants.MotorConstants.kShooterMotorBottomID);
-  private RobotStateMachine robotStateMachine;
+  private final RobotStateMachine robotStateMachine;
 
   TalonFXConfiguration talonFXConfigs;
 
@@ -129,11 +130,13 @@ public class Flywheel extends SubsystemBase {
   }
 
   /** Selects an exact speed in RPS until manual mode is cleared. */
+  @SuppressWarnings("unused") // Entry point for optional manual tuning bindings.
   public void setManualSpeed(double speed) {
     manualSpeedOverride = OptionalDouble.of(speed);
     setSpeed(speed);
   }
 
+  @SuppressWarnings("unused") // Entry point for optional manual tuning bindings.
   public void setManualSpeedIncrement(double increment) {
     double newSpeed = manualSpeedOverride.orElse(getReqSpeed()) + increment;
     manualSpeedOverride = OptionalDouble.of(newSpeed);
@@ -189,11 +192,6 @@ public class Flywheel extends SubsystemBase {
       measuredSpeedStable = false;
     }
     speedStable = SPEED_READINESS_OVERRIDE || measuredSpeedStable;
-  }
-
-  public void stopMotor() {
-    m_topMotor.set(0);
-    m_bottomMotor.set(0);
   }
 
   public void setControl(ControlRequest req) {

@@ -21,9 +21,10 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 /**
  * Publishes drivetrain telemetry to NetworkTables and SmartDashboard.
  */
-public class Telemetry {
+public class Telemetry implements AutoCloseable {
         private final double MaxSpeed;
         private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
+        private boolean closed;
 
         /**
          * Construct a telemetry object, with the specified max speed of the robot
@@ -97,7 +98,10 @@ public class Telemetry {
         /**
          * Publish structured drive state and field pose, plus optional dashboard diagnostics.
          */
-        public void telemeterize(SwerveDriveState state) {
+        public synchronized void telemeterize(SwerveDriveState state) {
+                if (closed) {
+                        return;
+                }
                 /* Telemeterize the swerve drive state */
                 drivePose.set(state.Pose);
                 driveSpeeds.set(state.Speeds);
@@ -128,5 +132,26 @@ public class Telemetry {
                         m_moduleDirections[i].setAngle(state.ModuleStates[i].angle);
                         m_moduleSpeeds[i].setLength(state.ModuleStates[i].speedMetersPerSecond / (2 * MaxSpeed));
                 }
+        }
+
+        /** Mechanism widgets live for the robot's lifetime, rather than one callback. */
+        @Override
+        public synchronized void close() {
+                if (closed) {
+                        return;
+                }
+                closed = true;
+                for (Mechanism2d mechanism : m_moduleMechanisms) {
+                        mechanism.close();
+                }
+                drivePose.close();
+                driveSpeeds.close();
+                driveModuleStates.close();
+                driveModuleTargets.close();
+                driveModulePositions.close();
+                driveTimestamp.close();
+                driveOdometryFrequency.close();
+                fieldPub.close();
+                fieldTypePub.close();
         }
 }

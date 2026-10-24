@@ -15,7 +15,7 @@ public class UpToSpeedHopperShoot extends Command {
   /** Creates a new JasonsShooting. */
   Hopper m_Hopper;
   Flywheel m_Flywheel;
-  private RobotStateMachine stateMachine = RobotStateMachine.getInstance();
+  private final RobotStateMachine stateMachine = RobotStateMachine.getInstance();
 
   public UpToSpeedHopperShoot(Hopper m_Hopper, Flywheel m_Flywheel) {
     this.m_Hopper = m_Hopper;

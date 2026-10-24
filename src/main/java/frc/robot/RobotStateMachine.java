@@ -47,17 +47,17 @@ public final class RobotStateMachine {
     private boolean switchingRed = false;
     private boolean switchingGreen = false;
     private Color exampleColor;
-    private Color whiteColor = new Color(237, 237, 237);
-    private Color blackColor = new Color(49, 49, 49);
-    private Color redColor = new Color(191, 0, 0);
-    private Color greenColor = new Color(0, 191, 0);
+    private final Color whiteColor = new Color(237, 237, 237);
+    private final Color blackColor = new Color(49, 49, 49);
+    private final Color redColor = new Color(191, 0, 0);
+    private final Color greenColor = new Color(0, 191, 0);
 
     private Pose2d turretPose = new Pose2d();
 
     private Vision m_vision;
-    private Flywheel m_Flywheel;
-    private Turret m_Turret;
-    private Hood m_hood;
+    private final Flywheel m_Flywheel;
+    private final Turret m_Turret;
+    private final Hood m_hood;
 
     public static Pose3d Tag_POSE2D;
 
@@ -103,7 +103,7 @@ public final class RobotStateMachine {
         exampleColor = whiteColor;
 
         m_Flywheel = new Flywheel(this);
-        m_Turret = new Turret(this);
+        m_Turret = new Turret();
         m_hood = new Hood(this);
 
         SmartDashboard.putString("RobotState", state.toString());
@@ -240,19 +240,17 @@ public final class RobotStateMachine {
     private void checkAlliance() {
         // double allianceMulti = 1;
         if (getAlliance() == Alliance.Red) {
-            Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(10).get();
+            Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(10)
+                    .orElseThrow(() -> new IllegalStateException("Field layout is missing red hub tag 10"));
         } else {
-            Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20).get();
+            Tag_POSE2D = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(20)
+                    .orElseThrow(() -> new IllegalStateException("Field layout is missing blue hub tag 20"));
             // allianceMulti = -1;
         }
         HubPose = Tag_POSE2D.toPose2d().transformBy(
                 new Transform2d(Distance.ofRelativeUnits(-0.5842, Meter),
                         Distance.ofBaseUnits(0, Meter),
                         new Rotation2d()));
-    }
-
-    public Pose2d getHubPose() {
-        return HubPose;
     }
 
     public Pose2d getTurretPose() {
@@ -434,14 +432,6 @@ public final class RobotStateMachine {
         return pose.getTranslation().getDistance(HubPose.getTranslation());
     }
 
-    public boolean isFarEnough() {
-        return distToTag() > 3.3;
-    }
-
-    public boolean isUpToSpeed() {
-        return m_Flywheel.isUpToSpeed();
-    }
-
     /** Shared target and velocity data used by turret and flywheel control. */
     public static final class ShotSolution {
         private final Pose2d targetPose;
@@ -479,6 +469,7 @@ public final class RobotStateMachine {
             return new ShotSolution(new Pose2d(), 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
+        @SuppressWarnings("unused") // Complete immutable shot-solution API for telemetry/tuning consumers.
         public Pose2d getTargetPose() {
             return targetPose;
         }
@@ -524,15 +515,6 @@ public final class RobotStateMachine {
         double tolerance = Math.toRadians(20);
 
         return Math.abs(delta) < tolerance;
-    }
-
-    /**
-     * Sets the current field zone override.
-     *
-     * @param currentZone new field zone
-     */
-    public void setCurrentZone(FieldZone currentZone) {
-        this.currentZone = currentZone;
     }
 
     /**
@@ -845,9 +827,6 @@ public final class RobotStateMachine {
     }
 
     /**
-     * Update state and refresh pose from vision.
-     */
-    /**
      * Requests a transition to the specified state.
      *
      * @param next next state to apply
@@ -857,14 +836,6 @@ public final class RobotStateMachine {
             return;
         refreshPoseFromVision();
         update(next);
-    }
-
-    public void switchState() {
-        if (getState() == RobotState.ACTIVE) {
-            setState(RobotState.INACTIVE);
-        } else {
-            setState(RobotState.ACTIVE);
-        }
     }
 
     /**
@@ -895,10 +866,6 @@ public final class RobotStateMachine {
                 pose = latest;
             }
         }
-    }
-
-    public double getPoseTime() {
-        return m_vision.getPoseTime();
     }
 
     /**
@@ -962,7 +929,7 @@ public final class RobotStateMachine {
     }
 
     public Alliance getAlliance() {
-        return DriverStation.getAlliance().isPresent() ? DriverStation.getAlliance().get() : Alliance.Blue;
+        return DriverStation.getAlliance().orElse(Alliance.Blue);
     }
 
     public enum RobotState {
@@ -975,10 +942,6 @@ public final class RobotStateMachine {
 
     public boolean isActive() {
         return getState() == RobotState.ACTIVE;
-    }
-
-    public boolean isInAlliance() {
-        return checkZone() == FieldZone.ALLIANCE;
     }
 
     private Optional<Pose2d> getBestPoseTarget() {

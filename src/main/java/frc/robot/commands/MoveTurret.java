@@ -16,8 +16,8 @@ import frc.robot.subsystems.turret.Turret;
  * Command that drives the turret at a supplied speed.
  */
 public class MoveTurret extends Command {
-  private Turret m_turret;
-  private DoubleSupplier speedSupplier;
+  private final Turret m_turret;
+  private final DoubleSupplier speedSupplier;
   private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
 
   /**

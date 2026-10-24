@@ -203,7 +203,7 @@ public final class Constants {
         new Rotation3d(0, 0, 180));
 
     // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout kTagLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
+    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
     // The standard deviations of our vision estimated poses, which affect
     // correction rate

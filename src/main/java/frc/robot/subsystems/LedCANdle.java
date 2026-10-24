@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.controls.EmptyAnimation;
 import com.ctre.phoenix6.controls.RainbowAnimation;
@@ -21,22 +22,22 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Controls the CTRE CANdle LED strip and animations.
  */
 @SuppressWarnings("unused")
-public class LedCANdle extends SubsystemBase {
-  private static CANdle candle = new CANdle(50, "Default Name");
-  private static CANdleConfiguration config = new CANdleConfiguration();
+public class LedCANdle extends SubsystemBase implements AutoCloseable {
+  private static final CANdle candle = new CANdle(50, new CANBus("Default Name"));
+  private static final CANdleConfiguration config = new CANdleConfiguration();
   private static final int END_INDEX = 185; // 8 for CANdle + 177 for strip
 
-  private static EmptyAnimation empty = new EmptyAnimation(0);
-  private static RainbowAnimation rainbow = new RainbowAnimation(0, END_INDEX);
+  private static final EmptyAnimation empty = new EmptyAnimation(0);
+  private static final RainbowAnimation rainbow = new RainbowAnimation(0, END_INDEX);
 
-  private static Timer timer = new Timer();
-  private static int fps = 20;
-  private static double[] color = { 255, 255, 255 };
+  private static final Timer timer = new Timer();
+  private static final int fps = 20;
+  private static final double[] color = { 255, 255, 255 };
 
   // FLAGS
   private static int currentFlag = -1;
-  private static String[] flagOptions = { "trans", "bi", "american", "gearcats" };
-  private static HashMap<String, RGBWColor[]> flags = new HashMap<String, RGBWColor[]>();
+  private static final String[] flagOptions = { "trans", "bi", "american", "gearcats" };
+  private static final HashMap<String, RGBWColor[]> flags = new HashMap<>();
   RGBWColor[] transFlag = { new RGBWColor(45, 103, 175), new RGBWColor(180, 45, 52), new RGBWColor(80, 80, 80),
       new RGBWColor(180, 45, 52) };
   RGBWColor[] biFlag = { new RGBWColor(180, 45, 52), new RGBWColor(80, 30, 80), new RGBWColor(0, 38, 168) };
@@ -104,7 +105,7 @@ public class LedCANdle extends SubsystemBase {
     }
 
     int increment = 6;
-    int count = 0 + 8; // offset for CANdle
+    int count = 8; // offset for CANdle
     int color = 0;
     while (count < END_INDEX) {
       candle.setControl(new SolidColor(count, count + increment)
@@ -118,6 +119,11 @@ public class LedCANdle extends SubsystemBase {
   public void cycleFlag() {
     currentFlag = (currentFlag + 1) % flagOptions.length;
     displayFlag(flagOptions[currentFlag]);
+  }
+
+  @Override
+  public void close() {
+    candle.close();
   }
 
   @Override

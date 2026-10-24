@@ -11,8 +11,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -33,8 +31,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -49,7 +45,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.HomeIntake;
 import frc.robot.commands.MoveTurret;
-import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunHopperBack;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.SetTurretAngle;
@@ -66,24 +61,19 @@ import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.limelight.LimelightHelpers;
-import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
-import frc.robot.utility.RangeFinder;
 import frc.robot.utility.SysIDUtil;
 
 /**
  * Central robot wiring for subsystems, commands, and operator bindings.
  */
-public class RobotContainer {
-        @SuppressWarnings("unused")
+public class RobotContainer implements AutoCloseable {
+        private static final boolean ENABLE_SYSID_BINDINGS = false;
 
-        private boolean testing = false;
-
-        private double speedModify = 1;
-        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+        private final double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
                                                                                       // speed
-        private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
+        private final double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
                                                                                           // second
                                                                                           // max angular velocity
 
@@ -92,18 +82,15 @@ public class RobotContainer {
                         .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
                         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
                                                                                  // motors
-        private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-        private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
         private final CommandXboxController joystick;
-        private final CommandPS4Controller pranav = new CommandPS4Controller(0);
 
         private final CommandXboxController joystick2 = new CommandXboxController(1);
         private final XboxController m_gunner;
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-        private LedCANdle m_candle = new LedCANdle();
+        private final LedCANdle m_candle = new LedCANdle();
 
         private final Hopper hopper = new Hopper();
 
@@ -117,32 +104,26 @@ public class RobotContainer {
 
         private final Intake m_intake = new Intake();
 
-        private final Climber m_climber = new Climber();
 
-        private final RangeFinder rangeFinder = new RangeFinder();
-        private RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
+        private final RobotStateMachine robotStateMachine = RobotStateMachine.getInstance();
 
         private final Turret m_turret = robotStateMachine.getTurret();
 
-        private Pose3d tagPose = Constants.APRIL_TAG_FIELD_LAYOUT.getTagPose(25).get();
 
         SysIDUtil m_turretSysID = new SysIDUtil();
         SysIDUtil m_flywheelSysID = new SysIDUtil();
 
         // Vision
-        PhotonVisionIO photonVisionIO;
         private final Vision m_vision;
 
         private final Telemetry logger = new Telemetry(MaxSpeed);
 
-        SlewRateLimiter filterXLimiter = new SlewRateLimiter(20);
-        SlewRateLimiter filterYLimiter = new SlewRateLimiter(20);
-        SlewRateLimiter filterRotLimiter = new SlewRateLimiter(20);
 
         /**
          * Creates the container, initializes logging, chooser options, and vision.
          */
         public RobotContainer() {
+                final Climber m_climber = new Climber();
                 m_hood = robotStateMachine.getHood();
                 m_flywheel = robotStateMachine.getFlywheel();
                 joystick = robotStateMachine.getDriver();
@@ -268,7 +249,7 @@ public class RobotContainer {
                                 m_vision = new Vision();
                                 break;
                 }
-                if (testing) {
+                if (ENABLE_SYSID_BINDINGS) {
                         testBindings();
                         m_turretSysID = new SysIDUtil(m_turret);
                         m_flywheelSysID = new SysIDUtil(m_flywheel);
@@ -288,8 +269,6 @@ public class RobotContainer {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
         // @formatter:off
-        //m_flywheel.setDefaultCommand(new RunCommand(()-> m_flywheel.setSpeed(RangeFinder.getShotVelocity(
-        //robotStateMachine.getTurretPose().getTranslation().getDistance(robotStateMachine.getHubPose().getTranslation()))), m_flywheel));
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(MathUtil.applyDeadband(-joystick.getLeftY(), 0.1) * MaxSpeed * m_flywheel.speedModifier) // Drive forward with negative Y (forward)
@@ -303,7 +282,7 @@ public class RobotContainer {
                                 drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
                 // Reset the field-centric heading on start button press
-                joystick.start().onTrue(new InstantCommand(() -> setRobotOrientation()));
+                joystick.start().onTrue(new InstantCommand(this::setRobotOrientation));
 
                 joystick2.rightBumper()
                                 .onTrue(new RunCommand(() -> m_intake.deployIntake(-0.3)).withTimeout(0.35)
@@ -319,7 +298,7 @@ public class RobotContainer {
                 // joystick.rightBumper().onTrue(ne
 
                 joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
-                joystick.leftBumper().onTrue(new InstantCommand(() -> reverseBoolean()));
+                joystick.leftBumper().onTrue(new InstantCommand(this::reverseBoolean));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
                                 .whileTrue(new ParallelCommandGroup(new RunCommand(
@@ -331,11 +310,11 @@ public class RobotContainer {
                                                 .andThen(new CoolSnurbo(m_flywheel).withTimeout(0.2)));
 
                 new JoystickButton(m_gunner, XboxController.Button.kStart.value)
-                                .onTrue(new InstantCommand(() -> m_turret.zeroMotorPosition()));
+                                .onTrue(new InstantCommand(m_turret::zeroMotorPosition));
 
                 new JoystickButton(m_gunner, XboxController.Button.kBack.value)
-                                .onTrue(new InstantCommand(() -> m_turret.toggleOverride()))
-                                .onFalse(new InstantCommand(() -> m_turret.toggleOverride()));
+                                .onTrue(new InstantCommand(m_turret::toggleOverride))
+                                .onFalse(new InstantCommand(m_turret::toggleOverride));
 
                 joystick2.rightTrigger().whileTrue(new HomeIntake(m_intake));
                 joystick2.b().onTrue(new RunHopperBack(hopper, 0.3).withTimeout(0.2));
@@ -346,7 +325,7 @@ public class RobotContainer {
                 joystick.a().whileTrue(new AlignTurretToHub(m_turret));
 
                 new JoystickButton(m_gunner, XboxController.Button.kX.value)
-                                .onTrue(new InstantCommand(() -> m_turret.goToZero()));
+                                .onTrue(new InstantCommand(m_turret::goToZero));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
                                 .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
                 // new POVButton(m_gunner, 0).onTrue(new InstantCommand(() ->
@@ -355,23 +334,18 @@ public class RobotContainer {
                 // new POVButton(m_gunner, 180).onTrue(new InstantCommand(() ->
                 // m_flywheel.setManualSpeedIncrement(-2)));
                 new JoystickButton(m_gunner, XboxController.Button.kB.value)
-                                .onTrue(new InstantCommand(() -> m_flywheel.clearManualSpeed()));
+                                .onTrue(new InstantCommand(m_flywheel::clearManualSpeed));
 
                 new JoystickButton(m_gunner, XboxController.Button.kY.value)
-                                .onTrue(new InstantCommand(() -> m_hood.moveUpOneStep()));
+                                .onTrue(new InstantCommand(m_hood::moveUpOneStep));
                 new JoystickButton(m_gunner, XboxController.Button.kA.value)
-                                .onTrue(new InstantCommand(() -> m_hood.moveDownOneStep()));
+                                .onTrue(new InstantCommand(m_hood::moveDownOneStep));
         }
 
         public void testBindings() {
                 //@formatter:off
                 drivetrain.registerTelemetry(logger::telemeterize);
                 
-                // joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-                // joystick.b().whileTrue(drivetrain.applyRequest(() ->
-                //                                         point.withModuleDirection(
-                //                                                 new Rotation2d(-joystick.getLeftY(),
-                //                                                                  -joystick.getLeftX()))));
                 //@formatter:on
 
                 joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
@@ -384,19 +358,12 @@ public class RobotContainer {
                 joystick2.start().and(joystick2.pov(180)).whileTrue(drivetrain.sysIdQuasistaticRot(Direction.kForward));
                 joystick2.start().and(joystick2.pov(270)).whileTrue(drivetrain.sysIdQuasistaticRot(Direction.kReverse));
 
-                if (m_turretSysID.isPresent()) {
-                        // Driver Back + x
-                        joystick2.back().and(joystick2.x())
-                                        .onTrue(m_turretSysID.sysIdAll().get().andThen(
-                                                        new InstantCommand(() -> System.out
-                                                                        .println("Get Hoot Logs from TunerX"))));
-                }
-                if (m_flywheelSysID.isPresent()) {
-                        // Driver Back + x
-                        joystick2.y().onTrue(m_flywheelSysID.sysIdAll().get().andThen(
-                                        new InstantCommand(() -> System.out
-                                                        .println("Get Hoot Logs from TunerX"))));
-                }
+                m_turretSysID.sysIdAll().ifPresent(command ->
+                        joystick2.back().and(joystick2.x()).onTrue(command.andThen(
+                                new InstantCommand(() -> System.out.println("Get Hoot Logs from TunerX")))));
+                m_flywheelSysID.sysIdAll().ifPresent(command ->
+                        joystick2.y().onTrue(command.andThen(
+                                new InstantCommand(() -> System.out.println("Get Hoot Logs from TunerX")))));
 
                 joystick.pov(0).onTrue(new InstantCommand(() -> m_turret.setPosition(-109), m_turret));
 
@@ -474,4 +441,10 @@ public class RobotContainer {
         public void disableExitCode() {
                 m_vision.resetLimelightThrottle();
         }
+        @Override
+        public void close() {
+                logger.close();
+                m_candle.close();
+        }
+
 }

@@ -148,6 +148,9 @@ public class Vision extends SubsystemBase {
     if (isReplay) {
       return;
     }
+    for (VisionIO visionIO : io) {
+      visionIO.updateInputs();
+    }
     Pose2d lastPose = getEstimatedPose();
     estimator.update(
         m_rotationSupplier.get(),
@@ -158,11 +161,11 @@ public class Vision extends SubsystemBase {
                 est.getPose(),
                 est.getTimestamp(),
                 est.getStdDevs().orElse(m_visionStndDev));
-      }
-      if (visionIO.getName().contains("gcc")) {
-        visionIO.getVisionEst().ifPresent(est -> gccPub.set(est.getPose()));
-      } else if (visionIO.getName().contains("gcd")) {
-        visionIO.getVisionEst().ifPresent(est -> gcdPub.set(est.getPose()));
+        if (visionIO.getName().contains("gcc")) {
+          gccPub.set(est.getPose());
+        } else if (visionIO.getName().contains("gcd")) {
+          gcdPub.set(est.getPose());
+        }
       }
 
     }

@@ -6,7 +6,6 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,8 +19,8 @@ import frc.robot.RobotStateMachine.RobotState;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-  private Timer m_gcTimer = new Timer();
-  private Timer autoTimer = new Timer();
+  private final Timer m_gcTimer = new Timer();
+  private final Timer autoTimer = new Timer();
   private final RobotContainer m_robotContainer;
   private final RobotStateMachine m_RobotStateMachine;
 
@@ -36,7 +35,7 @@ public class Robot extends TimedRobot {
     }
     SignalLogger.start();
     DataLogManager.start();
-    addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
+    addPeriodic(m_RobotStateMachine::periodic, kDefaultPeriod);
     SmartDashboard.putNumber("AutoTime", autoTimer.get());
   }
 
@@ -48,10 +47,15 @@ public class Robot extends TimedRobot {
     if (m_gcTimer.advanceIfElapsed(0.1)) {
       System.gc();
     }
-    // SignalLogger.writeStruct("odometry", Pose2d.struct,
-    // m_RobotStateMachine.getPose());
-    // SignalLogger.writeDouble("odom period", m_RobotStateMachine.getPoseTime(),
-    // "seconds");
+  }
+
+  @Override
+  public void close() {
+    try {
+      super.close();
+    } finally {
+      m_robotContainer.close();
+    }
   }
 
   @Override
@@ -125,10 +129,6 @@ public class Robot extends TimedRobot {
         }
       }
     }
-  }
-
-  @Override
-  public void teleopExit() {
   }
 
   @Override

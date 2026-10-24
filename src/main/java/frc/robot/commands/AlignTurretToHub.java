@@ -19,8 +19,8 @@ import frc.robot.subsystems.turret.Turret;
 public class AlignTurretToHub extends Command {
   /** Creates a new AlignTurretToHub. */
 
-  private Turret m_turret;
-  private RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
+  private final Turret m_turret;
+  private final RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
 
   private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
   private static final double ALIGNMENT_TOLERANCE_DEGREES = 1.5;

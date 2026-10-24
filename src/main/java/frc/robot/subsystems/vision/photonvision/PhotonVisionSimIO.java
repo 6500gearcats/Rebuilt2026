@@ -41,9 +41,10 @@ public class PhotonVisionSimIO implements VisionIO {
     public Transform3d robotToCamera;
 
     private boolean mountedOnTurret = false;
-    private boolean forPoseEstimation = false;
+    private final boolean forPoseEstimation;
 
     private final PhotonPoseEstimator estimator;
+    private final PhotonResultBuffer results;
 
     private double lastEstTimestamp = 0;
     public boolean isNewResult = false;
@@ -69,6 +70,7 @@ public class PhotonVisionSimIO implements VisionIO {
         // The simulation of this camera. Its values used in real robot code will be
         // updated.
         cameraSim = new PhotonCameraSim(new PhotonCamera(cameraName), cameraProp);
+        results = new PhotonResultBuffer(cameraSim.getCamera()::getAllUnreadResults);
 
         // Enable the raw and processed streams. These are enabled by default.
         cameraSim.enableRawStream(true);
@@ -78,10 +80,7 @@ public class PhotonVisionSimIO implements VisionIO {
         // This is extremely resource-intensive and is disabled by default.
         cameraSim.enableDrawWireframe(true);
 
-        estimator = new PhotonPoseEstimator(
-                kTagLayout,
-                PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
-                robotToCamera);
+        estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
     }
 
     @Override
@@ -106,8 +105,13 @@ public class PhotonVisionSimIO implements VisionIO {
         return yaw;
     }
 
+    @Override
+    public void updateInputs() {
+        results.update();
+    }
+
     public PhotonPipelineResult getLatestResult() {
-        return cameraSim.getCamera().getLatestResult();
+        return results.latest();
     }
 
     @Override
@@ -263,7 +267,7 @@ public class PhotonVisionSimIO implements VisionIO {
 
     /**
      * The standard deviations of the estimated pose from
-     * {@link #getEstimatedGlobalPose()}, for use
+     * {@link #getVisionEst()}, for use
      * with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
      * SwerveDrivePoseEstimator}.
      * This should only be used when there are targets visible.
@@ -302,14 +306,19 @@ public class PhotonVisionSimIO implements VisionIO {
      * empty. This should
      * only be called once per loop.
      *
-     * @return An {@link Optional<Pose2D>>} with an estimated pose, estimate
+     * @return An {@code Optional<VisionEstimate>} with an estimated pose, estimate
      *         timestamp, and targets
      *         used for estimation.
      */
     public Optional<VisionEstimate> getVisionEst() {
-        PhotonPipelineResult result = getLatestResult();
-        var visionEst = estimator.update(result);
-        double latestTimestamp = cameraSim.getCamera().getLatestResult().getTimestampSeconds();
+        List<PhotonPipelineResult> unread = results.takeUnread();
+        if (unread.isEmpty()) {
+            isNewResult = false;
+            return Optional.empty();
+        }
+        PhotonPipelineResult result = unread.get(unread.size() - 1);
+        var visionEst = estimator.estimateLowestAmbiguityPose(result);
+        double latestTimestamp = result.getTimestampSeconds();
         boolean newResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
         if (newResult) {
             lastEstTimestamp = latestTimestamp;

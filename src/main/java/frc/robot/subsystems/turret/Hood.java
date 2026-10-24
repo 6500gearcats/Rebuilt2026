@@ -19,7 +19,6 @@ import frc.robot.Constants.MotorConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.RobotStateMachine;
 import frc.robot.DashboardTelemetry;
-import frc.robot.generated.TunerConstants;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
@@ -32,9 +31,9 @@ public class Hood extends SubsystemBase {
   private final TalonFX m_motor = new TalonFX(MotorConstants.kTurretHoodID);
   private final CANcoder m_encoder = new CANcoder(MotorConstants.kTurretHoodEncoderID);
   private double m_commandedSpeed = 0.0;
-  private double targetPosition = 0.0;
-  private double HOOD_INCREMENT = 0.034;
-  private RobotStateMachine robotStateMachine;
+  private double targetPosition;
+  private static final double HOOD_INCREMENT = 0.034;
+  private final RobotStateMachine robotStateMachine;
   private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
 
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
@@ -87,7 +86,7 @@ public class Hood extends SubsystemBase {
     // double posSignal = m_encoder.getPosition().getValueAsDouble();
     boolean encoderConnected = positionSignal.getStatus().isOK();
 
-    if (!encoderConnected || isMotionBlocked(m_commandedSpeed, absolutePositionRotations)) {
+    if (!encoderConnected) {
       stop();
     }
     m_motor.setControl(positionRequest.withPosition(shotSolution.getHoodRotation()));
@@ -113,10 +112,6 @@ public class Hood extends SubsystemBase {
   public void setSpeed(double speed) {
     // var positionSignal = m_encoder.getAbsolutePosition();
     double limitedSpeed = MathUtil.clamp(speed, -1.0, 1.0);
-    // if (!positionSignal.getStatus().isOK()
-    //     || isMotionBlocked(limitedSpeed, positionSignal.getValueAsDouble())) {
-    //   limitedSpeed = 0.0;
-    // }
 
     m_commandedSpeed = limitedSpeed;
     m_motor.set(limitedSpeed);
@@ -128,28 +123,12 @@ public class Hood extends SubsystemBase {
     m_motor.stopMotor();
   }
 
-  private boolean isMotionBlocked(double speed, double positionRotations) {
-    // return (speed < 0.0 && isAtLowerLimit(positionRotations))
-    //     || (speed > 0.0 && isAtUpperLimit(positionRotations));
-    return false;
-  }
-
   private boolean isAtLowerLimit(double positionRotations) {
     return positionRotations <= TurretConstants.kHoodMinPositionRotations;
   }
 
   private boolean isAtUpperLimit(double positionRotations) {
     return positionRotations >= TurretConstants.kHoodMaxPositionRotations;
-  }
-
-  /** Returns the zeroed absolute hood position in rotations. */
-  public double getAbsolutePositionRotations() {
-    return m_encoder.getAbsolutePosition().getValueAsDouble();
-  }
-
-  /** Returns the zeroed absolute hood position in degrees. */
-  public double getAbsolutePositionDegrees() {
-    return getAbsolutePositionRotations() * 360.0;
   }
 
   public void moveDownOneStep(){
@@ -168,4 +147,4 @@ public class Hood extends SubsystemBase {
     m_motor.setControl(positionRequest.withPosition(targetPosition));
     SmartDashboard.putNumber("Hood Requested Position (degrees)", targetPosition * 360.0);
   }
-};
+}

@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.DashboardTelemetry;
-import frc.robot.RobotStateMachine;
 
 /**
  * Turret subsystem that controls the yaw motor and tracks its position.
@@ -31,13 +30,11 @@ public class Turret extends SubsystemBase {
   private final CANcoder m_encoder = new CANcoder(Constants.MotorConstants.kTurretEncoderID);
   private PositionVoltage m_request;
   private final DigitalInput m_switch = new DigitalInput(4);
-  private final RobotStateMachine robotStateMachine;
   private boolean overridden = false;
   private boolean feedbackInitialized = false;
   TalonFXConfiguration talonFXConfigs;
 
-  public Turret(RobotStateMachine robotStateMachine) {
-    this.robotStateMachine = robotStateMachine;
+  public Turret() {
     m_request = new PositionVoltage(0).withSlot(2);
     talonFXConfigs = new TalonFXConfiguration();
     talonFXConfigs.Feedback.FeedbackRemoteSensorID = m_encoder.getDeviceID();
@@ -93,7 +90,6 @@ public class Turret extends SubsystemBase {
       double targetPosition = absolutePositionSignal.getValueAsDouble();
       m_motor.setPosition(targetPosition);
     } else {
-      double targetPosition = m_motor.getPosition().getValueAsDouble();
       DriverStation.reportError("Failed to initialize turret position from absolute encoder: "
               + absolutePositionSignal.getStatus(), false);
     }
@@ -202,9 +198,6 @@ public class Turret extends SubsystemBase {
    * @param deg desired turret angle in degrees
    */
   public void setPosition(double deg) {
-//    if (robotStateMachine.ductTapeCorrection) {
-//      deg -= 5;
-//    }
     requestAngle(deg);
   }
 
@@ -229,6 +222,7 @@ public class Turret extends SubsystemBase {
     requestAngle(0.0);
   }
 
+  @SuppressWarnings("unused") // Optional pit-tuning entry point; slot selection changes control behavior.
   public void updateSlotConfigs() {
     var slot = talonFXConfigs.Slot1;
     slot.kV = SmartDashboard.getNumber("kV", 0);

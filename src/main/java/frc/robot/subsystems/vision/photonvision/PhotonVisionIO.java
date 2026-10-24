@@ -38,6 +38,7 @@ public class PhotonVisionIO implements VisionIO {
     private static final double MAX_POSE_Z_METERS = 1.00;
 
     private final PhotonCamera m_camera;
+    private final PhotonResultBuffer results;
     private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
     private Pose2d latestAcceptedPose;
     private Boolean latestPoseRejected;
@@ -45,7 +46,7 @@ public class PhotonVisionIO implements VisionIO {
     public Rotation3d robotToCameraRot;
     public Transform3d robotToCamera;
 
-    private boolean forPoseEstimation = true;
+    private final boolean forPoseEstimation;
 
     private final PhotonPoseEstimator estimator;
     public Field2d m_field = new Field2d();
@@ -68,6 +69,7 @@ public class PhotonVisionIO implements VisionIO {
         this.robotToCameraRot = robotToCameraRot;
         this.robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
         m_camera = new PhotonCamera(cameraName);
+        results = new PhotonResultBuffer(m_camera::getAllUnreadResults);
         estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
 
     }
@@ -94,8 +96,19 @@ public class PhotonVisionIO implements VisionIO {
         return yaw;
     }
 
+    @Override
+    public void updateInputs() {
+        results.update();
+        double timestamp = results.latest().getTimestampSeconds();
+        isNewResult = Math.abs(timestamp - lastEstTimestamp) > 1e-5;
+        if (isNewResult) {
+            lastEstTimestamp = timestamp;
+        }
+    }
+
+    /** Returns the snapshot captured by updateInputs; never drains the camera queue. */
     public PhotonPipelineResult getLatestResult() {
-        return m_camera.getLatestResult();
+        return results.latest();
     }
 
     @Override
@@ -195,16 +208,14 @@ public class PhotonVisionIO implements VisionIO {
     public double getChosenTargetRange(int fiducialID) {
         var result = getLatestResult();
         List<PhotonTrackedTarget> targets = result.getTargets();
-        double range = 0;
         if (result.hasTargets()) {
             for (PhotonTrackedTarget target : targets) {
                 if (target.getFiducialId() == fiducialID) {
-                    range = PhotonUtils.calculateDistanceToTargetMeters(
+                    return PhotonUtils.calculateDistanceToTargetMeters(
                             0,
                             0,
                             0,
                             Units.degreesToRadians(target.getPitch()));
-                    return range;
                 }
             }
         }
@@ -213,11 +224,7 @@ public class PhotonVisionIO implements VisionIO {
 
     @Override
     public boolean hasTargets() {
-        var result = getLatestResult();
-        if (result.hasTargets()) {
-            return true;
-        }
-        return false;
+        return getLatestResult().hasTargets();
     }
 
     @Override
@@ -238,8 +245,8 @@ public class PhotonVisionIO implements VisionIO {
     }
 
     /**
-     * The standard deviations of the estimated pose from
-     * {@link #getEstimatedGlobalPose()}, for use
+     * The standard deviations of an estimated pose from
+     * {@link #getVisionEstimates()}, for use
      * with {@link edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
      * SwerveDrivePoseEstimator}.
      * This should only be used when there are targets visible.
@@ -307,10 +314,8 @@ public class PhotonVisionIO implements VisionIO {
                 return true;
             }
 
-            if (!Double.isFinite(distance)
-                    || distance > MAX_SINGLE_TAG_DISTANCE_METERS) {
-                return true;
-            }
+            return !Double.isFinite(distance)
+                    || distance > MAX_SINGLE_TAG_DISTANCE_METERS;
         }
 
         return false;
@@ -335,23 +340,17 @@ public class PhotonVisionIO implements VisionIO {
      * empty. This should
      * only be called once per loop.
      *
-     * @return An {@link Optional<Pose2D>>} with an estimated pose, estimate
+     * @return An {@code Optional<VisionEstimate>} with an estimated pose, estimate
      *         timestamp, and targets
      *         used for estimation.
      */
     public Optional<VisionEstimate> getVisionEst() {
         Optional<VisionEstimate> latestEstimate = Optional.empty();
 
-        // Drain PhotonVision's FIFO and keep the newest valid estimate.
-        for (PhotonPipelineResult result : m_camera.getAllUnreadResults()) {
+        // Consume this loop's batch and keep the newest valid estimate.
+        for (PhotonPipelineResult result : results.takeUnread()) {
             Optional<EstimatedRobotPose> estimatedPose =
                     estimatePose(result);
-
-            double latestTimestamp = result.getTimestampSeconds();
-            isNewResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
-            if (isNewResult) {
-                lastEstTimestamp = latestTimestamp;
-            }
 
             if (estimatedPose.isPresent()) {
                 EstimatedRobotPose estimate = estimatedPose.get();
@@ -379,8 +378,8 @@ public class PhotonVisionIO implements VisionIO {
     public List<VisionEstimate> getVisionEstimates() {
         List<VisionEstimate> estimates = new ArrayList<>();
 
-        // Call exactly once per robot loop: this drains PhotonVision's FIFO.
-        for (PhotonPipelineResult result : m_camera.getAllUnreadResults()) {
+        // updateInputs drains the camera once per loop; consume the cached batch once.
+        for (PhotonPipelineResult result : results.takeUnread()) {
             Optional<EstimatedRobotPose> estimatedPose =
                     estimatePose(result);
 

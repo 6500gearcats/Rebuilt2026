@@ -4,28 +4,16 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.hal.simulation.RoboRioDataJNI;
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
-import frc.robot.RobotStateMachine;
-import frc.robot.RobotStateMachine.FieldZone;
 import frc.robot.subsystems.turret.Flywheel;
-import frc.robot.utility.RangeFinder;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 /**
- * Command that runs the flywheel at a supplied speed.
+ * Command that reserves the flywheel while its periodic method tracks the shot solution.
  */
 public class ShootFuel extends Command {
   /** Creates a new ShootFuel. */
-  Flywheel m_Flywheel;
-  DoubleSupplier supplier;
-
-  RobotStateMachine stateMachine = RobotStateMachine.getInstance();
-  int counter; // Delays time between spin-up and first ball
+  private final Flywheel m_Flywheel;
 
   /**
    * Creates a new ShootFuel command.
@@ -45,21 +33,12 @@ public class ShootFuel extends Command {
 
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
-      return;
-    }
-    // Flywheel.periodic() owns the shared shot-solution setpoint. Keeping this
-    // command free of a second setpoint prevents the two paths from fighting.
-  }
+  // Flywheel.periodic() owns the shot setpoint; no execute override is needed.
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     m_Flywheel.setSpeed(60);
-    counter = 0;
   }
 
   // Returns true when the command should end.

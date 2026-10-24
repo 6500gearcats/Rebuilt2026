@@ -6,11 +6,12 @@ package frc.robot.utility;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
-public class RangeFinder {
-  private static InterpolatingDoubleTreeMap m_shootMap = new InterpolatingDoubleTreeMap();
-  private static InterpolatingDoubleTreeMap m_TOFMap = new InterpolatingDoubleTreeMap();
-  private static InterpolatingDoubleTreeMap m_hoodMap = new InterpolatingDoubleTreeMap();
-  private static InterpolatingDoubleTreeMap m_rotMap = new InterpolatingDoubleTreeMap();
+public final class RangeFinder {
+  private RangeFinder() {}
+  private static final InterpolatingDoubleTreeMap m_shootMap = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap m_TOFMap = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap m_hoodMap = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap m_rotMap = new InterpolatingDoubleTreeMap();
 
   static {
 

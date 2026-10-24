@@ -8,6 +8,9 @@ import java.util.List;
  * IO abstraction for vision sources (PhotonVision, Limelight, or simulation).
  */
 public interface VisionIO {
+    /** Refresh input snapshots once per robot loop, before reading targets or pose estimates. */
+    default void updateInputs() {}
+
     /** @return camera name for dashboards and logging. */
     public String getName();
 
