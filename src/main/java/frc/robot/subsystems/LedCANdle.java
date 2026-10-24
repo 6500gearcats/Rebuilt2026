@@ -123,11 +123,6 @@ public class LedCANdle extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    try {
-      // color = SmartDashboard.getNumberArray("Color {r, g, b}", {255, 255, 255});
-    } catch (Exception e) {
-      System.out.println("somethings wrong with the led colors womp womp. error: " + e);
-    }
     /*
      * if((joystickView) && (timer.get() >= (1.0 / fps))) {
      * double whiteFactor = ((joystick.getLeftX() * -1) + 1) / 2;

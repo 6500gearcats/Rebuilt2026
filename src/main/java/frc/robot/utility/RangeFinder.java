@@ -5,7 +5,6 @@
 package frc.robot.utility;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RangeFinder {
   private static InterpolatingDoubleTreeMap m_shootMap = new InterpolatingDoubleTreeMap();

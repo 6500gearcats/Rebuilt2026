@@ -6,13 +6,9 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
-import frc.robot.RobotStateMachine;
+import frc.robot.DashboardTelemetry;
 import frc.robot.subsystems.turret.Turret;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -22,6 +18,7 @@ import frc.robot.subsystems.turret.Turret;
 public class MoveTurret extends Command {
   private Turret m_turret;
   private DoubleSupplier speedSupplier;
+  private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
 
   /**
    * Creates a new MoveTurret command.
@@ -45,8 +42,11 @@ public class MoveTurret extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    SmartDashboard.putNumber("Controller speed", speedSupplier.getAsDouble());
-    m_turret.setSpeed(speedSupplier.getAsDouble());
+    double speed = speedSupplier.getAsDouble();
+    m_turret.setSpeed(speed);
+    if (debugTelemetry.shouldPublish()) {
+      SmartDashboard.putNumber("Debug/Turret/Manual Duty Cycle", speed);
+    }
   }
 
   // Called once the command ends or is interrupted.

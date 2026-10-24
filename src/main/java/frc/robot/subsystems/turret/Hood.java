@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.MotorConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.RobotStateMachine;
+import frc.robot.DashboardTelemetry;
 import frc.robot.generated.TunerConstants;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -34,6 +35,7 @@ public class Hood extends SubsystemBase {
   private double targetPosition = 0.0;
   private double HOOD_INCREMENT = 0.034;
   private RobotStateMachine robotStateMachine;
+  private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
 
   private final PositionVoltage positionRequest = new PositionVoltage(0).withSlot(0);
   public Hood(RobotStateMachine robotStateMachine) {
@@ -90,14 +92,21 @@ public class Hood extends SubsystemBase {
     }
     m_motor.setControl(positionRequest.withPosition(shotSolution.getHoodRotation()));
 
-    SmartDashboard.putNumber("Hood Absolute Position (rotations)", absolutePositionRotations);
-    SmartDashboard.putNumber("Hood m_commandedSpeed", m_commandedSpeed);
-    // SmartDashboard.putNumber("Hood Position (rotations)", posSignal);
+    publishTelemetry(absolutePositionRotations, encoderConnected, shotSolution.getHoodRotation());
+  }
+
+  private void publishTelemetry(double absolutePositionRotations, boolean encoderConnected,
+      double requestedPositionRotations) {
     SmartDashboard.putNumber("Hood Absolute Position (degrees)", absolutePositionRotations * 360.0);
-    SmartDashboard.putNumber("Hood motor Position", targetPosition);
+    SmartDashboard.putNumber("Hood Requested Position (degrees)", requestedPositionRotations * 360.0);
     SmartDashboard.putBoolean("Hood Encoder Connected", encoderConnected);
     SmartDashboard.putBoolean("Hood At Lower Limit", isAtLowerLimit(absolutePositionRotations));
     SmartDashboard.putBoolean("Hood At Upper Limit", isAtUpperLimit(absolutePositionRotations));
+    if (debugTelemetry.shouldPublish()) {
+      SmartDashboard.putNumber("Debug/Hood/Absolute Position (rotations)", absolutePositionRotations);
+      SmartDashboard.putNumber("Debug/Hood/Manual Step Target (rotations)", targetPosition);
+      SmartDashboard.putNumber("Debug/Hood/Manual Duty Cycle", m_commandedSpeed);
+    }
   }
 
   /** Runs the hood motor at the requested duty cycle. */
@@ -146,23 +155,17 @@ public class Hood extends SubsystemBase {
   public void moveDownOneStep(){
     targetPosition -= HOOD_INCREMENT;
     if (targetPosition <= TurretConstants.kHoodMinPositionRotations){
-        SmartDashboard.putBoolean("Hood move down blocked", true);
         targetPosition = TurretConstants.kHoodMinPositionRotations;
-    }else{
-        SmartDashboard.putBoolean("Hood move down blocked", false);
     }
-    SmartDashboard.putNumber("Hood targetPosition", targetPosition);
     m_motor.setControl(positionRequest.withPosition(targetPosition));
+    SmartDashboard.putNumber("Hood Requested Position (degrees)", targetPosition * 360.0);
   }
   public void moveUpOneStep(){
     targetPosition += HOOD_INCREMENT;
     if (targetPosition >= TurretConstants.kHoodMaxPositionRotations){
-        SmartDashboard.putBoolean("Hood move up blocked", true);
         targetPosition = TurretConstants.kHoodMaxPositionRotations;
-    }else{
-        SmartDashboard.putBoolean("Hood move up blocked", false);
     }
-    SmartDashboard.putNumber("Hood targetPosition", targetPosition);
     m_motor.setControl(positionRequest.withPosition(targetPosition));
+    SmartDashboard.putNumber("Hood Requested Position (degrees)", targetPosition * 360.0);
   }
 };

@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
+import frc.robot.DashboardTelemetry;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.turret.Turret;
 
@@ -21,8 +22,7 @@ public class AlignTurretToHub extends Command {
   private Turret m_turret;
   private RobotStateMachine m_StateMachine = RobotStateMachine.getInstance();
 
-  private Pose2d prevPose = new Pose2d();
-  private double prevTurretRot = 0;
+  private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
   private static final double ALIGNMENT_TOLERANCE_DEGREES = 1.5;
   // Preserve the former 0.4 degrees/s tolerance with encoder-based velocity.
   private static final double ALIGNMENT_RATE_TOLERANCE_RPS = 0.4 / 360.0;
@@ -42,27 +42,14 @@ public class AlignTurretToHub extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d currPose = m_StateMachine.getTurretPose();
-    Translation2d errorFromPrev = prevPose.minus(currPose).getTranslation();
-    double errorFromPrevRot = prevTurretRot - m_turret.getConvertedTurretPosition();
-    SmartDashboard.putNumber("errorFromPrev.getX", errorFromPrev.getX());
-    SmartDashboard.putNumber("errorFromPrev.getY", errorFromPrev.getY());
-    SmartDashboard.putNumber("errorFromPrevRobotRot", prevPose.minus(currPose).getRotation().getDegrees());
-    SmartDashboard.putNumber("errroFromPrevRot", errorFromPrevRot);
-
     Pose2d m_targetPose = m_StateMachine.getTargetPose(); // Get updating pose of target from state machine
 
     Translation2d robotToTarget = m_targetPose.getTranslation()
         .minus(m_StateMachine.getTurretPose().getTranslation()); // gets x and y difference between robot and april tag
     Rotation2d turretAndRobot = m_StateMachine.getTurretPose().getRotation();
 
-    Pose2d newTurretPose = new Pose2d(m_StateMachine.getTurretPose().getTranslation(), turretAndRobot);
-    SmartDashboard.putNumber("turretAndRobot", turretAndRobot.getDegrees());
-    SmartDashboard.putNumber("Dist to Tag", newTurretPose.getTranslation().getDistance(m_targetPose.getTranslation()));
-
     Rotation2d turretToTargetAngle = robotToTarget.getAngle().minus(turretAndRobot); // angle of x and y difference
                                                                                      // minue rotation between tag/robot
-    SmartDashboard.putNumber("turretError", turretToTargetAngle.getDegrees());
 
     // Absolute encoder zero is forward. Add the heading error to the measured
     // angle to obtain the desired angle relative to the robot, including zero.
@@ -73,7 +60,12 @@ public class AlignTurretToHub extends Command {
     boolean aligned = (Math.abs(turretToTargetAngle.getDegrees()) <= ALIGNMENT_TOLERANCE_DEGREES)
         && (Math.abs(m_turret.getSpeed()) <= ALIGNMENT_RATE_TOLERANCE_RPS);
     SmartDashboard.putBoolean("Aligned", aligned);
-    SmartDashboard.putNumber("tunring_pos_setpoint", targetAngleDegrees);
+    if (debugTelemetry.shouldPublish()) {
+      SmartDashboard.putNumber("Debug/Turret/Field Heading (deg)", turretAndRobot.getDegrees());
+      SmartDashboard.putNumber("Debug/Turret/Target Distance (m)", robotToTarget.getNorm());
+      SmartDashboard.putNumber("Debug/Turret/Aim Error (deg)", turretToTargetAngle.getDegrees());
+      SmartDashboard.putNumber("Debug/Turret/Requested Angle (deg)", targetAngleDegrees);
+    }
   }
 
   static double calculateTargetAngleDegrees(Rotation2d headingError, double turretAngleDegrees) {
@@ -86,6 +78,7 @@ public class AlignTurretToHub extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    SmartDashboard.putBoolean("Aligned", false);
     m_turret.setSpeed(0);
   }
 

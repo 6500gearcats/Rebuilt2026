@@ -26,6 +26,7 @@ public class Robot extends TimedRobot {
   private final RobotStateMachine m_RobotStateMachine;
 
   public Robot() {
+    DashboardTelemetry.initialize();
     SignalLogger.setPath("media/sda1/ctre-logs");
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
@@ -34,7 +35,6 @@ public class Robot extends TimedRobot {
       System.gc();
     }
     SignalLogger.start();
-    // DataLogManager.start();
     DataLogManager.start();
     addPeriodic(() -> m_RobotStateMachine.periodic(), kDefaultPeriod);
     SmartDashboard.putNumber("AutoTime", autoTimer.get());
@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    DashboardTelemetry.update();
     CommandScheduler.getInstance().run();
     // m_RobotStateMachine.periodic();
     if (m_gcTimer.advanceIfElapsed(0.1)) {

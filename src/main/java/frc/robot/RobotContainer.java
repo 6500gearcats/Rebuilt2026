@@ -205,7 +205,6 @@ public class RobotContainer {
                 NamedCommands.registerCommand("ClimbUp2s", new ClimbPole(m_climber, 0.5).withTimeout(2));
                 NamedCommands.registerCommand("ClimbDown2s", new ClimbPole(m_climber, -0.5).withTimeout(2));
 
-                SmartDashboard.putNumber("Shoot Speed", 0);
 
                 autoChooser = AutoBuilder.buildAutoChooser("ShootOnTheMove");
 

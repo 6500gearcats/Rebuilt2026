@@ -18,12 +18,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.DashboardTelemetry;
 import frc.robot.RobotStateMachine;
 
 /**
  * Turret subsystem that controls the yaw motor and tracks its position.
  */
 public class Turret extends SubsystemBase {
+  private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
   /** Creates a new Turret. */
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private final CANcoder m_encoder = new CANcoder(Constants.MotorConstants.kTurretEncoderID);
@@ -100,13 +102,13 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     double absolutePositionRotations = getAbsolutePositionRotations();
-    SmartDashboard.putBoolean("switch on or off", m_switch.get());
-    SmartDashboard.putNumber("Motor Position", getMotorPosition());
-    SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
-    SmartDashboard.putNumber("Turret Absolute Position (rotations)", absolutePositionRotations);
+    SmartDashboard.putBoolean("Turret Limit Switch", m_switch.get());
     SmartDashboard.putNumber("Turret Absolute Position (degrees)", absolutePositionRotations * -360.0);
     SmartDashboard.putBoolean("Turret Encoder Connected", isEncoderFeedbackReady());
-    SmartDashboard.putNumber("Robot Rot in Deg", robotStateMachine.getPose().getRotation().getDegrees());
+    if (debugTelemetry.shouldPublish()) {
+      SmartDashboard.putNumber("Debug/Turret/Feedback Position (rotations)", getMotorPosition());
+      SmartDashboard.putNumber("Debug/Turret/Absolute Position (rotations)", absolutePositionRotations);
+    }
 
     if (!isEncoderFeedbackReady()) {
       m_motor.stopMotor();
@@ -213,7 +215,6 @@ public class Turret extends SubsystemBase {
     }
     deg = MathUtil.clamp(deg, TurretConstants.kTurretMinAngleDegrees,
         TurretConstants.kTurretMaxAngleDegrees);
-    SmartDashboard.putNumber("UnconvPos", unconvertPosition(deg));
     m_motor.setControl(m_request.withPosition(unconvertPosition(deg)));
   }
 

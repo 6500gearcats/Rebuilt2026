@@ -4,10 +4,8 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotStateMachine;
-import frc.robot.RobotStateMachine.FieldZone;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.turret.Flywheel;
 import frc.robot.utility.RangeFinder;
@@ -32,24 +30,9 @@ public class UpToSpeedHopperShoot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-//    if ((!stateMachine.isActive()) && (stateMachine.checkZone() == FieldZone.ALLIANCE)) {
-//      return;
-//    }
-//    if (SmartDashboard.getBoolean("Aligned", true)) {
-      m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
-          stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
-      // m_Flywheel.setSpeed(SmartDashboard.getNumber("Shoot Speed", 0));
-      // if (stateMachine.isFarEnough()) {
-      //   if (m_Flywheel.isUpToSpeed()) {
-      //     m_Hopper.startAllMotors(-1, 1);
-      //   }
-      // } else {
-      //   m_Hopper.startAllMotors(-1, 1);
-      // }
-
-      m_Hopper.startAllMotors(-1, 1);
-//    }
-
+    m_Flywheel.setSpeed(RangeFinder.getShotVelocity(
+        stateMachine.getTurretPose().getTranslation().getDistance(stateMachine.getTargetPose().getTranslation())));
+    m_Hopper.startAllMotors(-1, 1);
   }
 
   // Called once the command ends or is interrupted.

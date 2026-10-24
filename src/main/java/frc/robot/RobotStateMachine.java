@@ -68,6 +68,9 @@ public final class RobotStateMachine {
     private final Field2d aimTargetField = new Field2d();
 
     private ShotSolution shotSolution = ShotSolution.empty();
+    private double shotFieldVelocityX;
+    private double shotFieldVelocityY;
+    private final DashboardTelemetry.DebugPublisher debugTelemetry = new DashboardTelemetry.DebugPublisher();
 
     private Pose2d pose = new Pose2d();
     private FieldZone currentZone = FieldZone.ALLIANCE;
@@ -182,16 +185,34 @@ public final class RobotStateMachine {
         SmartDashboard.putBoolean("isFacing", isFacingHub());
         updateTargetPose();
 
+        publishDebugTelemetry();
+    }
+
+    private void publishDebugTelemetry() {
+        if (!debugTelemetry.shouldPublish()) {
+            return;
+        }
+        debugTelemetry.putData("Debug/Aiming/Targets", aimTargetField);
         aimTargetField.getObject("Hub").setPose(HubPose);
         aimTargetField.getObject("Motion Compensated Hub").setPose(targetPose);
 
-        SmartDashboard.putNumber("Hub X (m)", HubPose.getX());
-        SmartDashboard.putNumber("Hub Y (m)", HubPose.getY());
-        SmartDashboard.putNumber("Hub Heading (deg)", HubPose.getRotation().getDegrees());
-        SmartDashboard.putNumber("Motion Compensated Hub X (m)", targetPose.getX());
-        SmartDashboard.putNumber("Motion Compensated Hub Y (m)", targetPose.getY());
-        SmartDashboard.putNumber("Motion Compensated Hub Heading (deg)",
+        SmartDashboard.putNumber("Debug/Aiming/Hub X (m)", HubPose.getX());
+        SmartDashboard.putNumber("Debug/Aiming/Hub Y (m)", HubPose.getY());
+        SmartDashboard.putNumber("Debug/Aiming/Hub Heading (deg)", HubPose.getRotation().getDegrees());
+        SmartDashboard.putNumber("Debug/Aiming/Compensated Hub X (m)", targetPose.getX());
+        SmartDashboard.putNumber("Debug/Aiming/Compensated Hub Y (m)", targetPose.getY());
+        SmartDashboard.putNumber("Debug/Aiming/Compensated Hub Heading (deg)",
                 targetPose.getRotation().getDegrees());
+        SmartDashboard.putNumber("Debug/Aiming/Robot Velocity X (mps)", shotFieldVelocityX);
+        SmartDashboard.putNumber("Debug/Aiming/Robot Velocity Y (mps)", shotFieldVelocityY);
+        SmartDashboard.putNumber("Debug/Aiming/Turret Velocity X (mps)", shotSolution.getTurretVelocityX());
+        SmartDashboard.putNumber("Debug/Aiming/Turret Velocity Y (mps)", shotSolution.getTurretVelocityY());
+        SmartDashboard.putNumber("Debug/Aiming/Radial Velocity (mps)", shotSolution.getRadialVelocity());
+        SmartDashboard.putNumber("Debug/Aiming/Shot Distance (m)", shotSolution.getDistance());
+        SmartDashboard.putNumber("Debug/Aiming/Effective Shot Distance (m)", shotSolution.getEffectiveDistance());
+        SmartDashboard.putNumber("Debug/Aiming/Flight Time (s)", shotSolution.getTimeOfFlight());
+        SmartDashboard.putNumber("Debug/Aiming/Flywheel Speed (RPS)", shotSolution.getFlywheelSpeed());
+        SmartDashboard.putNumber("Debug/Aiming/Hood Position (rotations)", shotSolution.getHoodRotation());
     }
 
     private void newPostedValue() {
@@ -261,8 +282,8 @@ public final class RobotStateMachine {
             return;
         }
 
-        SmartDashboard.putNumber("VelX", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("VelY", speeds.vyMetersPerSecond);
+        shotFieldVelocityX = speeds.vxMetersPerSecond;
+        shotFieldVelocityY = speeds.vyMetersPerSecond;
 
         Pose2d best = bestPose.get();
         Translation2d targetVector = best.getTranslation().minus(getTurretPose().getTranslation());
@@ -305,15 +326,6 @@ public final class RobotStateMachine {
                 hoodRotation,
                 turretVelocity.getX(),
                 turretVelocity.getY());
-
-        SmartDashboard.putNumber("TurretVelX", turretVelocity.getX());
-        SmartDashboard.putNumber("TurretVelY", turretVelocity.getY());
-        SmartDashboard.putNumber("RadialVelocity", radialVelocity);
-        SmartDashboard.putNumber("ShotDistance", distance);
-        SmartDashboard.putNumber("EffectiveShotDistance", effectiveDistance);
-        SmartDashboard.putNumber("ShotTOF", tof);
-        SmartDashboard.putNumber("ShotVelocity", shotVelocity);
-        SmartDashboard.putNumber("HoodRotation", hoodRotation);
 
         // @formatter:off
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
