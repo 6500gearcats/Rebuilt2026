@@ -28,7 +28,7 @@ public class Turret extends SubsystemBase {
   private final TalonFX m_motor = new TalonFX(Constants.MotorConstants.kTurretYawMotorID);
   private final CANcoder m_encoder = new CANcoder(Constants.MotorConstants.kTurretEncoderID);
   private PositionVoltage m_request;
-  private final DigitalInput m_switch = new DigitalInput(4);
+  // This is from apollo and can be removed
   private final RobotStateMachine robotStateMachine;
   private boolean overridden = false;
   private boolean feedbackInitialized = false;
@@ -100,7 +100,6 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     double absolutePositionRotations = getAbsolutePositionRotations();
-    SmartDashboard.putBoolean("switch on or off", m_switch.get());
     SmartDashboard.putNumber("Motor Position", getMotorPosition());
     SmartDashboard.putNumber("Turret Position", getConvertedTurretPosition());
     SmartDashboard.putNumber("Turret Absolute Position (rotations)", absolutePositionRotations);
