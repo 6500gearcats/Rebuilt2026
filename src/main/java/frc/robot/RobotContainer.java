@@ -316,7 +316,7 @@ public class RobotContainer {
                 // encoder.
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
-
+                // new POVButton(m_gunner, 0).onTrue(new Hood());
                 // joystick.rightBumper().onTrue(ne
 
                 joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
@@ -350,11 +350,11 @@ public class RobotContainer {
                                 .onTrue(new InstantCommand(() -> m_turret.goToZero()));
                 new JoystickButton(m_gunner, XboxController.Button.kLeftBumper.value)
                                 .whileTrue(new ShootingSequenceUTS(hopper, m_flywheel));
-                // new POVButton(m_gunner, 0).onTrue(new InstantCommand(() ->
-                // m_flywheel.setManualSpeedIncrement(2)));
+                new POVButton(m_gunner, 0).onTrue(new InstantCommand(() ->
+                m_flywheel.setManualSpeedIncrement(10)));
 
-                // new POVButton(m_gunner, 180).onTrue(new InstantCommand(() ->
-                // m_flywheel.setManualSpeedIncrement(-2)));
+                new POVButton(m_gunner, 180).onTrue(new InstantCommand(() ->
+                m_flywheel.setManualSpeedIncrement(-10)));
                 new JoystickButton(m_gunner, XboxController.Button.kB.value)
                                 .onTrue(new InstantCommand(() -> m_flywheel.clearManualSpeed()));
 
