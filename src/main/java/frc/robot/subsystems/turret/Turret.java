@@ -124,7 +124,7 @@ public class Turret extends SubsystemBase {
         speed = 0;
       }
     }
-    m_motor.set(speed);
+    m_motor.set(40);
   }
 
   public void toggleOverride() {
