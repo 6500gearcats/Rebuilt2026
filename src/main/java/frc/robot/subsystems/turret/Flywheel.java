@@ -88,9 +88,9 @@ public class Flywheel extends SubsystemBase {
     RobotStateMachine.ShotSolution shotSolution = robotStateMachine.getShotSolution();
 
     if (snurboEnable) {
-      speedModifier = .15;//.15
+      speedModifier = 0.15;
     } else {
-      speedModifier = .15;//1
+      speedModifier = 1.0;
     }
     if (!robotStateMachine.isFacingHub()) {
       rotationMultiplier = 2;
