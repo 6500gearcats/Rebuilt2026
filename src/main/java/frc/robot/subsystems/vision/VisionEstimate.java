@@ -1,7 +1,5 @@
 package frc.robot.subsystems.vision;
 
-import frc.robot.subsystems.vision.limelight.LimelightHelpers.PoseEstimate;
-
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;

@@ -33,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -49,7 +48,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import frc.robot.commands.CoolSnurbo;
 import frc.robot.commands.HomeIntake;
 import frc.robot.commands.MoveTurret;
-import frc.robot.commands.RunHopper;
 import frc.robot.commands.RunHopperBack;
 import frc.robot.commands.RunIntake;
 import frc.robot.commands.SetTurretAngle;
@@ -65,8 +63,6 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.limelight.LimelightHelpers;
-import frc.robot.subsystems.vision.limelight.LimelightIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionIO;
 import frc.robot.subsystems.vision.photonvision.PhotonVisionSimIO;
 import frc.robot.utility.RangeFinder;
@@ -426,53 +422,15 @@ public class RobotContainer {
                                 // drivetrain.resetPose(new Pose2d());
                                 // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
                                 drivetrain.seedFieldCentric();
-
-                                // GCD
-                                LimelightHelpers.SetRobotOrientation("limelight-gcd",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
-
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.26, 0.273, 0.15, 0, 150,
-                                                45);
-
-                                // GCC
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble(), 0, 0, 0, 0,
-                                                0);
-
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.26, -0.273, 0.15,
-                                                0, 150,
-                                                -45);
                         } else {
                                 // drivetrain.resetPose(new Pose2d());
                                 drivetrain.seedFieldCentric();
                                 // drivetrain.setOperatorPerspectiveForward(new Rotation2d());
-
-                                // GCD
-                                LimelightHelpers.SetRobotOrientation("limelight-gcd",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                                0);
-
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcd", -0.26, 0.273, 0.15, 0, 150,
-                                                45);
-
-                                // GCC
-                                LimelightHelpers.SetRobotOrientation("limelight-gcc",
-                                                drivetrain.getPigeon().getYaw().getValueAsDouble() + 180, 0, 0, 0, 0,
-                                                0);
-
-                                LimelightHelpers.setCameraPose_RobotSpace("limelight-gcc", -0.26, -0.273, 0.15,
-                                                0, 150,
-                                                -45);
                         }
                 }
         }
 
         public void disableInitCode() {
                 m_flywheel.clearManualSpeed();
-                m_vision.throttleLimelight();
-        }
-
-        public void disableExitCode() {
-                m_vision.resetLimelightThrottle();
         }
 }
