@@ -317,9 +317,8 @@ public class RobotContainer {
                 new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.4));
                 new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.4));
                 // new POVButton(m_gunner, 0).onTrue(new Hood());
-                // joystick.rightBumper().onTrue(ne
-
-                joystick.rightBumper().whileTrue(new CoolSnurbo(m_flywheel));
+                joystick.leftBumper().and(joystick.rightBumper())
+                                .whileTrue(new CoolSnurbo(m_flywheel));
                 joystick.leftBumper().onTrue(new InstantCommand(() -> reverseBoolean()));
 
                 new Trigger(() -> Math.abs(m_gunner.getLeftTriggerAxis()) > 0.1)
