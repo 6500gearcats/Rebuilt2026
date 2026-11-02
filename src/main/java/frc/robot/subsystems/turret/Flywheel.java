@@ -168,11 +168,11 @@ public class Flywheel extends SubsystemBase {
     reqSpeed = speedValue;
     SmartDashboard.putNumber("flywheel initial speed", speed);
     SmartDashboard.putNumber("flywheel new speed", speedValue);
-    if(speedValue > 70) {
-      speedValue = 70;
+    if(speedValue > 65) {
+      speedValue = 65;
     }
-    if(speedValue < 30) {
-      speedValue = 30;
+    if(speedValue < 45) {
+      speedValue = 45;
     }
 
     m_topMotor.setControl(m_request.withVelocity(speedValue));

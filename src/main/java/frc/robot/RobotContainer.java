@@ -314,8 +314,8 @@ public class RobotContainer {
                 new Trigger(() -> toggleIntake).onFalse(new RunIntake(m_intake, 0, 0));
                 // Keep manual directions unchanged after matching motor polarity to the
                 // encoder.
-                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.2));
-                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.2));
+                new POVButton(m_gunner, 90).whileTrue(new MoveTurret(m_turret, () -> 0.4));
+                new POVButton(m_gunner, 270).whileTrue(new MoveTurret(m_turret, () -> -0.4));
                 // new POVButton(m_gunner, 0).onTrue(new Hood());
                 // joystick.rightBumper().onTrue(ne
 
