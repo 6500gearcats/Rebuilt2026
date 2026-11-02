@@ -88,7 +88,7 @@ public class Flywheel extends SubsystemBase {
     RobotStateMachine.ShotSolution shotSolution = robotStateMachine.getShotSolution();
 
     if (snurboEnable) {
-      speedModifier = 0.5;
+      speedModifier = 0.15;
     } else {
       speedModifier = 0.15;
     }
@@ -168,11 +168,11 @@ public class Flywheel extends SubsystemBase {
     reqSpeed = speedValue;
     SmartDashboard.putNumber("flywheel initial speed", speed);
     SmartDashboard.putNumber("flywheel new speed", speedValue);
-    if(speedValue > 65) {
-      speedValue = 65;
+    if(speedValue > 70) {
+      speedValue = 70;
     }
-    if(speedValue < 45) {
-      speedValue = 45;
+    if(speedValue < 30) {
+      speedValue = 30;
     }
 
     m_topMotor.setControl(m_request.withVelocity(speedValue));
