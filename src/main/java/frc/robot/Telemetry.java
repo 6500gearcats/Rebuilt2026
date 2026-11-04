@@ -24,6 +24,20 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
  * Publishes drivetrain telemetry to NetworkTables and SmartDashboard.
  */
 public class Telemetry {
+        /** Publishes the metadata embedded in this robot binary once at startup. */
+        public static void publishBuildInfo() {
+                SmartDashboard.putString("Build/Git Branch", BuildConstants.GIT_BRANCH);
+                SmartDashboard.putString("Build/Git SHA", BuildConstants.GIT_SHA);
+                SmartDashboard.putNumber("Build/Git Revision", BuildConstants.GIT_REVISION);
+                SmartDashboard.putString("Build/Git Date", BuildConstants.GIT_DATE);
+                SmartDashboard.putString("Build/Build Date", BuildConstants.BUILD_DATE);
+                SmartDashboard.putString("Build/Git Status", switch (BuildConstants.DIRTY) {
+                        case 0 -> "Clean";
+                        case 1 -> "Uncommitted changes";
+                        default -> "Unknown";
+                });
+        }
+
         private final double MaxSpeed;
 
         /**
