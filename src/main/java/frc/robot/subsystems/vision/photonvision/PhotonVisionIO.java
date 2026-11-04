@@ -55,7 +55,6 @@ public class PhotonVisionIO implements VisionIO {
     private boolean forPoseEstimation = true;
 
     private final PhotonPoseEstimator estimator;
-    private final VisionTrialLogger trialLogger = new VisionTrialLogger();
     private VisionCamera m_visionCam;
     public Field2d m_field = new Field2d();
 
@@ -78,9 +77,7 @@ public class PhotonVisionIO implements VisionIO {
         this.robotToCamera = new Transform3d(robotToCameraTrl, robotToCameraRot);
         m_camera = new PhotonCamera(cameraName);
         SmartDashboard.putData("CamPose" + m_camera.getName(), m_field);
-        trialLogger.publishDashboardDefaults();
         estimator = new PhotonPoseEstimator(kTagLayout, robotToCamera);
-
         m_visionCam = new VisionCamera(cameraName,m_camera,estimator);
     }
 
@@ -356,11 +353,9 @@ public class PhotonVisionIO implements VisionIO {
 
         // Drain PhotonVision's FIFO and keep the newest valid estimate.
         for (PhotonPipelineResult result : m_camera.getAllUnreadResults()) {
-            Optional<EstimatedRobotPose> estimatedPose =
-                    estimatePose(result);
+            Optional<EstimatedRobotPose> estimatedPose = estimatePose(result);
             m_visionCam.latestResult = Optional.of(result);
             m_visionCam.latestPose = estimatedPose;
-//             trialLogger.log(m_visionCam, result, estimatedPose);
 
             double latestTimestamp = result.getTimestampSeconds();
             isNewResult = Math.abs(latestTimestamp - lastEstTimestamp) > 1e-5;
@@ -397,7 +392,6 @@ public class PhotonVisionIO implements VisionIO {
                     estimatePose(result);
             m_visionCam.latestResult = Optional.of(result);
             m_visionCam.latestPose = estimatedPose;
-            //trialLogger.log(m_visionCam, result, estimatedPose);
 
             estimatedPose.ifPresent(estimate -> {
                 if (shouldRejectEstimate(estimate)) {

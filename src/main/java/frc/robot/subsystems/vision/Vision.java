@@ -20,8 +20,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -68,26 +66,12 @@ public class Vision extends SubsystemBase {
   private final ArrayList<VisionIO> m_visionOdometryCams = new ArrayList<VisionIO>();
   private final ArrayList<PhotonVisionSimIO> m_simCameras = new ArrayList<PhotonVisionSimIO>();
   private final ArrayList<PhotonVisionSimIO> m_turretCamSims = new ArrayList<PhotonVisionSimIO>();
-
   SwerveDrivePoseEstimator estimator;
-
   private Supplier<Rotation2d> m_rotationSupplier;
   private Supplier<SwerveModulePosition[]> m_swerveModulePositionSupplier;
   private Supplier<Pose2d> m_poseSupplier;
-
   private boolean isReplay = false;
-
   public Field2d m_field = new Field2d();
-
-  private final StructPublisher<Pose2d> gccPub = NetworkTableInstance.getDefault()
-      .getTable("StateMachine")
-      .getStructTopic("GCC", Pose2d.struct)
-      .publish();
-
-  private final StructPublisher<Pose2d> gcdPub = NetworkTableInstance.getDefault()
-      .getTable("StateMachine")
-      .getStructTopic("GCD", Pose2d.struct)
-      .publish();
 
   /**
    * Creates a vision subsystem with live camera IO.
@@ -144,7 +128,6 @@ public class Vision extends SubsystemBase {
     if (isReplay) {
       return;
     }
-    Pose2d lastPose = getEstimatedPose();
     estimator.update(
         m_rotationSupplier.get(),
         m_swerveModulePositionSupplier.get());
@@ -155,12 +138,6 @@ public class Vision extends SubsystemBase {
                 est.getTimestamp(),
                 est.getStdDevs().orElse(m_visionStndDev));
       }
-      if (visionIO.getName().contains("gcc")) {
-        visionIO.getVisionEst().ifPresent(est -> gccPub.set(est.getPose()));
-      } else if (visionIO.getName().contains("gcd")) {
-        visionIO.getVisionEst().ifPresent(est -> gcdPub.set(est.getPose()));
-      }
-
     }
     // In sim, fall back to drivetrain sim pose if module positions aren't simulated
     if (RobotBase.isSimulation() && m_poseSupplier != null) {
