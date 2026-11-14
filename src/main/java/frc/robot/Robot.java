@@ -26,6 +26,7 @@ public class Robot extends TimedRobot {
   private final RobotStateMachine m_RobotStateMachine;
 
   public Robot() {
+    Telemetry.publishBuildInfo();
     SignalLogger.setPath("media/sda1/ctre-logs");
     m_robotContainer = new RobotContainer();
     m_RobotStateMachine = RobotStateMachine.getInstance();
